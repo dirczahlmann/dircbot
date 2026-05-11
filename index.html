@@ -10,8 +10,16 @@
 <meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/legal.css">
 </head>
 <body class="lang-de">
+
+<!-- LOGO HEADER -->
+<header class="site-header">
+  <a href="/">
+    <img src="/assets/dirc_logo.jpg" alt="Dirc Zahlmann">
+  </a>
+</header>
 
 <!-- LANG TOGGLE -->
 <div class="lang-toggle">
@@ -65,7 +73,6 @@
       </div>
     </div>
 
-    <!-- SUGGESTED QUESTIONS (chips) -->
     <div class="question-area" id="questionArea">
       <div class="question-prompt">
         <span data-lang="en">Or pick a question</span>
@@ -91,7 +98,6 @@
       </div>
     </div>
 
-    <!-- FILE PREVIEW (shown when file is attached) -->
     <div class="file-preview" id="filePreview">
       <div class="file-preview-content">
         <div class="file-preview-icon" id="filePreviewIcon">📎</div>
@@ -108,7 +114,6 @@
       </div>
     </div>
 
-    <!-- INPUT BAR -->
     <div class="input-area">
       <form id="chatForm" onsubmit="sendMessage(event)">
         <button type="button" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Attach file or photo">
@@ -161,9 +166,9 @@
       <span data-lang="es">¿Quieres <span class="orange">acceso ilimitado</span>?</span>
     </h2>
     <p>
-      <span data-lang="en">Join the presale and get unlimited DircBot access, the 90-day income plan, ready-made content & live access to Dirc.</span>
-      <span data-lang="de">Sichere dir den Presale: unbegrenzter DircBot-Zugang, 90-Tage-Income-Plan, fertige Posts & Live-Zugang zu Dirc.</span>
-      <span data-lang="es">Únete a la preventa: acceso ilimitado a DircBot, plan de ingresos de 90 días, contenido listo y acceso en vivo a Dirc.</span>
+      <span data-lang="en">Join the academy for unlimited DircBot access, courses, frameworks & live access to Dirc.</span>
+      <span data-lang="de">Sichere dir den vollen Academy-Zugang: unbegrenzter DircBot, Kurse, Frameworks & Live-Zugang zu Dirc.</span>
+      <span data-lang="es">Únete a la academia: acceso ilimitado a DircBot, cursos, frameworks y acceso en vivo a Dirc.</span>
     </p>
 
     <form class="email-form" id="emailForm" onsubmit="signUp(event)" netlify name="dircbot-leads" data-netlify="true">
@@ -183,10 +188,10 @@
     </div>
 
     <div class="secondary-cta">
-      <span data-lang="en">Or jump to the full presale → </span>
-      <span data-lang="de">Oder direkt zum vollen Presale → </span>
-      <span data-lang="es">O ve directo a la preventa completa → </span>
-      <a href="https://n3xus.de" target="_blank">n3xus.de</a>
+      <span data-lang="en">Or visit the full academy → </span>
+      <span data-lang="de">Oder direkt zur vollen Academy → </span>
+      <span data-lang="es">O ve directo a la academia completa → </span>
+      <a href="https://dirczahlmann.com" target="_blank">dirczahlmann.com</a>
     </div>
   </div>
 
@@ -219,14 +224,66 @@
         <span data-lang="es">Modelos de IA</span>
       </div></div>
     </div>
-    <div class="footer-links">
-      <a href="https://n3xus.de" target="_blank">n3xus.de</a> ·
-      <a href="https://t.me/dircbot" target="_blank">Telegram</a>
-    </div>
   </div>
 
 </div>
 
+<!-- ============== SITE FOOTER WITH LEGAL ============== -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-logo">
+      <img src="/assets/dirc_logo.jpg" alt="Dirc Zahlmann">
+    </div>
+
+    <div class="site-footer-disclaimer">
+      <span data-lang="en"><strong>⚠️ AI Disclaimer:</strong> DircBot uses AI to generate responses. Answers may contain errors and do not constitute financial, legal, tax, or medical advice. Crypto investments carry significant risk including total loss. Always verify information and consult qualified professionals for individual decisions.</span>
+      <span data-lang="de"><strong>⚠️ KI-Hinweis:</strong> DircBot generiert Antworten mit Hilfe von KI. Antworten können Fehler enthalten und stellen keine Finanz-, Rechts-, Steuer- oder Medizinberatung dar. Crypto-Investments sind mit erheblichen Risiken inkl. Totalverlust verbunden. Prüfe Informationen immer eigenständig und konsultiere für individuelle Entscheidungen qualifizierte Fachleute.</span>
+      <span data-lang="es"><strong>⚠️ Aviso de IA:</strong> DircBot usa IA para generar respuestas. Las respuestas pueden contener errores y no constituyen asesoramiento financiero, legal, fiscal o médico. Las inversiones en crypto conllevan riesgos importantes incluida la pérdida total. Verifica siempre la información y consulta a profesionales cualificados para decisiones individuales.</span>
+    </div>
+
+    <div class="site-footer-links">
+      <a href="/impressum.html"><span data-lang="en">Imprint</span><span data-lang="de">Impressum</span><span data-lang="es">Aviso Legal</span></a>
+      <span>·</span>
+      <a href="/datenschutz.html"><span data-lang="en">Privacy</span><span data-lang="de">Datenschutz</span><span data-lang="es">Privacidad</span></a>
+      <span>·</span>
+      <a href="/nutzungsbedingungen.html"><span data-lang="en">Terms</span><span data-lang="de">Nutzungsbedingungen</span><span data-lang="es">Condiciones</span></a>
+      <span>·</span>
+      <a href="https://dirczahlmann.com/#legal/refund" target="_blank" rel="noopener"><span data-lang="en">Refund Policy</span><span data-lang="de">Rückerstattung</span><span data-lang="es">Reembolsos</span></a>
+      <span>·</span>
+      <a href="https://dirczahlmann.com/#legal/withdrawal" target="_blank" rel="noopener"><span data-lang="en">Withdrawal</span><span data-lang="de">Widerruf</span><span data-lang="es">Retiro</span></a>
+      <span>·</span>
+      <a href="https://dirczahlmann.com" target="_blank" rel="noopener">dirczahlmann.com</a>
+    </div>
+
+    <div class="site-footer-copy">
+      © <span id="year"></span> Dirc Zahlmann · Zahlmann Consulting International GmbH
+    </div>
+  </div>
+</footer>
+
+<!-- ============== COOKIE / CONSENT BANNER ============== -->
+<div class="consent-banner" id="consentBanner">
+  <p>
+    <span data-lang="en"><strong>Privacy notice:</strong> When using DircBot, your messages are sent to Anthropic (USA) for AI processing. We store your language preference locally in your browser. By continuing, you accept this processing. Details in our <a href="/datenschutz.html">Privacy Policy</a>.</span>
+    <span data-lang="de"><strong>Datenschutz-Hinweis:</strong> Bei der Nutzung von DircBot werden deine Nachrichten an Anthropic (USA) zur KI-Verarbeitung übermittelt. Wir speichern deine Spracheinstellung lokal in deinem Browser. Mit dem Fortfahren akzeptierst du diese Verarbeitung. Details in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</span>
+    <span data-lang="es"><strong>Aviso de privacidad:</strong> Al usar DircBot, tus mensajes se envían a Anthropic (EE.UU.) para el procesamiento de IA. Almacenamos tu preferencia de idioma localmente en tu navegador. Al continuar, aceptas este procesamiento. Detalles en nuestra <a href="/datenschutz.html">Política de Privacidad</a>.</span>
+  </p>
+  <div class="consent-actions">
+    <button class="consent-accept" onclick="acceptConsent()">
+      <span data-lang="en">Accept & continue</span>
+      <span data-lang="de">Akzeptieren & fortfahren</span>
+      <span data-lang="es">Aceptar y continuar</span>
+    </button>
+    <button class="consent-decline" onclick="window.location.href='/datenschutz.html'">
+      <span data-lang="en">Read details</span>
+      <span data-lang="de">Details lesen</span>
+      <span data-lang="es">Leer detalles</span>
+    </button>
+  </div>
+</div>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 <script src="/assets/app.js"></script>
+<script src="/assets/consent.js"></script>
 </body>
 </html>
