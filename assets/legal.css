@@ -1,0 +1,334 @@
+/* ============== LEGAL PAGES CSS ============== */
+
+body.legal-page {
+  background:#0a0a0a;
+  color:#f0ede8;
+  min-height:100vh;
+  font-family:'Inter',sans-serif;
+}
+
+.legal-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:24px 6vw;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  position:sticky;
+  top:0;
+  background:rgba(10,10,10,0.92);
+  backdrop-filter:blur(12px);
+  z-index:50;
+}
+.legal-logo img {
+  height:32px;
+  width:auto;
+  display:block;
+}
+.legal-back {
+  color:#c9a84c;
+  text-decoration:none;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  border:1px solid rgba(201,168,76,0.3);
+  padding:8px 16px;
+  border-radius:6px;
+  transition:all 0.2s;
+}
+.legal-back:hover {
+  background:rgba(201,168,76,0.1);
+  border-color:#c9a84c;
+}
+
+.legal-content {
+  max-width:780px;
+  margin:0 auto;
+  padding:60px 6vw 80px;
+}
+
+.legal-content h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(40px, 6vw, 64px);
+  line-height:1;
+  letter-spacing:0.01em;
+  margin-bottom:48px;
+  color:#f0ede8;
+  border-bottom:2px solid #e8420a;
+  padding-bottom:20px;
+}
+
+.legal-content h2 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:0.02em;
+  color:#c9a84c;
+  margin:40px 0 16px;
+}
+
+.legal-content h3 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;
+  font-weight:600;
+  color:#e8420a;
+  margin:24px 0 12px;
+}
+
+.legal-content section {
+  margin-bottom:32px;
+}
+
+.legal-content section.highlight {
+  background:rgba(232,66,10,0.06);
+  border:1px solid rgba(232,66,10,0.25);
+  border-radius:10px;
+  padding:24px 28px;
+  margin-bottom:40px;
+}
+.legal-content section.highlight h2 {
+  color:#e8420a;
+  margin-top:0;
+}
+
+.legal-content p {
+  color:rgba(240,237,232,0.85);
+  font-size:15px;
+  line-height:1.75;
+  margin-bottom:14px;
+}
+
+.legal-content strong {
+  color:#f0ede8;
+  font-weight:600;
+}
+
+.legal-content ul {
+  margin:12px 0 16px 0;
+  padding-left:24px;
+}
+
+.legal-content li {
+  color:rgba(240,237,232,0.8);
+  font-size:15px;
+  line-height:1.7;
+  margin-bottom:8px;
+}
+
+.legal-content a {
+  color:#c9a84c;
+  text-decoration:none;
+  border-bottom:1px solid rgba(201,168,76,0.3);
+  transition:all 0.2s;
+}
+.legal-content a:hover {
+  border-bottom-color:#c9a84c;
+  color:#e0c068;
+}
+
+.legal-meta {
+  margin-top:48px;
+  padding-top:24px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:#6b6660;
+}
+
+/* ============== LEGAL FOOTER ============== */
+.legal-footer {
+  background:#080808;
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:32px 6vw;
+}
+.legal-footer-inner {
+  max-width:780px;
+  margin:0 auto;
+  text-align:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#6b6660;
+}
+.legal-footer-inner a {
+  color:#c9a84c;
+  text-decoration:none;
+  margin:0 4px;
+}
+.legal-footer-inner a:hover {
+  color:#e8420a;
+}
+.legal-footer-copy {
+  margin-top:14px;
+  font-size:12px;
+  color:#4a4744;
+}
+
+@media (max-width:600px) {
+  .legal-header {
+    padding:16px 5vw;
+  }
+  .legal-content {
+    padding:40px 5vw 60px;
+  }
+  .legal-content section.highlight {
+    padding:18px 20px;
+  }
+}
+
+/* ============== MAIN PAGE: LOGO + FOOTER ============== */
+.site-header {
+  position:absolute;
+  top:24px;
+  left:24px;
+  z-index:60;
+}
+.site-header img {
+  height:32px;
+  width:auto;
+  display:block;
+}
+
+.site-footer {
+  background:#070707;
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:40px 6vw 32px;
+  margin-top:40px;
+}
+.site-footer-inner {
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+}
+.site-footer-logo img {
+  height:28px;
+  width:auto;
+  opacity:0.9;
+}
+.site-footer-disclaimer {
+  max-width:680px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.6;
+  color:rgba(240,237,232,0.5);
+}
+.site-footer-disclaimer strong {
+  color:rgba(240,237,232,0.7);
+}
+.site-footer-links {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#6b6660;
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.site-footer-links a {
+  color:#c9a84c;
+  text-decoration:none;
+  transition:color 0.2s;
+}
+.site-footer-links a:hover {
+  color:#e8420a;
+}
+.site-footer-copy {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:#4a4744;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.04);
+  width:100%;
+  text-align:center;
+}
+
+@media (max-width:600px) {
+  .site-header {
+    top:18px;
+    left:18px;
+  }
+  .site-header img {
+    height:26px;
+  }
+}
+
+/* ============== COOKIE/CONSENT BANNER ============== */
+.consent-banner {
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  right:20px;
+  max-width:680px;
+  margin:0 auto;
+  background:#111;
+  border:1px solid rgba(232,66,10,0.3);
+  border-radius:12px;
+  padding:20px 24px;
+  z-index:200;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+  display:none;
+}
+.consent-banner.visible {
+  display:block;
+  animation:slideUp 0.4s ease-out;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.consent-banner p {
+  color:rgba(240,237,232,0.85);
+  font-size:13px;
+  line-height:1.6;
+  margin-bottom:14px;
+}
+.consent-banner p a {
+  color:#c9a84c;
+  text-decoration:none;
+  border-bottom:1px solid rgba(201,168,76,0.3);
+}
+.consent-actions {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.consent-actions button {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:10px 18px;
+  border-radius:6px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:all 0.2s;
+}
+.consent-accept {
+  background:#e8420a;
+  color:#fff;
+  border-color:#e8420a;
+}
+.consent-accept:hover {
+  background:#ff5520;
+}
+.consent-decline {
+  background:transparent;
+  color:#6b6660;
+  border-color:rgba(255,255,255,0.1);
+}
+.consent-decline:hover {
+  color:#f0ede8;
+  border-color:rgba(255,255,255,0.3);
+}
