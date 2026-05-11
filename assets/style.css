@@ -51,87 +51,47 @@ body.lang-es [data-lang="es"] { display:inline; }
 
 /* ============== HERO ============== */
 .hero {
-  padding:80px 0 40px;
+  padding:110px 0 60px;
   text-align:center;
   position:relative;
+  overflow:hidden;
 }
+
+/* Subtle ambient orange glow */
 .hero::before {
   content:'';
   position:absolute;
   inset:0;
   background:radial-gradient(ellipse 70% 50% at 50% 30%, rgba(232,66,10,0.12) 0%, transparent 70%);
   pointer-events:none;
+  z-index:1;
 }
 
-/* Hero with portrait — 2-column desktop, stacked on mobile */
-.hero-with-portrait {
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:60px;
-  align-items:center;
-  text-align:left;
-  max-width:1100px;
-  margin:0 auto;
-  padding:90px 0 50px;
-}
-.hero-with-portrait .hero-text {
-  position:relative;
-  z-index:2;
-}
-.hero-with-portrait h1 {
-  text-align:left;
-}
-.hero-with-portrait .hero-sub {
-  margin-left:0;
-  margin-right:0;
-  text-align:left;
-}
-
-.hero-portrait {
-  position:relative;
-  z-index:2;
-  max-width:380px;
-  margin-left:auto;
-}
-.hero-portrait img {
-  width:100%;
-  height:auto;
-  border-radius:14px;
-  display:block;
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(255,255,255,0.04);
-  filter:saturate(1.05);
-}
-
-/* Floating badge on portrait */
-.hero-portrait-badge {
+/* Portrait as blurred background element — barely visible, just brand presence */
+.hero-bg-portrait {
   position:absolute;
-  bottom:-12px;
-  left:-16px;
-  background:linear-gradient(135deg,#e8420a,#c9a84c);
-  padding:14px 22px;
-  border-radius:12px;
-  box-shadow:0 14px 40px rgba(232,66,10,0.5);
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  transform:rotate(-3deg);
+  top:50%;
+  right:-80px;
+  transform:translateY(-50%);
+  width:520px;
+  height:520px;
+  background-image:url('/assets/dirc_portrait.jpg');
+  background-size:cover;
+  background-position:center top;
+  border-radius:50%;
+  filter:blur(40px) saturate(0.7);
+  opacity:0.22;
+  pointer-events:none;
+  z-index:0;
+  mix-blend-mode:screen;
 }
-.hero-portrait-badge .badge-num {
-  font-family:'Bebas Neue',sans-serif;
-  font-size:38px;
-  line-height:1;
-  color:#fff;
-  letter-spacing:0.02em;
-}
-.hero-portrait-badge .badge-label {
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:0.15em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,0.95);
+
+/* All hero content above the bg */
+.hero-label,
+.hero h1,
+.hero-sub {
+  position:relative;
+  z-index:2;
 }
 
 .hero-label {
@@ -142,56 +102,40 @@ body.lang-es [data-lang="es"] { display:inline; }
   text-transform:uppercase;
   color:#e8420a;
   margin-bottom:24px;
-  position:relative;
 }
 .hero h1 {
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(48px, 7vw, 84px);
+  font-size:clamp(48px, 8vw, 88px);
   line-height:0.95;
   letter-spacing:0.01em;
   margin-bottom:24px;
-  position:relative;
 }
 .hero h1 .gold { color:#c9a84c; }
 .hero h1 .orange { color:#e8420a; }
 .hero-sub {
   font-size:18px;
-  color:rgba(240,237,232,0.65);
-  max-width:560px;
+  color:rgba(240,237,232,0.7);
+  max-width:580px;
   margin:0 auto 40px;
   font-weight:300;
-  position:relative;
 }
 
-/* Mobile: stack portrait above text */
 @media (max-width:820px) {
-  .hero-with-portrait {
-    grid-template-columns:1fr;
-    gap:30px;
-    text-align:center;
-    padding:60px 0 30px;
+  .hero { padding:90px 0 40px; }
+  .hero-bg-portrait {
+    width:380px;
+    height:380px;
+    right:-120px;
+    opacity:0.18;
   }
-  .hero-with-portrait h1,
-  .hero-with-portrait .hero-sub {
-    text-align:center;
+}
+@media (max-width:600px) {
+  .hero-bg-portrait {
+    width:300px;
+    height:300px;
+    right:-100px;
+    opacity:0.15;
   }
-  .hero-with-portrait .hero-sub {
-    margin-left:auto;
-    margin-right:auto;
-  }
-  .hero-portrait {
-    order:-1;
-    max-width:280px;
-    margin:0 auto;
-  }
-  .hero-portrait-badge {
-    bottom:-10px;
-    left:auto;
-    right:-12px;
-    padding:10px 16px;
-  }
-  .hero-portrait-badge .badge-num { font-size:30px; }
-  .hero-portrait-badge .badge-label { font-size:11px; }
 }
 
 /* ============== CHAT WRAPPER ============== */

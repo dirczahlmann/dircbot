@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" preserveAspectRatio="xMidYMid meet">
-  <text x="0" y="46"
-        font-family="'Barlow Condensed', 'Inter', 'Helvetica Neue', Arial, sans-serif"
-        font-weight="700"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 70" preserveAspectRatio="xMinYMid meet">
+  <text x="0" y="52"
+        font-family="'Inter','Helvetica Neue',Arial,sans-serif"
+        font-weight="800"
         font-size="48"
-        letter-spacing="-0.5"
-        fill="#f0ede8">Dirc Zahlmann<tspan fill="#e8420a" dx="2">+</tspan></text>
+        letter-spacing="-1"
+        fill="#f0ede8">Dirc Zahlmann<tspan fill="#e8420a" dx="4">+</tspan></text>
 </svg>

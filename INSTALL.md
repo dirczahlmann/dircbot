@@ -1,69 +1,44 @@
-# 🔥 DircBot — Logo + Portrait Update (v4)
+# 🔥 DircBot — Hero Fix (v5)
 
-## ✅ Was neu ist
+## ✅ Was gefixt wurde
 
-- ✅ **Logo als SVG** — gestochen scharf, keine JPG-Kanten mehr, skaliert perfekt
-- ✅ **Portrait im Hero** — dein professionelles Foto rechts vom Headline-Text
-- ✅ **"8 Unicorns" Badge** — orange-gold, schräg auf dem Portrait als Eye-Catcher
-- ✅ **Mobile-optimiert** — auf dem Handy stackt das Portrait über den Text
+**Problem 1: Logo abgeschnitten** ✓
+- SVG viewBox vergrößert (420×70 statt 320×60)
+- Container hat jetzt explizite Breite (180px) statt nur Höhe
+- Verhindert dass Browser den Text abschneiden kann
 
-## 📦 Files in diesem ZIP (5 zum Überschreiben + 1 neu)
+**Problem 2: Portrait war zu dominant** ✓
+- Portrait jetzt als **geblurrter Hintergrund-Akzent** rechts (40px Blur, 22% Opazität)
+- Kreisförmig, abgedunkelt, mit screen-blend-mode
+- Wirkt nur als subtile Brand-Präsenz, kein dominantes Foto mehr
+- Inhalt steht weiterhin zentral im Vordergrund
+
+## 📦 Was im ZIP
 
 ```
 assets/
-├── dirc_logo.svg          ← NEU (ersetzt JPG)
-├── dirc_portrait.jpg      ← NEU (dein Foto, web-optimiert auf 184 KB)
-├── style.css              ← ÜBERSCHREIBT
-└── legal.css              ← ÜBERSCHREIBT
+├── dirc_logo.svg        ← FIXED (größere viewBox)
+├── dirc_portrait.jpg    ← bleibt (wird jetzt als Background genutzt)
+├── style.css            ← FIXED (Portrait als subtiles BG)
+└── legal.css            ← FIXED (Logo-Container mit fester Breite)
 
-index.html                  ← ÜBERSCHREIBT
-impressum.html              ← ÜBERSCHREIBT
-datenschutz.html            ← ÜBERSCHREIBT
-nutzungsbedingungen.html    ← ÜBERSCHREIBT
+index.html               ← FIXED (neues Hero-Markup)
 ```
 
 ## 🚀 Upload (1 Min)
 
 1. ZIP entpacken
-2. Auf **github.com/dirczahlmann/dircbot** → **Add file** → **Upload files**
-3. Drag den **gesamten Ordner-Inhalt mit Unterordnern** rein
-4. GitHub fragt bei Duplikaten: **Replace existing file** → Ja
-5. Commit: `Update logo to SVG, add hero portrait`
-6. ~1 Min warten → **Cmd+Shift+R**
+2. **github.com/dirczahlmann/dircbot** → **Add file** → **Upload files**
+3. Drag den Ordner-Inhalt rein
+4. Bei Duplikaten: **Replace existing file**
+5. Commit: `Fix logo cutoff, subtle portrait background`
+6. **Cmd+Shift+R** auf der Seite
 
 ## 🎯 Was du sehen solltest
 
-**Desktop:**
-- Logo oben links — gestochen scharf, keine Kanten
-- Hero ist jetzt zweispaltig: Text links, dein Portrait rechts
-- "8 Unicorns" Badge orange-gold auf dem Portrait
+- **Logo** "Dirc Zahlmann+" komplett lesbar oben links (mit orange +)
+- **Hero-Text** zentriert wie vorher
+- **Subtiler oranger/blauer Schimmer** rechts im Hintergrund (das ist das geblurrede Portrait)
+- Kein dominantes Foto mehr — alles harmonisch
 
-**Mobile:**
-- Portrait stackt über den Text
-- Logo etwas kleiner
-- Badge entsprechend kleiner
-
-## 🛡️ Falls was nicht passt
-
-**Logo wird nicht angezeigt:**
-- Check ob `dirc_logo.svg` wirklich in `assets/` Ordner liegt
-- Hard refresh: `Cmd+Shift+R`
-
-**Portrait wird nicht geladen:**
-- Check ob `dirc_portrait.jpg` in `assets/` liegt
-- Filename muss exakt `dirc_portrait.jpg` heißen (lowercase, kein Leerzeichen)
-
-**Alte Logo-JPG noch da:**
-- Du kannst die `assets/dirc_logo.jpg` jetzt löschen (oder einfach drinlassen, schadet nicht)
-
-## 💡 Bonus: Portrait austauschen
-
-Wenn du ein anderes Foto willst:
-1. Foto bearbeiten — quadratisch oder 4:5 Hochformat
-2. Auf ~800px Breite skalieren
-3. Als JPG mit Qualität 85-90 speichern
-4. Auf GitHub `assets/dirc_portrait.jpg` durch das neue ersetzen
-
----
-
-Nach Deploy → Topic-Sidebar! 🔥
+Das Portrait wirkt jetzt als **Brand-Atmosphäre**, nicht als Show-Stopper. 🎯
