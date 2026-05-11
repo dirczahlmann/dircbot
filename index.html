@@ -121,7 +121,7 @@
       <div class="msg-progress-fill" id="msgProgressFill"></div>
     </div>
 
-    <div class="chat-body" id="chatBody">
+    <div class="chat-body has-welcome" id="chatBody">
       <div class="welcome-state" id="welcomeState">
         <div class="welcome-avatar">D</div>
         <h2 class="welcome-heading">
@@ -471,6 +471,25 @@
           <span data-lang="es">Tu Meta Principal (una frase) ✦</span>
         </label>
         <input type="text" id="profileGoal" required maxlength="200" data-ph-en="e.g. Build my first SaaS to €10k MRR" data-ph-de="z.B. Mein erstes SaaS auf 10k MRR bringen" data-ph-es="ej. Construir mi primer SaaS a 10k MRR">
+      </div>
+
+      <div class="profile-form-row">
+        <div class="profile-form-group">
+          <label>
+            <span data-lang="en">What you do (job / business)</span>
+            <span data-lang="de">Was du beruflich machst</span>
+            <span data-lang="es">A qué te dedicas</span>
+          </label>
+          <input type="text" id="profileJob" maxlength="120" data-ph-en="e.g. Independent crypto consultant" data-ph-de="z.B. Selbstständiger Crypto-Berater" data-ph-es="ej. Consultor crypto independiente">
+        </div>
+        <div class="profile-form-group">
+          <label>
+            <span data-lang="en">Want to get better at</span>
+            <span data-lang="de">Möchte besser werden in</span>
+            <span data-lang="es">Quieres mejorar en</span>
+          </label>
+          <input type="text" id="profileImprove" maxlength="120" data-ph-en="e.g. closing high-ticket deals" data-ph-de="z.B. High-Ticket Closing" data-ph-es="ej. cerrar deals high-ticket">
+        </div>
       </div>
 
       <div class="profile-form-row">

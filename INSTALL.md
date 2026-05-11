@@ -1,149 +1,62 @@
-# DircBot v8.5 — Funnel-Guardrail + Cost-Calc + Bug-Fix
+# DircBot v8.6 — Layout-Bugfixes + Memory-Confirmation + Profile-Erweiterung
 
-## 🎯 Was neu ist in v8.5
+## 🎯 Was neu ist in v8.6
 
-### 1. Bug-Fix: "Verbleibende Nachrichten 0/3" weg im Tester-Mode
-- Im Tester-Mode wird der untere Counter (`Verbleibende Nachrichten: 0/3`) jetzt komplett versteckt
-- Der **Counter im Top-Header** (z.B. `22/500`) wird korrekt angezeigt und bleibt sticky beim Scrollen
-- Das Top-Pill hat jetzt `margin-right: 200px` damit es nicht hinter dem TESTER-MODUS-Badge verschwindet
+### Bugfixes (kritisch)
+- **Layout-Bug: Bot-Antworten erschienen nebeneinander statt untereinander** → fixed (welcome-state wird jetzt aus DOM entfernt, nicht nur hidden — der `:has()` Selector hat sonst weiter gematched und chat-body in flex-center belassen)
+- **TESTER-MODUS Badge überlappte Counter** → fixed (counter pill hat jetzt margin-right: 320px statt 200px, badge wird auf <1100px screens komplett ausgeblendet)
+- **Scrolling bei langen Antworten** → fixed (chat-body hat jetzt explizites `min-height:0; max-height:none; padding-bottom:80px` damit lange Antworten scrollen können ohne hinter dem sticky Input zu verschwinden)
+- **Scrollbar** → sichtbarer (orange-tinted statt grau)
 
-### 2. Conversion-Funnel-Guardrail (das Wichtigste)
-**Der Bot routet jetzt User je nach Intent automatisch:**
+### Memory mit User-Bestätigung
+Statt stiller Speicherung jetzt **Inline-Confirmation-Chips**:
+- Bot lernt einen Fakt → Memory wird gespeichert
+- Direkt unter der Bot-Antwort erscheint ein lila Chip: **"🧠 Gemerkt: [text]   ✕"**
+- User kann mit ✕ klick die Memory **sofort wieder entfernen** wenn falsch interpretiert
+- Bleibt sichtbar bis User explizit verwirft oder die Seite neu lädt
+- Memories sind weiterhin im Profil editierbar/löschbar
 
-| Intent | Trigger-Beispiele | Routing |
-|---|---|---|
-| 🔧 **Service/Build** | "kannst du mir einen Bot bauen", "AI-Agent fürs Business", "Custom Development" | **Telegram @zahlmann** (https://t.me/zahlmann) |
-| 📚 **Learning** | "wie lerne ich X", "empfiehl einen Kurs", "wo studier ich Y" | **dirczahlmann.com** + passender Track |
-| 🤝 **Pitch/Partnership** | "ich hab ein Projekt für dich", "Investment-Opportunity" | Telegram mit One-Pager-Anforderung |
-| 💬 **Tester-Feedback** | "du solltest hinzufügen", "Feature-Request" | Telegram mit "DircBot feedback" |
-| 🌐 **Casual** | Small Talk, allgemeine Fragen | Kein CTA, normale Antwort |
+### Profile-Erweiterung
+Zwei neue Felder im Profil-Modal:
+- **"Was du beruflich machst"** (`currentJob`) — z.B. "Selbstständiger Crypto-Berater"
+- **"Möchte besser werden in"** (`improvementGoal`) — z.B. "High-Ticket Closing"
 
-**Topic → Track-Mapping** (in KB-File 11 anpassbar):
-- Sales/Closing → **Sales Mastery Track**
-- Crypto/Blockchain → **Crypto Operator Track**
-- Wealth/Family Office → **Wealth Architect Track**
-- Network Marketing → **Network Recovery Track**
-- Tokenization → **Tokenization Foundations**
-- Mindset/Leadership → **Leadership OS**
-- Scaling/Unicorns → **Unicorn Stages Track**
-- AI for Business → **AI Operator Track**
-- Agentic AI → **Agentic Builder Track**
-- Personal Coaching → **Inner Circle Coaching**
+Beide werden in den USER PROFILE-Block des System-Prompts injiziert → der Bot referenziert sie aktiv in seinen Antworten und im Daily Focus.
 
-**Critical Rules** (im System-Prompt verankert):
-- Max 1 CTA pro Antwort
-- CTA nie am Anfang — immer erst Framework + Value, dann am Ende routen
-- Keine wiederholten CTAs in aufeinanderfolgenden Turns
-- Wenn User sagt "lass uns hier weiter reden" → respektieren, kein Push
-- Stay DircBot voice — nicht salesy
+### Daily Focus → personalisiert
+Wenn du auf "Mit DircBot besprechen" klickst, wird jetzt **nicht mehr** ein generischer Tip an den Bot geschickt, sondern eine **kontext-injizierte Frage**:
 
-### 3. Kosten-Kalkulator im Admin
-Neue Section "💰 Kosten-Kalkulator" im Admin-Panel:
-- **Modell-Selector**: Haiku 4.5 / Sonnet 4.6 (current) / Opus 4.6 / Custom mit Auto-Preisen
-- **Eingaben**: Ø Input-Tokens, Ø Output-Tokens, Nachrichten pro Tester, Aktive Tester
-- **Live-Berechnung**: Gesamt-Kosten, Pro Tester, Pro Nachricht, Input/Output-Split, Total Tokens
-- **Quick-Szenarien-Buttons**: 10×50, 50×100, 100×200, 500×500 (Beta-Max)
-- Link zum Anthropic Console für Echtdaten
+> "Mit meinem Kontext (Ziel: 1.5M Haus in 12 Monaten; ich mache aktuell: Crypto-Berater; will besser werden in: High-Ticket Closing; Stage: side-hustle) — was ist das EINE wirkungsvollste das ich HEUTE im Bereich Crypto & Blockchain angehen sollte um meinem Ziel näher zu kommen?"
 
-**Standard-Werte** (gut zum Starten):
-- Sonnet 4.6 (€3 in / €15 out per 1M tokens)
-- 2800 input tokens / msg (System + KB + Frage)
-- 600 output tokens / msg
-- 100 msgs pro Tester
-- 50 Tester
-
-Output bei diesen Werten: ~€72 für 50 Tester × 100 Nachrichten = 5000 Nachrichten total
-
-### 4. A/B Prompt-Testing (Preview)
-Neue Section "🧪 A/B Prompt-Testing" im Admin:
-- **Variante A** = aktueller Live-Prompt (mit Funnel-Routing)
-- **Variante B-Entwurf** = freies Textfeld für deinen alternativen Prompt-Override
-- Lokal speicherbar (localStorage)
-- **Hinweis:** Echtes A/B-Testing mit Tracking braucht Variant B (server-side). Aktuell ist es ein Drafting-Space für deine Varianten-Ideen.
+→ Bot gibt jetzt einen **wirklich relevanten** 3-Schritte-Plan für DEINE Situation, statt generisch "lies das DLT-Gesetz 30 Minuten".
 
 ---
 
-## 🚀 Upload-Steps
+## 🚀 Upload + Test
 
-1. GitHub: dircbot-v8 Inhalt überschreiben (36 Files — eine neue KB)
-2. Commit: `v8.5: Funnel guardrails, cost calc, counter fix`
+1. GitHub: dircbot-v8 hochladen (36 Files)
+2. Commit: `v8.6: Layout fix + memory confirm + profile fields`
 3. Auto-Deploy
-4. Hard-Refresh
+4. **Hard-Refresh** (`Cmd+Shift+R`) — sonst werden die alten JS-Files gecacht
 
-Keine neuen Env-Vars nötig — alles drin.
-
----
-
-## ✅ Test-Flow für Funnel-Guardrail
-
-### Test 1: Service-Anfrage → Telegram
-1. Tester-Mode, beliebiges Topic
-2. Frag: *"Kannst du mir einen AI-Agenten für mein Recruiting-Business bauen?"*
-3. Bot antwortet mit Framework + **ends with** "Ping mich auf Telegram @zahlmann (https://t.me/zahlmann)"
-
-### Test 2: Learning → Akademie
-1. Frag: *"Wie kann ich Crypto richtig von Grund auf lernen?"*
-2. Bot antwortet mit Basics + **ends with** "Die Crypto Operator Track auf dirczahlmann.com geht das end-to-end"
-
-### Test 3: Casual → KEIN CTA
-1. Frag: *"Wer bist du eigentlich?"*
-2. Bot antwortet normal über sich — **kein** CTA am Ende
-
-### Test 4: Counter-Fix
-1. Tester-Mode aktiv
-2. Unten: KEIN "Verbleibende Nachrichten: 0/3" mehr
-3. Top-Header: zeigt korrektes "X/500" Pill
-
-### Test 5: Cost-Kalkulator
-1. Admin öffnen → "💰 Kosten-Kalkulator"
-2. Slider/Inputs spielen, Werte updaten live
-3. Quick-Szenarien testen: "100 × 200" → ~€292
+### Test-Flow
+1. `dircbotDebug.reset()` → frisch
+2. 3 Free-Messages → DIRC500 → **Erweiteres Profile-Modal** mit neuen Feldern
+3. Fülle alles aus inkl. "Beruf" und "Verbesserungsziel"
+4. **Welcome-State** wird zentriert angezeigt
+5. Stelle eine längere Frage → Bot antwortet → **Antworten erscheinen UNTEREINANDER** (kein 3-Spalten-Layout mehr)
+6. Erzähl was Persönliches → Memory-Chip erscheint **unter** der Antwort mit ✕-Button
+7. Falsch interpretierte Memory? ✕ klicken → verschwindet sofort
+8. Klick **"Mit DircBot besprechen"** auf Daily Focus → Bot bekommt personalisierte Frage → relevante Antwort für deine Situation
+9. **Counter oben** ist sichtbar, **TESTER-MODUS** ist klar daneben, **Verbleibende Nachrichten unten** ist weg
 
 ---
 
-## 📁 Files v8.5 (36 total)
+## 📁 Files v8.6 (36 total)
 
-```
-knowledge-base/
-├── 00_identity.md
-├── 01_sales.md
-├── 02_crypto.md
-├── 03_scaling.md
-├── 04_wealth.md
-├── 05_product.md
-├── 06_no_go.md
-├── 07_languages.md
-├── 08_ventures_language.md
-├── 09_ai.md
-├── 10_agentic_ai.md
-└── 11_funnel_routing.md   ← NEU v8.5
-```
+Keine neuen Files, nur Updates:
+- `assets/app.js` — welcome.remove() statt display:none, renderMemoryChips()
+- `assets/profile.js` — saveAutoMemories returns added, removeMemoryByText, new profile fields, personalized daily focus
+- `assets/style.css` — has-welcome class, memory chips, counter margin, scroll fixes
+- `index.html` — has-welcome initial class, new profile fields (Job + Improvement)
 
----
-
-## 🎨 KB-File 11 anpassen (Track-Namen)
-
-Die Track-Namen im Funnel sind **Platzhalter**. Wenn du echte Kurs-Namen hast bei dirczahlmann.com, einfach `knowledge-base/11_funnel_routing.md` und `netlify/functions/chat.js` (im Funnel-Block) updaten:
-
-```
-| Sales/Closing | **Dein-echter-Sales-Kurs-Name** |
-```
-
-Wenn du mir die echten Kurs-Namen + URLs schickst, ersetz ich's direkt im nächsten Update.
-
----
-
-## 🐛 Troubleshooting
-
-**Funnel-CTA kommt zu früh / zu oft**
-→ Tester-Feedback sammeln. KB-File 11 hat "max 1 CTA pro Antwort, nie am Anfang" — wenn der Bot trotzdem übertreibt, screenshoten und ich verschärfe die Rules.
-
-**Bot routet nicht zu Telegram bei klarer Service-Anfrage**
-→ Manchmal interpretiert er es als generelle Frage. Schau ob die Frage konkret genug ist. "Kannst du mir bauen" = klar. "Was ist ein Bot" = unklar (Lernfrage).
-
-**Kosten-Kalkulator zeigt €0.00**
-→ Wahrscheinlich admin.js nicht geladen. Browser-Cache leeren oder URL-Parameter `?v=9` an admin.js erzwingen.
-
----
-
-Bei Bugs: Screenshot. 🔥

@@ -89,6 +89,10 @@ function openProfileModal(isEdit) {
   if (isEdit && userProfile) {
     document.getElementById('profileName').value = userProfile.name || '';
     document.getElementById('profileGoal').value = userProfile.primaryGoal || '';
+    const jobEl = document.getElementById('profileJob');
+    if (jobEl) jobEl.value = userProfile.currentJob || '';
+    const impEl = document.getElementById('profileImprove');
+    if (impEl) impEl.value = userProfile.improvementGoal || '';
     document.getElementById('profileFocus').value = userProfile.focusArea || '';
     document.getElementById('profileStage').value = userProfile.stage || '';
     document.getElementById('profilePriorities').value = (userProfile.priorities || []).join('\n');
@@ -129,6 +133,8 @@ function submitProfile(e) {
   e.preventDefault();
   const name = document.getElementById('profileName').value.trim();
   const goal = document.getElementById('profileGoal').value.trim();
+  const currentJob = (document.getElementById('profileJob')?.value || '').trim();
+  const improvementGoal = (document.getElementById('profileImprove')?.value || '').trim();
   const focus = document.getElementById('profileFocus').value;
   const stage = document.getElementById('profileStage').value;
   const prioritiesRaw = document.getElementById('profilePriorities').value.trim();
@@ -145,6 +151,8 @@ function submitProfile(e) {
   const profile = {
     name: name,
     primaryGoal: goal,
+    currentJob: currentJob,
+    improvementGoal: improvementGoal,
     focusArea: focus,
     stage: stage,
     priorities: priorities,
@@ -233,7 +241,40 @@ function startDailyFocusChat(topicId, tip, action) {
     selectTopic(topicId);
   }
   setTimeout(() => {
-    const msg = { en: `Help me work on this today: "${action}" — give me a tactical 3-step plan.`, de: `Hilf mir das heute anzugehen: "${action}" — gib mir einen taktischen 3-Schritte-Plan.`, es: `Ayúdame a trabajar esto hoy: "${action}" — dame un plan táctico de 3 pasos.` }[currentLang];
+    const topic = TOPICS.find(t => t.id === topicId);
+    const topicName = topic ? topic.name[currentLang] : topicId;
+    const hasProf = hasProfile();
+
+    // If profile exists, ask the bot for a PERSONALIZED daily action based on profile.
+    // Otherwise fall back to the static tip.
+    let msg;
+    if (hasProf && userProfile.primaryGoal) {
+      const ctxBits = [];
+      ctxBits.push(`mein Ziel: ${userProfile.primaryGoal}`);
+      if (userProfile.currentJob) ctxBits.push(`ich mache aktuell: ${userProfile.currentJob}`);
+      if (userProfile.improvementGoal) ctxBits.push(`will besser werden in: ${userProfile.improvementGoal}`);
+      if (userProfile.stage) ctxBits.push(`Stage: ${userProfile.stage}`);
+      const ctxDE = ctxBits.join('; ');
+
+      const ctxBitsEN = [];
+      ctxBitsEN.push(`my goal: ${userProfile.primaryGoal}`);
+      if (userProfile.currentJob) ctxBitsEN.push(`I currently do: ${userProfile.currentJob}`);
+      if (userProfile.improvementGoal) ctxBitsEN.push(`want to get better at: ${userProfile.improvementGoal}`);
+      if (userProfile.stage) ctxBitsEN.push(`stage: ${userProfile.stage}`);
+      const ctxEN = ctxBitsEN.join('; ');
+
+      msg = {
+        en: `Given my context (${ctxEN}), what's the ONE most-impactful thing I should focus on TODAY in the ${topicName} area to move closer to my goal? Be specific to MY situation — not generic. Give me a 3-step plan I can execute today.`,
+        de: `Mit meinem Kontext (${ctxDE}) — was ist das EINE wirkungsvollste das ich HEUTE im Bereich ${topicName} angehen sollte um meinem Ziel näher zu kommen? Spezifisch für MEINE Situation — nicht generisch. Gib mir einen 3-Schritte-Plan den ich heute ausführen kann.`,
+        es: `Con mi contexto (${ctxEN}), ¿cuál es la UNA cosa más impactante en la que debo enfocarme HOY en ${topicName} para acercarme a mi meta? Específico a MI situación. Plan de 3 pasos para hoy.`
+      }[currentLang];
+    } else {
+      msg = {
+        en: `Help me work on this today: "${action}" — give me a tactical 3-step plan.`,
+        de: `Hilf mir das heute anzugehen: "${action}" — gib mir einen taktischen 3-Schritte-Plan.`,
+        es: `Ayúdame a trabajar esto hoy: "${action}" — dame un plan táctico de 3 pasos.`
+      }[currentLang];
+    }
     if (typeof askQuestion === 'function') askQuestion(msg);
   }, 300);
 }
@@ -319,6 +360,7 @@ function loadChat(chatId) {
   const cb = document.getElementById('chatBody');
   if (cb) {
     cb.innerHTML = '';
+    cb.classList.remove('has-welcome');
     chat.messages.forEach(m => {
       if (typeof appendMessage === 'function') {
         appendMessage(m.role, m.content);
@@ -439,6 +481,8 @@ function getProfilePrompt() {
   let p = '\n\nUSER PROFILE:';
   p += `\n- Name: ${userProfile.name}`;
   p += `\n- Primary goal: ${userProfile.primaryGoal}`;
+  if (userProfile.currentJob) p += `\n- Currently does for work: ${userProfile.currentJob}`;
+  if (userProfile.improvementGoal) p += `\n- Wants to get better at: ${userProfile.improvementGoal}`;
   if (userProfile.focusArea) {
     const t = TOPICS.find(t => t.id === userProfile.focusArea);
     if (t) p += `\n- Current focus area: ${t.name.en}`;
@@ -447,7 +491,7 @@ function getProfilePrompt() {
   if (userProfile.priorities && userProfile.priorities.length) {
     p += `\n- Top priorities: ${userProfile.priorities.join('; ')}`;
   }
-  p += '\n\nAddress them by name occasionally. Reference their goal/stage in advice. Make every response personal to their context.';
+  p += '\n\nAddress them by name occasionally. Reference their goal, what they do, and what they want to improve in your advice. Tie every recommendation to THEIR specific situation. Don\'t give generic answers when their profile gives you context.';
   return p;
 }
 
@@ -491,7 +535,7 @@ function extractMemoryBlock(rawText) {
 }
 
 function saveAutoMemories(memories) {
-  if (!memories || memories.length === 0) return 0;
+  if (!memories || memories.length === 0) return [];
   if (!userProfile) {
     // Create minimal profile if user is in tester mode without setup yet
     userProfile = {
@@ -507,7 +551,7 @@ function saveAutoMemories(memories) {
   }
   if (!userProfile.memories) userProfile.memories = [];
 
-  let added = 0;
+  const newlyAdded = [];
   memories.forEach(mem => {
     // Deduplicate (case-insensitive, fuzzy)
     const normalized = mem.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -517,7 +561,7 @@ function saveAutoMemories(memories) {
     });
     if (!exists) {
       userProfile.memories.push(mem);
-      added++;
+      newlyAdded.push(mem);
     }
   });
 
@@ -526,19 +570,22 @@ function saveAutoMemories(memories) {
     userProfile.memories = userProfile.memories.slice(-30);
   }
 
-  if (added > 0) {
+  if (newlyAdded.length > 0) {
     saveProfile(userProfile);
-    // Soft toast notification — non-intrusive
-    if (typeof showToast === 'function') {
-      const msg = {
-        en: `+${added} memory saved`,
-        de: `+${added} Merkmal gespeichert`,
-        es: `+${added} memoria guardada`
-      }[currentLang] || `+${added} memory`;
-      showToast('🧠 ' + msg);
-    }
   }
-  return added;
+  return newlyAdded;
+}
+
+// Remove a memory by its exact text (used by inline ✕ chip dismiss)
+function removeMemoryByText(text) {
+  if (!userProfile || !userProfile.memories) return false;
+  const idx = userProfile.memories.indexOf(text);
+  if (idx !== -1) {
+    userProfile.memories.splice(idx, 1);
+    saveProfile(userProfile);
+    return true;
+  }
+  return false;
 }
 
 // ============== MEMORY MANAGEMENT (Profile Modal Section) ==============

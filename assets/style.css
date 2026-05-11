@@ -2060,7 +2060,7 @@ body.mode-tester .chat-body {
 }
 
 /* When welcome state is visible, center it vertically + horizontally */
-body.mode-tester .chat-body:has(.welcome-state) {
+body.mode-tester .chat-body.has-welcome {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2361,13 +2361,137 @@ body.mode-tester .counter {
 body.mode-tester .msg-counter-pill {
   display: flex !important;
   margin-left: auto;
-  margin-right: 200px;  /* leave room for TESTER-MODUS badge + lang toggle */
+  margin-right: 320px;  /* clear TESTER-MODUS badge (right:220px) + lang-toggle (right:24px) */
   position: relative;
   z-index: 31;
 }
 
 @media (max-width: 1100px) {
   body.mode-tester .msg-counter-pill {
-    margin-right: 0;
+    margin-right: 12px;
+  }
+  /* On smaller screens, hide tester badge to make room */
+  body.mode-tester .tester-badge {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   V8.6: FIXES — layout/scroll/memory chips
+   ============================================ */
+
+/* Ensure chat-body really scrolls in tester mode (not just at viewport) */
+body.mode-tester .chat-body {
+  display: block;  /* explicit, but messages stack naturally as block-flex msgs */
+  min-height: 0;   /* required for flex children to shrink */
+  max-height: none;
+}
+
+/* When chat-body has welcome state, override to flex-center */
+body.mode-tester .chat-body.has-welcome {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Add padding bottom to ensure last message clears sticky input */
+body.mode-tester .chat-body:not(.has-welcome) {
+  padding-bottom: 80px !important;
+}
+
+/* Better scrollbar visibility */
+body.mode-tester .chat-body::-webkit-scrollbar {
+  width: 8px;
+}
+body.mode-tester .chat-body::-webkit-scrollbar-thumb {
+  background: rgba(232,66,10,0.25);
+  border-radius: 4px;
+}
+body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(232,66,10,0.4);
+}
+
+/* ============== MEMORY CHIPS (inline under bot message) ============== */
+.memory-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-left: 4px;
+  max-width: 90%;
+}
+
+.memory-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.22);
+  border-radius: 16px;
+  font-size: 11.5px;
+  color: rgba(240,237,232,0.85);
+  animation: chip-in 0.3s ease;
+  max-width: 100%;
+}
+
+@keyframes chip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.memory-chip.dismissed {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.2s;
+}
+
+.memory-chip-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.memory-chip-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: #c084fc;
+  text-transform: uppercase;
+}
+
+.memory-chip-text {
+  font-weight: 500;
+  color: rgba(240,237,232,0.92);
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memory-chip-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  color: rgba(240,237,232,0.5);
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  transition: all 0.15s;
+}
+
+.memory-chip-dismiss:hover {
+  background: rgba(239,68,68,0.18);
+  color: #ef4444;
+}
+
+@media (max-width: 600px) {
+  .memory-chip-text {
+    max-width: 200px;
   }
 }

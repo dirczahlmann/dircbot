@@ -228,6 +228,7 @@ function newChat() {
   clearTopic();
   const cb = document.getElementById('chatBody');
   if (cb) {
+    cb.classList.add('has-welcome');
     cb.innerHTML = `
       <div class="welcome-state" id="welcomeState">
         <div class="welcome-avatar">D</div>
@@ -378,15 +379,22 @@ async function callBot(text, fileData) {
 
     // Auto-memory: strip <<MEMORY>> blocks from displayed text, save silently
     let displayText = botText;
+    let newlyAddedMemories = [];
     if (typeof extractMemoryBlock === 'function') {
       const ex = extractMemoryBlock(botText);
       displayText = ex.cleanText;
       if (ex.memories && ex.memories.length > 0 && typeof saveAutoMemories === 'function') {
-        saveAutoMemories(ex.memories);
+        newlyAddedMemories = saveAutoMemories(ex.memories) || [];
       }
     }
 
     appendMessage('bot', displayText);
+
+    // After bot message, render memory-confirmation chips (if any new memories)
+    if (newlyAddedMemories.length > 0) {
+      renderMemoryChips(newlyAddedMemories);
+    }
+
     conversationHistory.push({ role: 'user', content: text });
     conversationHistory.push({ role: 'assistant', content: displayText });
 
@@ -426,9 +434,12 @@ async function tryAnother() {
 function appendMessage(role, text, attachment) {
   const cb = document.getElementById('chatBody');
   if (!cb) return;
-  // Hide welcome state once chat starts
+  // Remove welcome state from DOM (not just hide) once chat starts.
+  // Using display:none would leave it in DOM and the :has() selector
+  // would still match, breaking the flex layout for subsequent messages.
   const welcome = document.getElementById('welcomeState');
-  if (welcome) welcome.style.display = 'none';
+  if (welcome) welcome.remove();
+  cb.classList.remove('has-welcome');
   const msgDiv = document.createElement('div');
   msgDiv.className = 'msg ' + role;
   const bubble = document.createElement('div');
@@ -690,3 +701,49 @@ window.dircbotDebug = {
   },
   state: () => ({ testerMode, testerCode, testerMessagesUsed, freeMessagesUsed, currentTopic, currentLang })
 };
+
+
+// ============== MEMORY CONFIRMATION CHIPS ==============
+// Shows learned memories as small inline chips below the bot's response.
+// User can dismiss with ✕ → memory gets removed silently.
+function renderMemoryChips(memories) {
+  const cb = document.getElementById('chatBody');
+  if (!cb || !memories.length) return;
+  // Find the last bot message
+  const botMsgs = cb.querySelectorAll('.msg.bot');
+  const lastBot = botMsgs[botMsgs.length - 1];
+  if (!lastBot) return;
+
+  const chipsContainer = document.createElement('div');
+  chipsContainer.className = 'memory-chips';
+
+  const labels = {
+    en: { learned: 'Learned', dismiss: 'Remove' },
+    de: { learned: 'Gemerkt', dismiss: 'Verwerfen' },
+    es: { learned: 'Aprendido', dismiss: 'Quitar' }
+  }[currentLang] || { learned: 'Learned', dismiss: 'Remove' };
+
+  memories.forEach(mem => {
+    const chip = document.createElement('div');
+    chip.className = 'memory-chip';
+    chip.innerHTML = `
+      <span class="memory-chip-icon">🧠</span>
+      <span class="memory-chip-label">${labels.learned}:</span>
+      <span class="memory-chip-text"></span>
+      <button class="memory-chip-dismiss" title="${labels.dismiss}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    chip.querySelector('.memory-chip-text').textContent = mem;
+    chip.querySelector('.memory-chip-dismiss').onclick = () => {
+      if (typeof removeMemoryByText === 'function') {
+        removeMemoryByText(mem);
+      }
+      chip.classList.add('dismissed');
+      setTimeout(() => chip.remove(), 200);
+    };
+    chipsContainer.appendChild(chip);
+  });
+
+  lastBot.appendChild(chipsContainer);
+}
