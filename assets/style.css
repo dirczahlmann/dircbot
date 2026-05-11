@@ -1306,3 +1306,77 @@ body.mode-free .topic-suggestions {
   .tester-wall-card { padding:30px 22px 24px; }
   .tester-wall-title { font-size:26px; }
 }
+
+/* ============== V8 SAFETY OVERRIDES ============== */
+/* These !important rules prevent v7-cached-CSS conflicts on first deploy */
+
+/* Modals MUST be hidden by default */
+.tester-wall {
+  display: none !important;
+}
+.tester-wall.visible {
+  display: flex !important;
+}
+
+/* In tester mode, hero & free-mode UI MUST be hidden */
+body.mode-tester .hero,
+body.mode-tester .cta-section,
+body.mode-tester .trust-bar,
+body.mode-tester .question-area {
+  display: none !important;
+}
+
+/* In free mode, tester UI MUST be hidden */
+body.mode-free .tester-badge,
+body.mode-free .msg-counter-pill,
+body.mode-free .msg-progress,
+body.mode-free .topic-header,
+body.mode-free .topic-suggestions {
+  display: none !important;
+}
+body.mode-free .topic-sidebar {
+  transform: translateX(-100%) !important;
+}
+
+/* Sidebar MUST be fixed when in tester mode */
+body.mode-tester .topic-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 260px !important;
+  transform: translateX(0) !important;
+  z-index: 50 !important;
+}
+
+/* Tester badge must be properly styled */
+.tester-badge {
+  position: fixed !important;
+  top: 22px !important;
+  right: 220px !important;
+  left: auto !important;
+  z-index: 55 !important;
+}
+body.mode-free .tester-badge {
+  display: none !important;
+}
+body.mode-tester .tester-badge {
+  display: inline-flex !important;
+}
+
+/* Modal backdrop MUST be visible when modal is open */
+.tester-wall.visible .tester-wall-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0,0,0,0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 1 !important;
+}
+.tester-wall.visible .tester-wall-card {
+  position: relative !important;
+  z-index: 2 !important;
+}
