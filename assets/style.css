@@ -1931,3 +1931,420 @@ body.mode-tester .main-content {
     margin-left: 0 !important;
   }
 }
+
+/* ============================================
+   V8.4: EQUINAT-STYLE LAYOUT (TESTER MODE)
+   ============================================
+   In tester mode, body becomes app-like:
+   - Full viewport height, no page scroll
+   - Sidebar fixed left
+   - Main content: sticky header + scrollable middle + sticky input
+   - Centered welcome state when no chat yet
+   ============================================ */
+
+body.mode-tester {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Hide site-wide elements not needed in tester app mode */
+body.mode-tester .site-header,
+body.mode-tester .site-footer,
+body.mode-tester .hero,
+body.mode-tester .cta-section,
+body.mode-tester .trust-bar,
+body.mode-tester .topic-header,
+body.mode-tester .question-area {
+  display: none !important;
+}
+
+body.mode-tester .main-content {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 !important;
+  margin-left: 290px;
+}
+
+body.mode-tester .container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Chat wrapper becomes a flat app shell, NOT a rounded card */
+body.mode-tester .chat-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+/* === STICKY TOP HEADER === */
+body.mode-tester .chat-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(15,15,15,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 16px 36px;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+body.mode-tester .chat-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+body.mode-tester .chat-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+body.mode-tester .chat-status {
+  font-size: 12px;
+}
+
+body.mode-tester .msg-counter-pill {
+  margin-left: auto;
+}
+
+/* === STICKY PROGRESS BAR (just below header) === */
+body.mode-tester .msg-progress {
+  position: sticky;
+  top: 76px;
+  z-index: 29;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  height: 3px;
+  background: rgba(255,255,255,0.04);
+  border: none;
+}
+
+body.mode-tester .msg-progress-fill {
+  height: 100%;
+  border-radius: 0;
+}
+
+/* === SCROLLABLE CHAT BODY === */
+body.mode-tester .chat-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 40px 24px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  scroll-behavior: smooth;
+}
+
+/* When welcome state is visible, center it vertically + horizontally */
+body.mode-tester .chat-body:has(.welcome-state) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === WELCOME STATE (Equinat-style centered hero) === */
+.welcome-state {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  padding: 40px 20px;
+  animation: welcome-fade-in 0.5s ease;
+}
+
+@keyframes welcome-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-avatar {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8420a 0%, #c9a84c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 0 0 4px rgba(232,66,10,0.15),
+    0 20px 50px rgba(232,66,10,0.25);
+}
+
+.welcome-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 38px;
+  font-weight: 400;
+  color: #f0ede8;
+  margin-bottom: 14px;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.welcome-sub {
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(240,237,232,0.6);
+  margin: 0 auto 36px;
+  max-width: 560px;
+}
+
+.welcome-suggestions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.welcome-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s;
+  color: #f0ede8;
+  font-family: inherit;
+}
+
+.welcome-card:hover {
+  background: rgba(232,66,10,0.06);
+  border-color: rgba(232,66,10,0.3);
+  transform: translateY(-1px);
+}
+
+.welcome-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c9a84c;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+.welcome-card-desc {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: rgba(240,237,232,0.78);
+}
+
+@media (max-width: 600px) {
+  .welcome-suggestions { grid-template-columns: 1fr; }
+  .welcome-heading { font-size: 30px; }
+  .welcome-avatar { width: 72px; height: 72px; font-size: 38px; }
+}
+
+/* === TOPIC SUGGESTIONS in chat-body (when topic clicked) === */
+body.mode-tester .topic-suggestions {
+  margin: 0 40px 16px;
+}
+
+/* === STICKY BOTTOM INPUT BAR === */
+body.mode-tester .input-area {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  margin: 0 !important;
+  padding: 14px 36px 16px !important;
+  background: rgba(15,15,15,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0 !important;
+}
+
+body.mode-tester .file-preview {
+  margin: 0 36px 8px !important;
+}
+
+/* === COUNTER (bottom bar) === */
+body.mode-tester .counter {
+  padding: 8px 36px 12px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  background: rgba(0,0,0,0.3);
+  font-size: 11.5px;
+  text-align: center;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* === MOBILE: collapse sidebar, full width === */
+@media (max-width: 900px) {
+  body.mode-tester .main-content {
+    margin-left: 0 !important;
+  }
+  body.mode-tester .chat-header {
+    padding: 14px 20px;
+  }
+  body.mode-tester .msg-progress {
+    top: 70px;
+  }
+  body.mode-tester .chat-body {
+    padding: 24px 20px;
+  }
+  body.mode-tester .input-area {
+    padding: 12px 20px !important;
+  }
+  body.mode-tester .counter {
+    padding: 8px 20px 12px;
+  }
+}
+
+/* === Top-right floating elements (lang toggle, tester badge) — keep visible === */
+body.mode-tester .lang-toggle,
+body.mode-tester .tester-badge {
+  position: fixed;
+  z-index: 50;
+}
+
+/* === MEMORY SECTION in Profile Modal === */
+.profile-memories-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.profile-memories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.profile-memories-header label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin: 0;
+}
+
+.profile-memories-clear {
+  background: transparent;
+  border: 1px solid rgba(239,68,68,0.25);
+  color: rgba(239,68,68,0.75);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.profile-memories-clear:hover {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  border-color: rgba(239,68,68,0.4);
+}
+
+.profile-memories-hint {
+  font-size: 12px;
+  color: rgba(240,237,232,0.4);
+  margin: 0 0 12px;
+}
+
+.profile-memories-list {
+  max-height: 240px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.memories-empty {
+  padding: 18px;
+  font-size: 13px;
+  color: rgba(240,237,232,0.4);
+  text-align: center;
+  font-style: italic;
+}
+
+.memory-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  transition: background 0.12s;
+  margin-bottom: 2px;
+}
+
+.memory-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.memory-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.memory-text {
+  flex: 1;
+  font-size: 13px;
+  color: #f0ede8;
+  line-height: 1.45;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.memory-text:focus {
+  background: rgba(201,168,76,0.08);
+  box-shadow: inset 0 0 0 1px rgba(201,168,76,0.3);
+}
+
+.memory-delete {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: rgba(240,237,232,0.3);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.memory-item:hover .memory-delete {
+  opacity: 1;
+}
+
+.memory-delete:hover {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+}

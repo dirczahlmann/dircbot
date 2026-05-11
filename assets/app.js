@@ -228,14 +228,45 @@ function newChat() {
   clearTopic();
   const cb = document.getElementById('chatBody');
   if (cb) {
-    cb.innerHTML = '';
-    const wm = {
-      en: "Hey — I'm DircBot. 30 years of sales mastery, 15 years in crypto, 8 unicorns built. Pick a topic on the left or ask me anything. 🔥",
-      de: 'Hey — ich bin DircBot. 30 Jahre Vertriebsmeisterschaft, 15 Jahre Crypto, 8 Unicorns aufgebaut. Wähl ein Thema links oder frag mich alles. 🔥',
-      es: 'Hey — soy DircBot. 30 años de maestría en ventas, 15 años en crypto, 8 unicornios construidos. Elige un tema a la izquierda o pregúntame lo que sea. 🔥'
-    };
-    appendMessage('bot', wm[currentLang]);
+    cb.innerHTML = `
+      <div class="welcome-state" id="welcomeState">
+        <div class="welcome-avatar">D</div>
+        <h2 class="welcome-heading">
+          <span data-lang="en">Hey — I'm DircBot</span>
+          <span data-lang="de">Hey — ich bin DircBot</span>
+          <span data-lang="es">Hey — soy DircBot</span>
+        </h2>
+        <p class="welcome-sub">
+          <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic on the left or ask me anything.</span>
+          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema links oder frag mich alles.</span>
+          <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema o pregúntame lo que sea.</span>
+        </p>
+        <div class="welcome-suggestions">
+          <button class="welcome-card" onclick="askSuggested(1)">
+            <div class="welcome-card-title"><span data-lang="en">Sales objection</span><span data-lang="de">Vertriebs-Einwand</span><span data-lang="es">Objeción de ventas</span></div>
+            <div class="welcome-card-desc"><span data-lang="en">"I need to think about it" — how to handle</span><span data-lang="de">"Ich muss noch nachdenken" — wie umgehen</span><span data-lang="es">"Necesito pensarlo" — cómo manejar</span></div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(2)">
+            <div class="welcome-card-title"><span data-lang="en">Bitcoin DCA</span><span data-lang="de">Bitcoin DCA</span><span data-lang="es">DCA Bitcoin</span></div>
+            <div class="welcome-card-desc"><span data-lang="en">Should I keep buying at this level?</span><span data-lang="de">Soll ich auf diesem Level weiterkaufen?</span><span data-lang="es">¿Sigo comprando a este nivel?</span></div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(3)">
+            <div class="welcome-card-title"><span data-lang="en">Scale my business</span><span data-lang="de">Business skalieren</span><span data-lang="es">Escalar mi negocio</span></div>
+            <div class="welcome-card-desc"><span data-lang="en">Next-level moves for serious operators</span><span data-lang="de">Next-Level Moves für ernsthafte Operators</span><span data-lang="es">Movimientos de siguiente nivel</span></div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(4)">
+            <div class="welcome-card-title"><span data-lang="en">AI for my business</span><span data-lang="de">AI für mein Business</span><span data-lang="es">IA para mi negocio</span></div>
+            <div class="welcome-card-desc"><span data-lang="en">Where do I actually start in 2026?</span><span data-lang="de">Wo fang ich 2026 wirklich an?</span><span data-lang="es">¿Por dónde empiezo realmente en 2026?</span></div>
+          </button>
+        </div>
+      </div>
+    `;
   }
+  // Hide topic suggestions and free question area
+  const sug = document.getElementById('topicSuggestions');
+  if (sug) sug.classList.remove('visible');
+  const qa = document.getElementById('questionArea');
+  if (qa) qa.style.display = 'none';
   if (typeof renderChatHistory === 'function') renderChatHistory();
 }
 
@@ -273,7 +304,8 @@ function askSuggested(idx) {
   const q = {
     1: { en: 'My prospect said "I need to think about it." What do I do?', de: 'Mein Interessent sagt "Ich muss noch nachdenken." Was tun?', es: 'Mi prospecto dijo "Necesito pensarlo". ¿Qué hago?' },
     2: { en: 'Should I DCA into Bitcoin at this level?', de: 'Soll ich auf diesem Level in Bitcoin DCA-en?', es: '¿Debería hacer DCA en Bitcoin a este nivel?' },
-    3: { en: 'How do I scale my business to the next level?', de: 'Wie skaliere ich mein Business auf das nächste Level?', es: '¿Cómo escalo mi negocio al siguiente nivel?' }
+    3: { en: 'How do I scale my business to the next level?', de: 'Wie skaliere ich mein Business auf das nächste Level?', es: '¿Cómo escalo mi negocio al siguiente nivel?' },
+    4: { en: 'How do I actually start using AI in my business in 2026?', de: 'Wie fang ich 2026 wirklich an AI in meinem Business zu nutzen?', es: '¿Cómo empiezo realmente a usar IA en mi negocio en 2026?' }
   }[idx];
   if (q) askQuestion(q[currentLang]);
 }
@@ -343,14 +375,25 @@ async function callBot(text, fileData) {
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
     const botText = data.response || data.message || 'Hmm — something went wrong. Try again?';
-    appendMessage('bot', botText);
-    conversationHistory.push({ role: 'user', content: text });
-    conversationHistory.push({ role: 'assistant', content: botText });
 
-    // Save to chat history
+    // Auto-memory: strip <<MEMORY>> blocks from displayed text, save silently
+    let displayText = botText;
+    if (typeof extractMemoryBlock === 'function') {
+      const ex = extractMemoryBlock(botText);
+      displayText = ex.cleanText;
+      if (ex.memories && ex.memories.length > 0 && typeof saveAutoMemories === 'function') {
+        saveAutoMemories(ex.memories);
+      }
+    }
+
+    appendMessage('bot', displayText);
+    conversationHistory.push({ role: 'user', content: text });
+    conversationHistory.push({ role: 'assistant', content: displayText });
+
+    // Save to chat history (cleaned text, not raw with markers)
     if (typeof appendToCurrentChat === 'function') {
       appendToCurrentChat('user', text);
-      appendToCurrentChat('assistant', botText);
+      appendToCurrentChat('assistant', displayText);
     }
   } catch (err) {
     removeTyping(typingId);
@@ -383,6 +426,9 @@ async function tryAnother() {
 function appendMessage(role, text, attachment) {
   const cb = document.getElementById('chatBody');
   if (!cb) return;
+  // Hide welcome state once chat starts
+  const welcome = document.getElementById('welcomeState');
+  if (welcome) welcome.style.display = 'none';
   const msgDiv = document.createElement('div');
   msgDiv.className = 'msg ' + role;
   const bubble = document.createElement('div');

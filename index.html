@@ -122,11 +122,67 @@
     </div>
 
     <div class="chat-body" id="chatBody">
-      <div class="msg bot">
-        <div class="msg-bubble">
-          <span data-lang="en">Hey — I'm DircBot. 30 years of sales mastery, 15 years in crypto, 8 unicorns built. Ask me anything about sales, crypto, scaling or wealth — or send a photo/file you want me to analyze. 🔥</span>
-          <span data-lang="de">Hey — ich bin DircBot. 30 Jahre Vertriebsmeisterschaft, 15 Jahre Crypto, 8 Unicorns aufgebaut. Frag mich alles zu Vertrieb, Crypto, Skalierung oder Wealth — oder schick mir ein Foto/File zur Analyse. 🔥</span>
-          <span data-lang="es">Hey — soy DircBot. 30 años de maestría en ventas, 15 años en crypto, 8 unicornios construidos. Pregúntame lo que sea sobre ventas, crypto, escalado o riqueza — o envíame una foto/archivo para analizar. 🔥</span>
+      <div class="welcome-state" id="welcomeState">
+        <div class="welcome-avatar">D</div>
+        <h2 class="welcome-heading">
+          <span data-lang="en">Hey — I'm DircBot</span>
+          <span data-lang="de">Hey — ich bin DircBot</span>
+          <span data-lang="es">Hey — soy DircBot</span>
+        </h2>
+        <p class="welcome-sub">
+          <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic on the left or ask me anything.</span>
+          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema links oder frag mich alles.</span>
+          <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema o pregúntame lo que sea.</span>
+        </p>
+        <div class="welcome-suggestions">
+          <button class="welcome-card" onclick="askSuggested(1)">
+            <div class="welcome-card-title">
+              <span data-lang="en">Sales objection</span>
+              <span data-lang="de">Vertriebs-Einwand</span>
+              <span data-lang="es">Objeción de ventas</span>
+            </div>
+            <div class="welcome-card-desc">
+              <span data-lang="en">"I need to think about it" — how to handle</span>
+              <span data-lang="de">"Ich muss noch nachdenken" — wie umgehen</span>
+              <span data-lang="es">"Necesito pensarlo" — cómo manejar</span>
+            </div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(2)">
+            <div class="welcome-card-title">
+              <span data-lang="en">Bitcoin DCA</span>
+              <span data-lang="de">Bitcoin DCA</span>
+              <span data-lang="es">DCA Bitcoin</span>
+            </div>
+            <div class="welcome-card-desc">
+              <span data-lang="en">Should I keep buying at this level?</span>
+              <span data-lang="de">Soll ich auf diesem Level weiterkaufen?</span>
+              <span data-lang="es">¿Sigo comprando a este nivel?</span>
+            </div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(3)">
+            <div class="welcome-card-title">
+              <span data-lang="en">Scale my business</span>
+              <span data-lang="de">Business skalieren</span>
+              <span data-lang="es">Escalar mi negocio</span>
+            </div>
+            <div class="welcome-card-desc">
+              <span data-lang="en">Next-level moves for serious operators</span>
+              <span data-lang="de">Next-Level Moves für ernsthafte Operators</span>
+              <span data-lang="es">Movimientos de siguiente nivel</span>
+            </div>
+          </button>
+          <button class="welcome-card" onclick="askSuggested(4)">
+            <div class="welcome-card-title">
+              <span data-lang="en">AI for my business</span>
+              <span data-lang="de">AI für mein Business</span>
+              <span data-lang="es">IA para mi negocio</span>
+            </div>
+            <div class="welcome-card-desc">
+              <span data-lang="en">Where do I actually start in 2026?</span>
+              <span data-lang="de">Wo fang ich 2026 wirklich an?</span>
+              <span data-lang="es">¿Por dónde empiezo realmente en 2026?</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -443,6 +499,27 @@
           <span data-lang="es">Top 3 Prioridades (una por línea)</span>
         </label>
         <textarea id="profilePriorities" rows="3" maxlength="500"></textarea>
+      </div>
+
+      <div class="profile-memories-section" id="profileMemoriesSection">
+        <div class="profile-memories-header">
+          <label>
+            <span data-lang="en">🧠 What DircBot remembers about you</span>
+            <span data-lang="de">🧠 Was DircBot über dich weiß</span>
+            <span data-lang="es">🧠 Lo que DircBot recuerda de ti</span>
+          </label>
+          <button type="button" class="profile-memories-clear" onclick="clearAllMemories()">
+            <span data-lang="en">Clear all</span>
+            <span data-lang="de">Alle löschen</span>
+            <span data-lang="es">Borrar todo</span>
+          </button>
+        </div>
+        <p class="profile-memories-hint">
+          <span data-lang="en">Auto-learned from your conversations. Click any item to edit, ✕ to remove.</span>
+          <span data-lang="de">Automatisch aus deinen Chats gelernt. Click zum bearbeiten, ✕ zum löschen.</span>
+          <span data-lang="es">Aprendido automáticamente de tus conversaciones. Click para editar, ✕ para quitar.</span>
+        </p>
+        <div id="profileMemoriesList" class="profile-memories-list"></div>
       </div>
 
       <div class="profile-modal-error" id="profileError"></div>

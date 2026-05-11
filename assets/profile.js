@@ -98,6 +98,13 @@ function openProfileModal(isEdit) {
   const skipBtn = document.getElementById('profileSkipBtn');
   if (skipBtn) skipBtn.style.display = isEdit ? 'none' : 'inline-flex';
 
+  // Show memory section only when editing an existing profile (not on first setup)
+  const memSection = document.getElementById('profileMemoriesSection');
+  if (memSection) {
+    memSection.style.display = isEdit ? 'block' : 'none';
+    if (isEdit && typeof renderMemoriesList === 'function') renderMemoriesList();
+  }
+
   // Modal title
   const title = document.getElementById('profileModalTitle');
   if (title) {
@@ -456,3 +463,134 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProfile();
   loadChats();
 });
+
+
+// ============== AUTO-MEMORY EXTRACTION ==============
+// Parses <<MEMORY>>...<<END_MEMORY>> blocks from bot responses,
+// strips them from displayed text, and silently saves to profile.
+
+function extractMemoryBlock(rawText) {
+  if (!rawText) return { cleanText: rawText, memories: [] };
+  const re = /<<MEMORY>>([\s\S]*?)<<END_MEMORY>>/i;
+  const match = rawText.match(re);
+  if (!match) return { cleanText: rawText, memories: [] };
+
+  const block = match[1];
+  // Strip from display
+  const cleanText = rawText.replace(re, '').trim();
+
+  // Parse memories (lines starting with -, *, •)
+  const memories = block
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(line => line.replace(/^[-*•]\s*/, '').trim())
+    .filter(line => line.length > 3 && line.length < 200);
+
+  return { cleanText, memories };
+}
+
+function saveAutoMemories(memories) {
+  if (!memories || memories.length === 0) return 0;
+  if (!userProfile) {
+    // Create minimal profile if user is in tester mode without setup yet
+    userProfile = {
+      name: 'Tester',
+      primaryGoal: '',
+      focusArea: '',
+      stage: '',
+      priorities: [],
+      memories: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+  }
+  if (!userProfile.memories) userProfile.memories = [];
+
+  let added = 0;
+  memories.forEach(mem => {
+    // Deduplicate (case-insensitive, fuzzy)
+    const normalized = mem.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const exists = userProfile.memories.some(existing => {
+      const eNorm = existing.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return eNorm === normalized || eNorm.includes(normalized) || normalized.includes(eNorm);
+    });
+    if (!exists) {
+      userProfile.memories.push(mem);
+      added++;
+    }
+  });
+
+  // Cap at 30 (FIFO — drop oldest)
+  if (userProfile.memories.length > 30) {
+    userProfile.memories = userProfile.memories.slice(-30);
+  }
+
+  if (added > 0) {
+    saveProfile(userProfile);
+    // Soft toast notification — non-intrusive
+    if (typeof showToast === 'function') {
+      const msg = {
+        en: `+${added} memory saved`,
+        de: `+${added} Merkmal gespeichert`,
+        es: `+${added} memoria guardada`
+      }[currentLang] || `+${added} memory`;
+      showToast('🧠 ' + msg);
+    }
+  }
+  return added;
+}
+
+// ============== MEMORY MANAGEMENT (Profile Modal Section) ==============
+function renderMemoriesList() {
+  const container = document.getElementById('profileMemoriesList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!userProfile || !userProfile.memories || userProfile.memories.length === 0) {
+    container.innerHTML = `<div class="memories-empty">${{en:'No memories yet. The bot will start learning as you chat.',de:'Noch keine Memories. Der Bot lernt sobald du chattest.',es:'Sin memorias aún. El bot empezará a aprender al chatear.'}[currentLang]}</div>`;
+    return;
+  }
+
+  userProfile.memories.forEach((mem, idx) => {
+    const item = document.createElement('div');
+    item.className = 'memory-item';
+    item.innerHTML = `
+      <span class="memory-icon">🧠</span>
+      <div class="memory-text" contenteditable="true" data-idx="${idx}">${escapeHtml(mem)}</div>
+      <button class="memory-delete" onclick="deleteMemory(${idx})" title="Delete">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    const textEl = item.querySelector('.memory-text');
+    textEl.addEventListener('blur', () => {
+      const newText = textEl.textContent.trim();
+      if (newText && newText !== userProfile.memories[idx]) {
+        userProfile.memories[idx] = newText;
+        saveProfile(userProfile);
+      }
+    });
+    container.appendChild(item);
+  });
+}
+
+function deleteMemory(idx) {
+  if (!userProfile || !userProfile.memories) return;
+  userProfile.memories.splice(idx, 1);
+  saveProfile(userProfile);
+  renderMemoriesList();
+}
+
+function clearAllMemories() {
+  const msg = {
+    en: 'Delete all memories? The bot will forget what it learned.',
+    de: 'Alle Memories löschen? Der Bot vergisst was er gelernt hat.',
+    es: '¿Borrar todas las memorias?'
+  }[currentLang];
+  if (!confirm(msg)) return;
+  if (userProfile) {
+    userProfile.memories = [];
+    saveProfile(userProfile);
+    renderMemoriesList();
+  }
+}
