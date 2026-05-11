@@ -1,7 +1,7 @@
 {
-  "name": "dircbot-netlify",
-  "version": "1.0.0",
-  "description": "DircBot — AI coach powered by Claude API + Dirc Zahlmann's knowledge base",
+  "name": "dircbot-v2",
+  "version": "2.0.0",
+  "description": "DircBot v2 — AI coach with legal compliance, multilingual support, file uploads",
   "private": true,
   "scripts": {
     "dev": "netlify dev",
