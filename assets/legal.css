@@ -20,7 +20,7 @@ body.legal-page {
   z-index:50;
 }
 .legal-logo img {
-  height:32px;
+  height:30px;
   width:auto;
   display:block;
 }
@@ -187,8 +187,15 @@ body.legal-page {
   left:24px;
   z-index:60;
 }
+.site-header a {
+  display:block;
+  transition:opacity 0.2s;
+}
+.site-header a:hover {
+  opacity:0.85;
+}
 .site-header img {
-  height:32px;
+  height:30px;
   width:auto;
   display:block;
 }
@@ -208,9 +215,9 @@ body.legal-page {
   gap:18px;
 }
 .site-footer-logo img {
-  height:28px;
+  height:26px;
   width:auto;
-  opacity:0.9;
+  opacity:0.85;
 }
 .site-footer-disclaimer {
   max-width:680px;
@@ -255,11 +262,11 @@ body.legal-page {
 
 @media (max-width:600px) {
   .site-header {
-    top:18px;
-    left:18px;
+    top:16px;
+    left:16px;
   }
   .site-header img {
-    height:26px;
+    height:22px;
   }
 }
 
