@@ -294,6 +294,13 @@ async function sendMessage(e) {
     else openTesterWall();
     return;
   }
+
+  // Hide topic suggestions and question area once any message is sent
+  const sug = document.getElementById('topicSuggestions');
+  if (sug) sug.classList.remove('visible');
+  const qa = document.getElementById('questionArea');
+  if (qa) qa.style.display = 'none';
+
   lastUserMessage = text;
   lastUserFileData = attachedFileData;
   appendMessage('user', text, attachedFile ? { type: attachedFile.type, name: attachedFile.name } : null);
@@ -302,10 +309,6 @@ async function sendMessage(e) {
   removeAttachment();
   await callBot(text, fileToSend);
   incrementMessageCount();
-  if (!testerMode && freeMessagesUsed === 1) {
-    const qa = document.getElementById('questionArea');
-    if (qa) qa.style.display = 'none';
-  }
 }
 
 async function callBot(text, fileData) {
