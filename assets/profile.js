@@ -213,11 +213,46 @@ function renderDailyFocus() {
   }
 
   const labels = {
-    en: { today: "Today's Focus", action: 'Action' },
-    de: { today: 'Heute fokussieren', action: 'Action' },
-    es: { today: 'Foco de hoy', action: 'Acción' }
+    en: { today: "Today's Focus", action: 'Action', goal: 'Your goal', cta: 'Get my plan' },
+    de: { today: 'Dein Fokus heute', action: 'Action', goal: 'Dein Ziel', cta: 'Hol meinen Plan' },
+    es: { today: 'Tu foco hoy', action: 'Acción', goal: 'Tu meta', cta: 'Dame mi plan' }
   }[currentLang];
 
+  // PERSONALIZED VIEW: when profile exists, show user's goal + a generic-but-pointed
+  // "one step closer" prompt. The actual content gets generated when they click,
+  // using their full profile context.
+  if (hasProfile() && userProfile.primaryGoal) {
+    const goalShort = userProfile.primaryGoal.length > 70
+      ? userProfile.primaryGoal.slice(0, 68) + '…'
+      : userProfile.primaryGoal;
+    const stageLabel = userProfile.stage ? `<span class="daily-focus-stage">${escapeHtml(userProfile.stage)}</span>` : '';
+    const ctxLine = {
+      en: 'One concrete step closer today. The bot picks based on your full context.',
+      de: 'Ein konkreter Schritt näher heute. Der Bot pickt basierend auf deinem ganzen Kontext.',
+      es: 'Un paso concreto más cerca hoy. El bot elige según tu contexto completo.'
+    }[currentLang];
+
+    widget.innerHTML = `
+      <div class="daily-focus-header">
+        <span class="daily-focus-label">✦ ${labels.today}</span>
+        <span class="daily-focus-topic" style="color:${topic.color};">${topic.name[currentLang]}</span>
+      </div>
+      <div class="daily-focus-goal-block">
+        <div class="daily-focus-goal-label">${labels.goal}</div>
+        <div class="daily-focus-goal-text">${escapeHtml(goalShort)}</div>
+        ${stageLabel}
+      </div>
+      <div class="daily-focus-ctxline">${ctxLine}</div>
+      <button class="daily-focus-go" onclick="startDailyFocusChat('${topicId}', '', '')">
+        <span>${labels.cta}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    `;
+    widget.style.display = 'block';
+    return;
+  }
+
+  // FALLBACK VIEW (no profile): show static daily tip
   widget.innerHTML = `
     <div class="daily-focus-header">
       <span class="daily-focus-label">✦ ${labels.today}</span>

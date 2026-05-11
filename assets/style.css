@@ -2495,3 +2495,112 @@ body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
     max-width: 200px;
   }
 }
+
+/* ============================================
+   V8.7: SIDEBAR FIXED-TOP + SCROLLABLE-BOTTOM
+   Topics stay visible at top, chats scroll within their section
+   ============================================ */
+
+/* Sidebar becomes flex column with fixed top + scrollable bottom */
+body.mode-tester .topic-sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh;
+  overflow: hidden;  /* outer container doesn't scroll */
+}
+
+/* Top header (newer chat button) — fixed */
+body.mode-tester .topic-sidebar .sidebar-header {
+  flex-shrink: 0;
+}
+
+/* Fixed top: Daily + Profile + Topics — never scrolls */
+.sidebar-fixed-top {
+  flex-shrink: 0;
+  max-height: 65vh;
+  overflow-y: auto;  /* if user has too many things, this section can scroll independently */
+  overflow-x: hidden;
+  padding-bottom: 6px;
+}
+
+/* Sleeker scrollbar for fixed-top */
+.sidebar-fixed-top::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-fixed-top::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+}
+
+/* Scrollable bottom: Chat history — takes remaining space, scrolls */
+.sidebar-scrollable-bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 100px;  /* always at least this tall */
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.sidebar-scrollable-bottom .sidebar-chat-history {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 8px 30px;
+  min-height: 0;
+}
+
+/* Sticky chat-history label */
+.sidebar-section-divider-sticky {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(to bottom, rgba(15,15,15,0.95), rgba(15,15,15,0.85));
+  backdrop-filter: blur(6px);
+  z-index: 5;
+  padding: 12px 18px 8px !important;
+}
+
+/* ============================================
+   V8.7: DAILY FOCUS — Personalized View
+   ============================================ */
+.daily-focus-goal-block {
+  margin: 4px 0 10px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+.daily-focus-goal-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.45);
+  margin-bottom: 4px;
+}
+.daily-focus-goal-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #f0ede8;
+  font-weight: 600;
+  word-break: break-word;
+}
+.daily-focus-stage {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 7px;
+  background: rgba(201,168,76,0.1);
+  color: #c9a84c;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.daily-focus-ctxline {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(240,237,232,0.6);
+  margin-bottom: 10px;
+  font-style: italic;
+}

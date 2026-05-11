@@ -38,25 +38,31 @@
     </button>
   </div>
 
-  <!-- Daily Focus Widget -->
-  <div class="sidebar-daily-focus" id="dailyFocusWidget" style="display:none;"></div>
+  <!-- FIXED TOP: Daily + Profile + Topics (never scroll out of view) -->
+  <div class="sidebar-fixed-top">
+    <!-- Daily Focus Widget -->
+    <div class="sidebar-daily-focus" id="dailyFocusWidget" style="display:none;"></div>
 
-  <!-- Profile Card -->
-  <div class="sidebar-profile" id="sidebarProfileCard"></div>
+    <!-- Profile Card -->
+    <div class="sidebar-profile" id="sidebarProfileCard"></div>
 
-  <div class="sidebar-section-divider">
-    <span data-lang="en">Topics</span>
-    <span data-lang="de">Themen</span>
-    <span data-lang="es">Temas</span>
+    <div class="sidebar-section-divider">
+      <span data-lang="en">Topics</span>
+      <span data-lang="de">Themen</span>
+      <span data-lang="es">Temas</span>
+    </div>
+    <nav class="sidebar-topics" id="sidebarTopics"></nav>
   </div>
-  <nav class="sidebar-topics" id="sidebarTopics"></nav>
 
-  <div class="sidebar-section-divider">
-    <span data-lang="en">My Chats</span>
-    <span data-lang="de">Meine Chats</span>
-    <span data-lang="es">Mis Chats</span>
+  <!-- SCROLLABLE BOTTOM: Chat history (grows over time, scrolls within) -->
+  <div class="sidebar-scrollable-bottom">
+    <div class="sidebar-section-divider sidebar-section-divider-sticky">
+      <span data-lang="en">My Chats</span>
+      <span data-lang="de">Meine Chats</span>
+      <span data-lang="es">Mis Chats</span>
+    </div>
+    <div class="sidebar-chat-history" id="chatHistoryList"></div>
   </div>
-  <div class="sidebar-chat-history" id="chatHistoryList"></div>
 </aside>
 
 <div class="main-content" id="mainContent">

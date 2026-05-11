@@ -167,6 +167,84 @@
       </div>
     </section>
 
+    <!-- PRICING MODEL (v8.7) -->
+    <section class="admin-section">
+      <h2>💎 Pricing-Modell: €50/Monat mit 25% Affiliate</h2>
+      <p class="admin-section-sub">Empfohlene Subscription + Top-Up-Pakete basierend auf realistischen API-Kosten (Claude Sonnet 4.6).</p>
+
+      <div class="pricing-grid">
+        <div class="pricing-card pricing-card-main">
+          <div class="pricing-tier">SUBSCRIPTION</div>
+          <div class="pricing-price">€50<span class="pricing-period">/Monat</span></div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><strong>500 Nachrichten</strong> inklusive</div>
+            <div class="pricing-feature">Alle 10 Themen-Bereiche</div>
+            <div class="pricing-feature">Voice-Input, Chat-Verlauf, Memory</div>
+            <div class="pricing-feature">Personal Profile + Daily Focus</div>
+          </div>
+          <div class="pricing-breakdown">
+            <div class="pricing-breakdown-row"><span>Affiliate (25%)</span><span class="pricing-debit">−€12.50</span></div>
+            <div class="pricing-breakdown-row"><span>Stripe (3% + €0.30)</span><span class="pricing-debit">−€1.80</span></div>
+            <div class="pricing-breakdown-row"><span>API @ avg 200 msgs</span><span class="pricing-debit">−€7.00</span></div>
+            <div class="pricing-breakdown-row pricing-profit"><span><strong>Profit (avg)</strong></span><span class="pricing-credit"><strong>€28.70</strong> (57%)</span></div>
+            <div class="pricing-breakdown-row pricing-worst"><span>Worst case @ 500 msgs</span><span>€18.20 (36%)</span></div>
+          </div>
+        </div>
+
+        <div class="pricing-cards-stack">
+          <div class="pricing-headline">Top-Up-Pakete (nach 500 inkludierten)</div>
+          <p class="pricing-headline-sub">Keine Affiliate-Provision auf Top-Ups → bessere Margen. Verkauft via Stripe One-Time-Payments.</p>
+
+          <div class="pricing-card pricing-card-small">
+            <div class="pricing-tier-row">
+              <span class="pricing-tier">SMALL</span>
+              <span class="pricing-price-sm">€7</span>
+            </div>
+            <div class="pricing-msgs">+100 Nachrichten</div>
+            <div class="pricing-permsg">€0.07/msg • Profit: €3.20 (46%)</div>
+          </div>
+
+          <div class="pricing-card pricing-card-medium pricing-card-recommended">
+            <div class="pricing-tier-row">
+              <span class="pricing-tier">MEDIUM <span class="pricing-pop">★ BELIEBT</span></span>
+              <span class="pricing-price-sm">€18</span>
+            </div>
+            <div class="pricing-msgs">+300 Nachrichten</div>
+            <div class="pricing-permsg">€0.06/msg • Profit: €6.70 (37%)</div>
+          </div>
+
+          <div class="pricing-card pricing-card-large">
+            <div class="pricing-tier-row">
+              <span class="pricing-tier">LARGE</span>
+              <span class="pricing-price-sm">€50</span>
+            </div>
+            <div class="pricing-msgs">+1000 Nachrichten</div>
+            <div class="pricing-permsg">€0.05/msg • Profit: €13.40 (27%)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-rationale">
+        <h3>📐 Pricing-Logik</h3>
+        <ul>
+          <li><strong>€50/Monat verankert €0.10/Nachricht</strong> als psychologischen Preis.</li>
+          <li><strong>Top-Ups werden günstiger pro Nachricht</strong> (€0.07 → €0.06 → €0.05) → Incentive zum größeren Paket.</li>
+          <li><strong>Keine Affiliate-Provision auf Top-Ups</strong> = bessere Margen für dich (Industry-Standard, kommunizier das in den Affiliate-Terms).</li>
+          <li><strong>Average Use ist realistisch ~150-200 msgs/Monat.</strong> Nur 5-10% der User schöpfen 500 aus.</li>
+          <li><strong>Bei 1000 zahlenden Subscribers</strong> @ avg 200 msgs: ~€28.700/Monat Profit, ~€7.000 API-Kosten.</li>
+        </ul>
+      </div>
+
+      <div class="pricing-warnings">
+        <strong>⚠️ Wichtige Caveats:</strong>
+        <ul>
+          <li>Diese Kalkulation basiert auf <strong>Variant A</strong> (frontend-localStorage). Variant B mit echter Quota brauchst du für €-Verkauf — sonst kann User die 500 msgs via Inkognito-Mode umgehen.</li>
+          <li>API-Kosten <strong>Sonnet 4.6: €3 in / €15 out</strong> per 1M tokens. Wenn Anthropic die Preise senkt → mehr Marge. Aktuelle Preise immer auf <a href="https://console.anthropic.com/pricing" target="_blank">Anthropic Console</a> checken.</li>
+          <li>Bei <strong>500+ aktiven Subscribers</strong> kann sich ein wechsel zu <strong>Haiku 4.5</strong> (€1/€5) lohnen — würde API-Kosten 3x senken bei nur leicht reduzierter Qualität.</li>
+        </ul>
+      </div>
+    </section>
+
     <!-- COST CALCULATOR (NEW v8.5) -->
     <section class="admin-section">
       <h2>💰 Kosten-Kalkulator</h2>
@@ -197,8 +275,8 @@
 
           <div class="cost-input-row">
             <div class="cost-input-group">
-              <label>Ø Input-Tokens / Nachricht <span class="cost-hint">(System + KB + Frage)</span></label>
-              <input type="number" id="costInputTokens" value="2800" min="0" step="100" onchange="recalcCost()">
+              <label>Ø Input-Tokens / Nachricht <span class="cost-hint">(System + 12 KB-Files + Profile + Memories + History + Frage)</span></label>
+              <input type="number" id="costInputTokens" value="8500" min="0" step="100" onchange="recalcCost()">
             </div>
             <div class="cost-input-group">
               <label>Ø Output-Tokens / Nachricht <span class="cost-hint">(Antwort)</span></label>
