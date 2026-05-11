@@ -1,73 +1,70 @@
-# DircBot v8.7 — Pricing-Modell + Sidebar Fixed-Top + Personalized Daily
+# DircBot v8.8 — CI-Integration + Topic-Chips-Bar
 
-## 🎯 Was neu ist in v8.7
+## 🎯 Was neu ist in v8.8
 
-### 1. 💎 Pricing-Modell-Section im Admin
-Komplett ausgearbeitete Empfehlung für €50/Monat-Subscription mit 25% Affiliate:
+### 1. 🎨 DIRCBOT-CI komplett integriert
+Beide CI-Assets sind jetzt eingebaut:
+- **DIRCBOT-Logo** (metallisches D + Schriftzug + "YOUR AI. YOUR EDGE." Tagline) ersetzt den simplen "D"-Kreis im Welcome-State
+- **Cyber-Suit-Dirc** wird als Hero-Image auf der Tester-Signup-Seite (`tester-signup.html`) verwendet — neues 2-Spalten-Layout mit Content links, Image rechts
 
-**Subscription:** €50/Monat → 500 Nachrichten inklusive
-- Profit avg (200 msgs/User): €28.70 (57% Marge)
-- Profit worst (500 msgs/User): €18.20 (36% Marge)
+Files:
+- `assets/dircbot_logo.png` (139KB)
+- `assets/dirc_avatar_suit.jpg` (139KB)
 
-**Top-Up-Pakete** (nach 500 verbraucht, keine Affiliate-Provision):
-- **SMALL** — +100 msgs / €7 (€0.07/msg, 46% Marge)
-- **MEDIUM ⭐** — +300 msgs / €18 (€0.06/msg, 37% Marge) ← Sweet Spot
-- **LARGE** — +1000 msgs / €50 (€0.05/msg, 27% Marge)
-
-Komplette Breakdown im Admin → "💎 Pricing-Modell".
-
-### 2. 📐 Sidebar-Layout: Topics fixed top, Chats scrollable bottom
-Vorher: Topics wurden bei vielen Chats nach unten geschoben — verschwanden aus dem View.
-Jetzt: 
-- **Oben (fixed):** New Chat, Daily Focus, Profile-Card, **Topics** — bleiben IMMER sichtbar
-- **Unten (scrollable):** Chat-Verlauf scrollt in seinem eigenen Container
-- Section-Label "Meine Chats" ist sticky beim Scrollen
-
-### 3. ✨ Daily Focus personalisiert
-Vorher: Generischer Topic-Tip aus statischer Tipps-Liste
-Jetzt: Wenn Profil existiert, zeigt das Widget direkt **DEIN ZIEL** im Goal-Block:
+### 2. ⚡ Horizontal Topic-Chips-Bar oben (Equinat-Style)
+Topics sind jetzt IMMER sichtbar — auch wenn du tief in einem Chat bist und in der Sidebar gescrollt hast:
 
 ```
-✦ DEIN FOKUS HEUTE           Crypto & Blockchain
-┌─────────────────────────────────────────┐
-│ DEIN ZIEL                                │
-│ in 12 Monaten ein Haus kaufen für 1.5M  │
-│ [side-hustle]                            │
-└─────────────────────────────────────────┘
-Ein konkreter Schritt näher heute.
-Der Bot pickt basierend auf deinem ganzen Kontext.
-[Hol meinen Plan →]
+[Topic Chips: Vertrieb · Crypto · Wealth · Network · Tokenization · Mindset · ...]  ← horizontal scroll
+─────────────────────────────────────────────────────────────────────────
+[Chat-Inhalt]
 ```
 
-Beim Klick generiert der Bot einen personalisierten 3-Schritte-Plan für genau DEINE Situation (dein Job, dein Ziel, dein Improvement-Goal, dein Stage).
+- Zwischen Progress-Bar und Chat-Body
+- Klick auf Chip → wählt Topic + scrollt zu Suggestions
+- Active-State synchronisiert mit Sidebar-Topics (beides hervorgehoben gleichzeitig)
+- Horizontal scrollbar auf kleineren Screens
+- Nur in Tester-Mode sichtbar (Free-Mode bleibt clean)
 
-### 4. 🔢 Cost-Calculator Defaults aktualisiert
-Default Input-Tokens jetzt 8500 (statt 2800) — realistisch mit 12 KB-Files + Profile + Memories + Conversation History injection.
+Sidebar-Topics bleiben zusätzlich erhalten — Topics sind jetzt von ZWEI Stellen aus erreichbar.
+
+### 3. ✨ Welcome-State Redesign
+- DIRCBOT-Logo (320px max-width) prominent zentriert mit Drop-Shadow-Glow
+- Subtext aktualisiert: "Wähl ein Thema **oben** oder frag mich alles" (verweist auf neue Chips-Bar statt Sidebar)
+- 4 Suggestion-Cards bleiben unverändert
+
+### 4. 🖼️ Tester-Signup Hero Redesign
+2-Spalten-Layout:
+- **Links:** DIRCBOT-Logo oben + alle bisherigen Inhalte (Label, h1, Subtext, Stats, CTA)
+- **Rechts:** Cyber-Suit-Dirc Image mit Drop-Shadow + radialem Orange-Glow im Hintergrund
+- Mobile: Image stackt nach oben, Content nach unten
 
 ---
 
 ## 🚀 Upload + Test
 
-1. GitHub upload (36 Files)
-2. Auto-Deploy + Hard-Refresh (Cmd+Shift+R)
+1. GitHub: 38 Files hochladen (2 neue Image-Assets dazugekommen)
+2. Commit: `v8.8: CI integration + topic chips bar + cyber-suit hero`
+3. Hard-Refresh (`Cmd+Shift+R`)
 
 ### Test-Flow
-1. `dircbotDebug.reset()` → frisch starten
-2. 3 Free + DIRC500 → Profile mit Beruf + Improvement-Ziel ausfüllen
-3. **Sidebar checken:** New Chat / Daily Focus / Profile / Topics oben fixiert. Chats darunter scrollbar.
-4. **Daily Focus checken:** zeigt jetzt dein Ziel + Stage statt generischer Tipp
-5. Klick "Hol meinen Plan" → Bot bekommt vollen Profile-Kontext, gibt personalisierten Plan
-6. **Admin → "💎 Pricing-Modell"** — komplette Preisstrategie + Top-Ups + Profit-Breakdown
+1. `dircbotDebug.reset()` → DIRC500 → erstes Bild: **DIRCBOT-Logo** im Welcome statt "D"-Kreis ✓
+2. Direkt über dem Chat-Body: **horizontale Topic-Chips** sichtbar ✓
+3. Klick auf einen Chip → wird active (farbiger Outline), Sidebar sync, Suggestions erscheinen
+4. Lange chatten → Chips bleiben **immer** sichtbar oben
+5. `tester-signup.html` öffnen → **Cyber-Suit-Dirc** rechts im Hero, Content links
 
 ---
 
-## 💼 Was du jetzt brauchst für Launch
+## 📁 Files v8.8 (38 total)
 
-**Variant B (server-side)** ist Voraussetzung für €50-Verkauf:
-- Echte Quota pro User (nicht via Inkognito umgehbar)
-- Stripe-Integration für Subscription + Top-Ups
-- Per-User-Token-Tracking
-- Affiliate-Dashboard für Partner
+Neu:
+- `assets/dircbot_logo.png` 🆕 (CI Logo)
+- `assets/dirc_avatar_suit.jpg` 🆕 (Cyber-Suit Dirc)
 
-Das ist ein 2-3 Wochen Build. Wenn du soweit bist sag Bescheid — dann planen wir den V2-Backend.
-
+Modified:
+- `index.html` — Welcome-State mit Logo, topic-chips-bar div, content-classes
+- `assets/app.js` — renderTopicChips(), selectTopic+clearTopic sync chips, newChat() rebuilt mit Logo
+- `assets/style.css` — Topic-chips-bar CSS, welcome-logo CSS
+- `tester-signup.html` — 2-col hero layout
+- `assets/tester-signup.css` — Grid-Layout + image styling

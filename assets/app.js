@@ -155,17 +155,37 @@ function openTesterLimitWall() {
 
 function renderTopics() {
   const container = document.getElementById('sidebarTopics');
-  if (!container) return;
-  container.innerHTML = '';
+  if (container) {
+    container.innerHTML = '';
+    TOPICS.forEach(topic => {
+      const btn = document.createElement('button');
+      btn.className = 'topic-item';
+      btn.dataset.topicId = topic.id;
+      if (currentTopic && currentTopic.id === topic.id) btn.classList.add('active');
+      btn.style.setProperty('--topic-color', topic.color);
+      btn.innerHTML = '<span class="topic-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg></span><span class="topic-name">' + topic.name[currentLang] + '</span>';
+      btn.onclick = () => selectTopic(topic.id);
+      container.appendChild(btn);
+    });
+  }
+  // Also render the horizontal chip bar at top of chat
+  renderTopicChips();
+}
+
+// Horizontal chip bar at top of chat area (Equinat-style)
+function renderTopicChips() {
+  const bar = document.getElementById('topicChipsBar');
+  if (!bar) return;
+  bar.innerHTML = '';
   TOPICS.forEach(topic => {
-    const btn = document.createElement('button');
-    btn.className = 'topic-item';
-    btn.dataset.topicId = topic.id;
-    if (currentTopic && currentTopic.id === topic.id) btn.classList.add('active');
-    btn.style.setProperty('--topic-color', topic.color);
-    btn.innerHTML = '<span class="topic-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg></span><span class="topic-name">' + topic.name[currentLang] + '</span>';
-    btn.onclick = () => selectTopic(topic.id);
-    container.appendChild(btn);
+    const chip = document.createElement('button');
+    chip.className = 'topic-chip';
+    chip.dataset.topicId = topic.id;
+    if (currentTopic && currentTopic.id === topic.id) chip.classList.add('active');
+    chip.style.setProperty('--chip-color', topic.color);
+    chip.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg><span>' + topic.name[currentLang] + '</span>';
+    chip.onclick = () => selectTopic(topic.id);
+    bar.appendChild(chip);
   });
 }
 
@@ -174,6 +194,9 @@ function selectTopic(topicId) {
   if (!topic) return;
   currentTopic = topic;
   document.querySelectorAll('.topic-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.topicId === topicId);
+  });
+  document.querySelectorAll('.topic-chip').forEach(el => {
     el.classList.toggle('active', el.dataset.topicId === topicId);
   });
   const header = document.getElementById('topicHeader');
@@ -198,6 +221,7 @@ function selectTopic(topicId) {
 function clearTopic() {
   currentTopic = null;
   document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.topic-chip').forEach(el => el.classList.remove('active'));
   const header = document.getElementById('topicHeader');
   if (header) header.classList.remove('visible');
   const sug = document.getElementById('topicSuggestions');
@@ -230,17 +254,17 @@ function newChat() {
   if (cb) {
     cb.classList.add('has-welcome');
     cb.innerHTML = `
-      <div class="welcome-state" id="welcomeState">
-        <div class="welcome-avatar">D</div>
+      <div class="welcome-state welcome-state-v2" id="welcomeState">
+        <img src="/assets/dircbot_logo.png?v=11" alt="DircBot — Your AI. Your Edge." class="welcome-logo">
         <h2 class="welcome-heading">
           <span data-lang="en">Hey — I'm DircBot</span>
           <span data-lang="de">Hey — ich bin DircBot</span>
           <span data-lang="es">Hey — soy DircBot</span>
         </h2>
         <p class="welcome-sub">
-          <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic on the left or ask me anything.</span>
-          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema links oder frag mich alles.</span>
-          <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema o pregúntame lo que sea.</span>
+          <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic above or ask me anything.</span>
+          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema oben oder frag mich alles.</span>
+          <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema arriba o pregúntame lo que sea.</span>
         </p>
         <div class="welcome-suggestions">
           <button class="welcome-card" onclick="askSuggested(1)">
