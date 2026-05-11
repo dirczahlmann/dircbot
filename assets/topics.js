@@ -302,6 +302,80 @@ const TOPICS = [
         es: 'Mi primer millón: hoja de ruta realista'
       }
     ]
+  },
+  {
+    id: 'ai',
+    icon: 'M12 3l3 6 6 3-6 3-3 6-3-6-6-3 6-3z M19 2v3 M20.5 3.5h-3 M19 19v3 M20.5 20.5h-3',
+    color: '#06b6d4',
+    name: {
+      en: 'AI for Business',
+      de: 'KI fürs Business',
+      es: 'IA para Negocios'
+    },
+    intro: {
+      en: 'AI is a layer you build on, not a tool you use. Let\'s talk leverage.',
+      de: 'KI ist eine Schicht auf der du baust, kein Tool das du nutzt. Lass uns über Hebel reden.',
+      es: 'La IA es una capa sobre la que construyes, no una herramienta que usas. Hablemos de apalancamiento.'
+    },
+    suggestions: [
+      {
+        en: 'Which AI tools should I actually use in 2026?',
+        de: 'Welche AI-Tools sollte ich 2026 wirklich nutzen?',
+        es: '¿Qué herramientas de IA debo usar en 2026?'
+      },
+      {
+        en: 'How do I use AI to 10x my sales output?',
+        de: 'Wie 10xe ich meinen Sales-Output mit AI?',
+        es: '¿Cómo uso IA para 10x mi output de ventas?'
+      },
+      {
+        en: 'How do entrepreneurs make money with AI in 2026?',
+        de: 'Wie verdienen Entrepreneure 2026 Geld mit AI?',
+        es: '¿Cómo ganan dinero los emprendedores con IA en 2026?'
+      },
+      {
+        en: 'What\'s the 4-step framework to plug AI into my business?',
+        de: 'Was ist das 4-Schritte-Framework um AI in mein Business zu bauen?',
+        es: '¿Cuál es el framework de 4 pasos para integrar IA en mi negocio?'
+      }
+    ]
+  },
+  {
+    id: 'agentic',
+    icon: 'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M8.59 10.51l6.83-3.98 M15.41 17.49l-6.82-3.98',
+    color: '#a855f7',
+    name: {
+      en: 'Agentic AI',
+      de: 'Agentic AI',
+      es: 'IA Agéntica'
+    },
+    intro: {
+      en: 'ChatGPT answers. Agents act. The biggest opportunity since the internet.',
+      de: 'ChatGPT antwortet. Agents handeln. Die größte Chance seit dem Internet.',
+      es: 'ChatGPT responde. Los agentes actúan. La mayor oportunidad desde internet.'
+    },
+    suggestions: [
+      {
+        en: 'Which agentic AI framework should I pick (CrewAI, LangGraph, AutoGen)?',
+        de: 'Welches Agentic-Framework passt zu mir (CrewAI, LangGraph, AutoGen)?',
+        es: '¿Qué framework agéntico elijo (CrewAI, LangGraph, AutoGen)?'
+      },
+      {
+        en: 'How do I build my first AI agent in 30 days?',
+        de: 'Wie baue ich meinen ersten AI-Agent in 30 Tagen?',
+        es: '¿Cómo construyo mi primer agente de IA en 30 días?'
+      },
+      {
+        en: 'Best 7 business models to monetize AI agents',
+        de: 'Die 7 besten Business-Modelle um AI-Agents zu monetarisieren',
+        es: 'Los 7 mejores modelos de negocio para monetizar agentes IA'
+      },
+      {
+        en: 'What is MCP (Model Context Protocol) and why does it matter?',
+        de: 'Was ist MCP (Model Context Protocol) und warum ist das wichtig?',
+        es: '¿Qué es MCP (Model Context Protocol) y por qué importa?'
+      }
+    ]
   }
 ];
 
@@ -623,6 +697,80 @@ const DAILY_TIPS = {
       en: { tip: "Compound conversations beat coffee meetings.", action: "Have one deep 60-min conversation this week. Skip 5 small ones." },
       de: { tip: "Compound-Gespräche schlagen Kaffee-Meetings.", action: "Hab diese Woche ein 60-min tiefes Gespräch. Skip 5 kleine." },
       es: { tip: "Conversaciones profundas ganan a cafés.", action: "Ten una conversación profunda de 60min. Salta 5 pequeñas." }
+    }
+  ],
+  ai: [
+    {
+      en: { tip: "AI in 2026 isn't a tool. It's a layer you build on.", action: "List 3 weekly tasks AI could handle for you. Pick one — automate it this week." },
+      de: { tip: "KI ist 2026 kein Tool. Es ist eine Schicht auf der du baust.", action: "List 3 wöchentliche Aufgaben die AI für dich übernehmen kann. Pick eine — automatisier sie diese Woche." },
+      es: { tip: "La IA en 2026 no es una herramienta. Es una capa sobre la que construyes.", action: "Lista 3 tareas semanales que la IA podría manejar. Elige una — automatízala esta semana." }
+    },
+    {
+      en: { tip: "Don't collect tools. Ship workflows.", action: "Cancel 2 AI subscriptions you don't use. Master the 3 you keep." },
+      de: { tip: "Sammel keine Tools. Ship Workflows.", action: "Kündig 2 AI-Subscriptions die du nicht nutzt. Master die 3 die du behältst." },
+      es: { tip: "No colecciones herramientas. Lanza workflows.", action: "Cancela 2 suscripciones de IA que no usas. Domina las 3 que mantienes." }
+    },
+    {
+      en: { tip: "Use Claude + GPT + Gemini in parallel. Different LLMs for different jobs.", action: "Same prompt to all 3 today. Compare outputs. Pick the best for that job type going forward." },
+      de: { tip: "Nutz Claude + GPT + Gemini parallel. Verschiedene LLMs für verschiedene Jobs.", action: "Gleicher Prompt an alle 3 heute. Vergleich die Outputs. Pick den besten für den Job-Typ." },
+      es: { tip: "Usa Claude + GPT + Gemini en paralelo. LLMs distintos para trabajos distintos.", action: "Mismo prompt a los 3 hoy. Compara outputs. Elige el mejor para ese tipo de trabajo." }
+    },
+    {
+      en: { tip: "The bleeding-wound test: automate where pain is biggest, not where it's easiest.", action: "Identify your most painful weekly process. AI-augment that one first." },
+      de: { tip: "Der Bleeding-Wound-Test: automatisier wo der Schmerz am größten ist, nicht wo's am einfachsten ist.", action: "Identifizier deinen schmerzhaftesten Wochenprozess. AI-augmentier den zuerst." },
+      es: { tip: "Test de herida sangrante: automatiza donde el dolor es mayor, no donde es más fácil.", action: "Identifica tu proceso semanal más doloroso. Aumenta ese primero con IA." }
+    },
+    {
+      en: { tip: "Sales AI stack 2026: Apollo + Clay + HeyReach + Gong. Stop overthinking.", action: "Pick ONE from that stack today. Set it up. Run a test campaign in 48h." },
+      de: { tip: "Sales-AI-Stack 2026: Apollo + Clay + HeyReach + Gong. Stop Overthinking.", action: "Pick EINS aus dem Stack heute. Setup. Test-Kampagne in 48h." },
+      es: { tip: "Stack de ventas IA 2026: Apollo + Clay + HeyReach + Gong. Deja de pensar tanto.", action: "Elige UNO hoy. Configúralo. Lanza campaña de prueba en 48h." }
+    },
+    {
+      en: { tip: "AI replaces low-skill digital work. It amplifies high-value outcome work.", action: "What's the highest-value outcome you sell? Stack AI to do everything below that line." },
+      de: { tip: "KI ersetzt low-skill Digital-Arbeit. Sie verstärkt high-value Outcome-Arbeit.", action: "Was ist dein höchstwertiger Outcome? Stack AI für alles darunter." },
+      es: { tip: "La IA reemplaza trabajo digital de baja habilidad. Amplifica trabajo de alto valor.", action: "¿Cuál es tu resultado de mayor valor? Apila IA para todo lo demás." }
+    },
+    {
+      en: { tip: "Sell outcomes with AI, not hours. Charge for the result.", action: "Reformulate one service: instead of 'I'll build X' say 'I'll cut your Y by Z% in 90 days'." },
+      de: { tip: "Verkauf Outcomes mit AI, keine Stunden. Charge für das Resultat.", action: "Reformulier einen Service: statt 'ich baue X' sag 'ich reduzier dein Y um Z% in 90 Tagen'." },
+      es: { tip: "Vende resultados con IA, no horas. Cobra por el resultado.", action: "Reformula un servicio: en vez de 'construiré X' di 'reduciré tu Y en Z% en 90 días'." }
+    }
+  ],
+  agentic: [
+    {
+      en: { tip: "Chatbots answer. Agents act. Build for action, not conversation.", action: "Pick one task you'd want to NEVER do again. Sketch the agent that takes it over." },
+      de: { tip: "Chatbots antworten. Agents handeln. Bau für Action, nicht Conversation.", action: "Pick eine Task die du NIE wieder machen willst. Sketch den Agent der sie übernimmt." },
+      es: { tip: "Los chatbots responden. Los agentes actúan. Construye para acción, no conversación.", action: "Elige una tarea que NUNCA quieres hacer de nuevo. Esboza el agente que la asume." }
+    },
+    {
+      en: { tip: "The 7 business models for agents: Automation Agency, Custom Builds, Vertical SaaS, AI Worker-as-Service, Outcome-Based Services, Internal Operator, Education+Tools.", action: "Pick ONE of the 7. Outline what your first offer looks like." },
+      de: { tip: "Die 7 Business-Modelle für Agents: Automation Agency, Custom Builds, Vertical SaaS, AI-Worker-as-Service, Outcome-Based Services, Internal Operator, Education+Tools.", action: "Pick EINS der 7. Skizzier wie dein erstes Angebot aussieht." },
+      es: { tip: "Los 7 modelos de negocio para agentes: Agencia de Automatización, Builds Custom, SaaS Vertical, Worker-as-Service, Servicios por Resultados, Operador Interno, Educación+Tools.", action: "Elige UNO de los 7. Esboza cómo se ve tu primera oferta." }
+    },
+    {
+      en: { tip: "CrewAI for beginners. LangGraph for serious builds. AutoGen for multi-agent conversations. Don't overthink it.", action: "Try CrewAI today. Build the simplest 2-agent system. Just to feel it." },
+      de: { tip: "CrewAI für Beginner. LangGraph für ernsthafte Builds. AutoGen für Multi-Agent-Conversations. Don't overthink it.", action: "Probier CrewAI heute. Bau das simpelste 2-Agent-System. Nur um's zu spüren." },
+      es: { tip: "CrewAI para principiantes. LangGraph para builds serios. AutoGen para conversaciones multi-agente. No lo compliques.", action: "Prueba CrewAI hoy. Construye el sistema más simple de 2 agentes. Solo para sentirlo." }
+    },
+    {
+      en: { tip: "MCP (Model Context Protocol) is the USB-C of AI. Learn it now.", action: "Read Anthropic's MCP docs for 30 min today. Identify one tool you'd want your agents to access." },
+      de: { tip: "MCP (Model Context Protocol) ist der USB-C von AI. Lern es jetzt.", action: "Lies heute 30min Anthropic's MCP-Docs. Identifizier ein Tool das deine Agents nutzen sollten." },
+      es: { tip: "MCP (Model Context Protocol) es el USB-C de la IA. Apréndelo ahora.", action: "Lee 30min de los docs MCP de Anthropic hoy. Identifica una herramienta que tus agentes deberían usar." }
+    },
+    {
+      en: { tip: "Vertical beats horizontal. Specialized agents for ONE industry win in 2026.", action: "Pick one industry you know well. What's the agent that would save them 20+ hours/week?" },
+      de: { tip: "Vertical schlägt horizontal. Spezialisierte Agents für EINE Industrie gewinnen 2026.", action: "Pick eine Industrie die du gut kennst. Welcher Agent würde ihnen 20+ Stunden/Woche sparen?" },
+      es: { tip: "Vertical gana a horizontal. Los agentes especializados para UNA industria ganan en 2026.", action: "Elige una industria que conozcas. ¿Qué agente les ahorraría 20+ horas/semana?" }
+    },
+    {
+      en: { tip: "Human-in-the-loop is not a weakness — it's how you sell.", action: "Position your agent as '70-80% autonomous with human review for edge cases'. Customers buy that. Not 'fully autonomous'." },
+      de: { tip: "Human-in-the-loop ist keine Schwäche — es ist wie du verkaufst.", action: "Positionier deinen Agent als '70-80% autonom mit Human-Review für Edge-Cases'. Das kaufen Kunden. Nicht 'fully autonomous'." },
+      es: { tip: "Human-in-the-loop no es debilidad — es cómo vendes.", action: "Posiciona tu agente como '70-80% autónomo con revisión humana'. Eso compran los clientes. No 'fully autonomous'." }
+    },
+    {
+      en: { tip: "40% of agentic AI deployments will be canceled by 2027 due to cost + unclear value. Don't be in that 40%.", action: "Define your agent's measurable ROI BEFORE you build. Hours saved? Conversion lifted? Cost cut?" },
+      de: { tip: "40% der Agentic-AI-Deployments werden bis 2027 gekillt wegen Kosten + unklarem Wert. Sei nicht in den 40%.", action: "Definier den messbaren ROI deines Agents BEVOR du baust. Stunden gespart? Conversion gehoben? Kosten gecuttet?" },
+      es: { tip: "40% de los despliegues agénticos serán cancelados para 2027 por costo + valor poco claro. No estés en ese 40%.", action: "Define el ROI medible de tu agente ANTES de construir. ¿Horas ahorradas? ¿Conversión? ¿Costo?" }
     }
   ]
 };
