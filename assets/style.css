@@ -1380,3 +1380,70 @@ body.mode-tester .tester-badge {
   position: relative !important;
   z-index: 2 !important;
 }
+
+/* ============== V8.1 ACTION BUTTON FIX ============== */
+/* Force .msg to stack bubble + actions vertically */
+.msg {
+  display: flex !important;
+  flex-direction: column !important;
+}
+.msg.user {
+  align-items: flex-end !important;
+}
+.msg.bot {
+  align-items: flex-start !important;
+}
+.msg-bubble {
+  display: block !important;
+  width: auto !important;
+  max-width: 90% !important;
+}
+
+/* Action buttons: small boxes under the answer, always visible */
+.msg-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-top: 8px !important;
+  padding-left: 4px !important;
+  opacity: 1 !important;  /* Always visible, no hover trick */
+  width: auto !important;
+}
+.msg-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  width: auto !important;
+  height: auto !important;
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(240,237,232,0.55) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 5px 9px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+  line-height: 1 !important;
+}
+.msg-action-btn:hover {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  color: #f0ede8 !important;
+}
+.msg-action-btn.success {
+  background: rgba(16,185,129,0.12) !important;
+  border-color: rgba(16,185,129,0.35) !important;
+  color: #34d399 !important;
+}
+.msg-action-btn svg {
+  flex-shrink: 0;
+}
+.msg-action-btn span {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}

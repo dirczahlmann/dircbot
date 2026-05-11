@@ -1,189 +1,182 @@
-# DircBot v8 — Big Tester Update
+# DircBot v8.1 — Tester Signup Page + Admin Panel
 
-**Was neu ist** vs. dem aktuell live laufenden DircBot:
+**Was in diesem Update neu ist (v8.1 vs v8):**
 
-- 🔐 **Tester-System** — 3 Nachrichten frei für alle, dann Code-Wall → 500 Nachrichten für Tester
-- 📑 **Topic-Sidebar** (Tester-Mode) — 8 Themen mit je 4 vorgeschlagenen Fragen in einem 2×2 Grid
-- 📊 **Message-Counter + Progress-Bar** — wie bei Equinat, mit Farbwechsel grün → amber → rot
-- 🎤 **Voice Input** — Mikrofon-Button, nutzt Web Speech API (DE/EN/ES)
-- 📋 **Copy + Share Buttons** unter jeder Bot-Antwort
-- 🔄 **Try-Another-Answer Button** — Bot generiert die Antwort neu mit anderem Winkel
-- 🆕 **New Chat Button** — Tester können einen frischen Chat starten
-- 🤖 **Topic-aware Backend** — Wenn Tester ein Thema gewählt hat, fokussiert der Bot die relevanten KB-Sections
+- 🛠️ **Action-Buttons-Fix** — Kopieren/Teilen/Andere Antwort sind jetzt kleine Boxen UNTER der Antwort, nicht mehr senkrechte Balken rechts
+- 📝 **`/tester-signup.html`** — Vollwertige Landing Page für Tester-Bewerbungen (Equinat-Style)
+- 🛡️ **`/admin.html`** — Passwortgeschütztes Admin-Panel mit Email-Generator
+- 🔗 **Verlinkungen** — Tester-Wall und CTA-Sektion linken jetzt zur Signup-Page
 
 ---
 
-## 🚀 Upload auf GitHub (überschreibt das alte Repo)
+## 🌐 Drei URLs nach dem Deploy
 
-Du hast bereits das Repo `github.com/dirczahlmann/dircbot`. Wir überschreiben jetzt einfach.
-
-### Option 1: GitHub Web UI (einfach)
-
-1. Geh auf https://github.com/dirczahlmann/dircbot
-2. **Lösche zuerst die alten Dateien** die nicht mehr existieren (gibt es eigentlich nur eine: `topics.js` ist neu, sonst Updates)
-3. Klick **"Add file" → "Upload files"**
-4. Zieh **den GESAMTEN Inhalt** des `dircbot-v8/`-Ordners rein (nicht den Ordner selbst!)
-   - Wichtig: auch die Hidden Files mitkopieren — `.env.example` und `.gitignore` (auf Mac: `Cmd+Shift+.` um sie sichtbar zu machen)
-5. Commit message: `v8: Tester system + topic sidebar + voice/copy/share`
-6. **Commit changes**
-7. Netlify deployed automatisch in ~2 Min
-
-### Option 2: Drag & Drop direkt zu Netlify (noch einfacher)
-
-1. Geh auf https://app.netlify.com → dein DircBot Site
-2. **Deploys** → unter "Drag and drop your site folder here"
-3. Zieh den **gesamten `dircbot-v8/` Ordner** rein
-4. Fertig — live in ~30 Sek
-5. **Wichtig:** Wenn du diese Methode nutzt, geht der GitHub-Sync verloren. Mach dann später nochmal Option 1.
+| URL | Wer? | Was? |
+|-----|------|------|
+| `dircbot.netlify.app/` | Alle | Bot mit 3 Free-Messages + Tester-Code-Eingabe |
+| `dircbot.netlify.app/tester-signup.html` | Interessenten | Bewerbung als Beta-Tester (Form → Netlify Forms) |
+| `dircbot.netlify.app/admin.html` | Nur Dirc | Code-Verwaltung + Email-Generator |
 
 ---
 
-## 🔑 Tester-Codes
+## 🔐 Admin-Passwort
 
-Die folgenden 10 Codes funktionieren ab Deployment. Jeder Tester gibt einen ein → unlock 500 Nachrichten in seinem Browser.
+**Default:** `dirczahlmann2026`
+
+⚠️ **Wichtig:** Das Passwort ist im JS-Source-Code sichtbar (Frontend-only). Das ist **keine echte Security**, nur Obscurity. Wer den Source liest, findet das Passwort. Für echte Security: später Netlify Identity.
+
+**Passwort ändern:** Öffne `assets/admin.js`, Zeile 7:
+```js
+const ADMIN_PASSWORD = 'dirczahlmann2026';
+```
+Ändere den String. Deploy. Fertig.
+
+**Wo wird das Passwort gespeichert?** SessionStorage im Browser — gilt nur für die aktuelle Browser-Session. Logout oder Tab schließen → wieder Passwort nötig.
+
+---
+
+## 📝 Admin-Panel Features
+
+Auf `dircbot.netlify.app/admin.html`:
+
+1. **📊 Übersicht** — Stats über Codes, Quotas, Themen
+2. **📧 Tester-Bewerbungen** — Direkt-Link zu Netlify Forms Dashboard
+3. **🔑 Tester-Codes-Liste** — Alle 10 Codes als Cards mit Copy-Button
+4. **✉️ Email-Generator** — Tester-Name + Code wählen → fertige Welcome-Email in DE/EN/ES generieren und kopieren
+5. **⚡ Quick Actions** — Links zu Netlify, GitHub, Anthropic Console, Academy
+6. **🚀 Variant B Preview** — Was später kommt (serverseitige Quota, etc.)
+
+**Email-Generator-Flow:**
+1. Vorname eintippen: z.B. "Anna"
+2. Code wählen: z.B. "DIRC500"
+3. Sprache wählen: DE/EN/ES
+4. "📝 Email generieren" klicken
+5. "📋 Kopieren" klicken
+6. In Email-Client einfügen → an Tester senden
+
+Die generierte Email enthält: Code, URL, Anleitung, Feature-Liste, Feedback-Bitte, Signatur.
+
+---
+
+## 📝 Tester-Signup Landing Page Flow
+
+Auf `dircbot.netlify.app/tester-signup.html`:
+
+1. Hero: "Bau die Zukunft mit mir" mit Stats (50 Plätze · 500 Nachrichten · 0€ · 8 Themen)
+2. 4-Schritte-Prozess (Bewerbung → Freischaltung → Testen → Nach der Beta)
+3. Feature-Grid (6 Topic-Cards)
+4. Affiliate-Teaser
+5. Bewerbungs-Formular mit Feldern:
+   - Vorname, Nachname (Pflicht)
+   - Email (Pflicht)
+   - Telegram-Handle (Pflicht)
+   - Instagram-Handle (optional)
+   - Hauptinteresse (Dropdown der 8 Topics, Pflicht)
+   - Land/Region (optional)
+   - Größte Herausforderung (Pflicht)
+   - Motivation (optional)
+   - Consent-Checkboxes (Datenschutz, AI-Disclaimer, Affiliate, Marketing)
+6. Submit → Netlify Forms → Email an dich
+7. Success-State: "Bewerbung eingegangen! Antwort in 48h."
+
+**Dein Workflow:**
+1. Du bekommst Email von Netlify mit Bewerbungs-Daten
+2. Du screenst und entscheidest
+3. Du gehst zum Admin-Panel → Email-Generator
+4. Generierst die Welcome-Email mit Code
+5. Schickst sie an den Tester
+
+---
+
+## 🚀 Upload-Schritte (gleich wie vorher)
+
+**Option 1: GitHub (empfohlen)**
+1. https://github.com/dirczahlmann/dircbot
+2. "Add file" → "Upload files"
+3. Inhalt von `dircbot-v8/` reinziehen (alle 28 Files inkl. neue `tester-signup.html`, `admin.html`, `assets/admin.js`, `assets/admin.css`, `assets/tester-signup.css`)
+4. Commit: `v8.1: Tester signup page + admin panel + action button fix`
+5. Netlify deployed automatisch
+
+**Option 2: Direct-Drop zu Netlify**
+1. https://app.netlify.com/sites/dircbot/deploys
+2. Drag den `dircbot-v8/`-Ordner rein
+3. Fertig in 30 Sek
+
+**Nach dem Deploy:**
+- **Hard-Refresh** im Browser: `Cmd+Shift+R` (Mac) / `Ctrl+Shift+R` (Win)
+- Test: Geh auf `dircbot.netlify.app/admin.html` → Passwort eingeben → Panel öffnet sich
+- Test: Geh auf `dircbot.netlify.app/tester-signup.html` → Form sollte sauber aussehen
+
+---
+
+## 🔑 Tester-Codes (unverändert)
 
 ```
-DIRC500
-DIRCBETA
-DIRCINSIDER
-LAUNCH2026
-UNICORN8
-SALESGENT
-CRYPTO2011
-TOKEN500
-DZACADEMY
-PRESALE500
+DIRC500            Universal Master
+DIRCBETA           Beta Wave
+DIRCINSIDER        Inner Circle
+LAUNCH2026         Launch Campaign
+UNICORN8           8 Unicorns Reference
+SALESGENT          Sales Gentleman
+CRYPTO2011         Year Started in Crypto
+TOKEN500           Tokenization Theme
+DZACADEMY          Academy Members
+PRESALE500         Presale Connection
 ```
 
-**Wie du sie verteilst:**
-- Telegram-Gruppen: jeder Channel bekommt einen eigenen Code → du kannst Tracken woher die Tester kamen
-- Instagram-Stories: "Comment 'TESTER' → DM mit Code"
-- LinkedIn: Direkt-DM an Top-Connections
-- Email an deine Liste
-
-**Codes ändern / hinzufügen:** Editier die Liste in `assets/topics.js`, Zeile mit `VALID_TESTER_CODES`. Neu deployen.
-
-⚠️ **Wichtiger Hinweis zu Variante A:** Diese Implementierung ist *Browser-basiert*. Ein Tester der in Inkognito-Mode wechselt oder den Browser-Speicher löscht, bekommt 500 neue Nachrichten. Für die erste Test-Phase ist das OK — wenn Missbrauch passiert, machen wir Variante B (serverseitig mit Netlify Blobs).
+Bearbeiten in `assets/topics.js`, Suche nach `VALID_TESTER_CODES`.
 
 ---
 
-## ✅ Testen nach dem Deployment
-
-1. Öffne `dircbot.netlify.app`
-2. **Free-Test:** 3 Nachrichten schreiben → Wall sollte erscheinen → Klick "Have a tester code"
-3. **Tester-Code:** `DIRC500` eingeben → Topic-Sidebar links erscheint
-4. **Topic-Test:** Auf "Sales & Closing" klicken → 2×2 Grid mit 4 Fragen → eine anklicken
-5. **Counter:** Oben rechts sollte stehen "1 / 500", grüne Progress-Bar
-6. **Voice:** Mikrofon-Button drücken → Browser fragt Erlaubnis → sprechen → Text erscheint im Input
-7. **Copy/Share/Try Another:** Über eine Bot-Antwort hovern → 3 Buttons erscheinen unten
-
-### Debug-Befehle (Browser Console)
-
-```javascript
-// State checken
-dircbotDebug.state()
-
-// Alles resetten (zurück zu 0 Nachrichten, kein Code)
-dircbotDebug.reset()
-```
-
----
-
-## 📁 Datei-Übersicht
+## 📁 File-Übersicht v8.1
 
 ```
 dircbot-v8/
-├── INSTALL.md (diese Datei)
-├── index.html                      ← Updated: Sidebar, Wall, Counter, Mic
-├── impressum.html                  ← unchanged
-├── datenschutz.html                ← unchanged
-├── nutzungsbedingungen.html        ← unchanged
-├── netlify.toml                    ← unchanged
-├── package.json                    ← unchanged
-├── .env.example                    ← unchanged (Hidden File)
-├── .gitignore                      ← unchanged (Hidden File)
+├── INSTALL.md
+├── index.html                      ← Updated: Link zur Signup-Page
+├── tester-signup.html              ← NEU: Bewerbungs-Page
+├── admin.html                      ← NEU: Admin-Panel
+├── impressum.html
+├── datenschutz.html
+├── nutzungsbedingungen.html
+├── netlify.toml
+├── package.json
+├── .env.example
+├── .gitignore
 │
 ├── assets/
-│   ├── topics.js                   ← NEU: 8 Topics + Tester-Codes
-│   ├── app.js                      ← Rewritten: alle neuen Features
-│   ├── style.css                   ← Extended: +600 Lines neue UI
-│   ├── consent.js                  ← unchanged
-│   ├── legal.css                   ← unchanged
-│   ├── dirc_logo.svg               ← unchanged
-│   └── dirc_portrait_sharp.jpg     ← unchanged
+│   ├── topics.js                   ← Codes-Liste
+│   ├── app.js                      ← Bot Logic
+│   ├── style.css                   ← Updated: Action-Button-Fix
+│   ├── consent.js
+│   ├── legal.css
+│   ├── tester-signup.css           ← NEU
+│   ├── admin.js                    ← NEU: mit Email-Templates
+│   ├── admin.css                   ← NEU
+│   ├── dirc_logo.svg
+│   └── dirc_portrait_sharp.jpg
 │
-├── knowledge-base/                 ← unchanged (8 Files)
-│   ├── 00_identity.md
-│   ├── 01_sales.md
-│   ├── 02_crypto.md
-│   ├── 03_scaling.md
-│   ├── 04_wealth.md
-│   ├── 05_product.md
-│   ├── 06_no_go.md
-│   └── 07_languages.md
+├── knowledge-base/                 (8 Files, unchanged)
 │
-└── netlify/functions/
-    └── chat.js                     ← Updated: Topic-Context, neuer Payload
+└── netlify/functions/chat.js       (unchanged)
 ```
 
 ---
 
-## ⚙️ Backend-Änderungen im Detail
+## 🐛 Troubleshooting
 
-**`chat.js`** wurde umgebaut für den neuen Frontend-Payload:
+**Action-Buttons immer noch senkrecht?**
+→ Hard-Refresh: `Cmd+Shift+R`. Das v8.1 CSS hat `!important` overrides die das Layout erzwingen.
 
-**Vorher** (v7):
-```json
-{ "messages": [...], "language": "de" }
-```
+**Admin-Panel akzeptiert Passwort nicht?**
+→ Default: `dirczahlmann2026` (kleinbuchstaben, kein Space, mit der Jahreszahl 2026)
 
-**Jetzt** (v8):
-```json
-{
-  "message": "User-Frage",
-  "conversationHistory": [...],
-  "language": "de",
-  "topic": "crypto",
-  "fileData": "base64...",
-  "fileType": "image/png",
-  "fileName": "foto.png"
-}
-```
+**Tester-Signup Form geht nicht durch?**
+→ Netlify muss das `form-name=dircbot-tester-signup` Form erkannt haben. Bei erstem Deploy kann das ein paar Minuten dauern. Check: https://app.netlify.com/sites/dircbot/forms
 
-Wenn `topic` mitgeschickt wird, injiziert das Backend einen Focus-Block in den System-Prompt, der dem Bot sagt: "Konzentrier dich auf die KB-Sections für dieses Thema". Das macht Antworten deutlich relevanter.
-
-Die API-Key-Config ändert sich NICHT — `ANTHROPIC_API_KEY` ist weiterhin in Netlify Environment Variables.
+**Bewerbungen kommen nicht per Email?**
+→ Netlify Forms → Settings → Form notifications. Email-Adresse hinzufügen.
 
 ---
 
-## 🐛 Bekannte Limits & nächste Schritte
-
-**Variante B (geplant für später):**
-- Server-seitige Quota pro Code (echte 500-Nachrichten-Limits, nicht umgehbar)
-- Tracking welcher Code wie oft genutzt wurde
-- Einmalige Codes pro Tester (DIRC-A7F2-9KX statt Universal-Codes)
-- Erfordert Netlify Blobs oder Supabase
-
-**Wann auf Variante B upgraden?**
-- Wenn du merkst dass Tester Codes weitergeben und Inkognito missbrauchen
-- Wenn du genau tracken willst welche Tester wie aktiv sind
-- Wenn du die Codes monetarisieren willst (z.B. "1€ für 500 Test-Nachrichten")
-
-**Nach dem Deployment:**
-- Migrating to `bot.dirczahlmann.com` (DNS CNAME zu `dircbot.netlify.app`)
-- Custom Domain in Netlify Settings hinzufügen
-- SSL automatisch via Let's Encrypt
-
----
-
-## 🆘 Wenn was nicht funktioniert
-
-1. **Tester-Code wird nicht akzeptiert** → Browser Console öffnen, Fehler checken. Codes sind case-insensitive, aber müssen exakt einer aus der Liste sein.
-2. **Voice geht nicht** → Browser-Erlaubnis prüfen (chrome://settings/content/microphone). Funktioniert nicht in Firefox-iOS.
-3. **Topic-Sidebar erscheint nicht** → Du bist noch nicht im Tester-Mode. Code muss eingegeben sein, dann reload.
-4. **Counter zeigt falsche Zahl** → `dircbotDebug.reset()` in Console.
-5. **Bot antwortet nicht** → Netlify Function Logs checken (Netlify UI → Functions → chat → Logs). Häufig: `ANTHROPIC_API_KEY` nicht gesetzt oder falsch.
-
----
-
-**Bei Fragen:** Schick einen Screenshot in den Chat, ich helf direkt.
+**Bei Problemen:** Screenshot in den Chat — ich seh sofort was los ist. 🔧
