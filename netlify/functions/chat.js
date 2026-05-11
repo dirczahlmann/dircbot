@@ -1,7 +1,7 @@
-// ============== DIRCBOT NETLIFY FUNCTION ==============
-// Calls Claude API with full knowledge base.
-// Supports: text, images (PNG/JPG/GIF/WebP), PDFs.
-// Languages: English, German, Spanish.
+// ============== DIRCBOT NETLIFY FUNCTION v8 ==============
+// Accepts the new app.js payload:
+//   { message, conversationHistory[], language, topic?, fileData?, fileType?, fileName? }
+// Returns: { response, model }
 // Env var required: ANTHROPIC_API_KEY
 
 const Anthropic = require('@anthropic-ai/sdk');
@@ -36,16 +36,29 @@ function languageInstruction(language) {
     case 'de':
       return 'IMPORTANT: Respond in German. Use "Du"-form, direct, confident. Use Dirc\'s natural German voice: short sentences, no corporate language, frameworks > theory.';
     case 'es':
-      return 'IMPORTANT: Respond in Spanish. Use "tú"-form (familiar), direct, confident. Use Dirc\'s natural Spanish voice: short sentences, no corporate language, frameworks > theory. Adapt cultural references appropriately.';
+      return 'IMPORTANT: Respond in Spanish. Use "tú"-form (familiar), direct, confident. Use Dirc\'s natural Spanish voice: short sentences, no corporate language, frameworks > theory.';
     case 'en':
     default:
       return 'IMPORTANT: Respond in English. Direct, confident. Frameworks > theory.';
   }
 }
 
-function buildSystemPrompt(language) {
+// Topic context injection — guides bot to focus relevant KB sections
+const TOPIC_CONTEXT = {
+  sales: 'CURRENT FOCUS: Sales & Closing. The user is in a sales/closing context. Prioritize KB sections on sales mastery, objection handling, closing frameworks, the 3-list method, network marketing patterns. Lead with operator-level sales tactics.',
+  crypto: 'CURRENT FOCUS: Crypto & Blockchain. The user wants crypto-specific guidance. Prioritize KB sections on crypto mastery, DCA strategies, market cycles, Swiss crypto regulation. Frame everything through Dirc\'s 15-year crypto lens. NEVER give specific buy/sell signals — always frame as framework + how to think.',
+  wealth: 'CURRENT FOCUS: Wealth & Family Office. The user wants wealth-building guidance. Prioritize KB sections on wealth allocation, family office structures, asset protection, the 4-quadrant method. Talk like an advisor to family offices, because Dirc is one.',
+  network: 'CURRENT FOCUS: Network Marketing. The user is in MLM/network marketing. Focus on sustainable team building, recruiting that works in 2026, MLM recovery patterns, the 3-list method specifically applied to network marketing. Honest about what works vs. cult-like patterns.',
+  tokenization: 'CURRENT FOCUS: Tokenization & RWA. The user wants tokenization expertise. Lean heavily on Swiss Crypto Roundtable context, RWA (Real-World Asset) tokenization, real estate tokenization, Swiss legal frameworks. Dirc advises governments and asset managers on this.',
+  mindset: 'CURRENT FOCUS: Mindset & Leadership. The user wants mindset/leadership coaching. Focus on decision-making OS, breaking through plateaus, self-leadership in crises, mental models for scaling. Personal, direct, no fluff.',
+  scaling: 'CURRENT FOCUS: Business Build & Scale. The user wants scaling guidance. Use the 4 Unicorn Stages framework (Dirc built 8). Focus on operational leverage, team-building for next level, knowing when ready to scale.',
+  coaching: 'CURRENT FOCUS: Personal Coaching. The user wants personalized coaching. Be direct and warm. Help them do situational analysis, translate vision to 90-day plans, energy management. Ask them sharp questions when needed.'
+};
+
+function buildSystemPrompt(language, topic) {
   const kb = loadKnowledgeBase();
   const langInstruction = languageInstruction(language);
+  const topicLine = topic && TOPIC_CONTEXT[topic] ? `\n\n## ${TOPIC_CONTEXT[topic]}\n` : '';
 
   return `You ARE DircBot — the AI embodiment of Dirc Zahlmann.
 
@@ -93,11 +106,11 @@ When analyzing, always:
 - NEVER reproduce generic LLM responses. If the question is generic, give it a Dirc-twist.
 - Crypto questions: explain the framework, never tell them what to buy. Frame it as "how I think."
 - Sales questions: give the exact pattern, the exact script, the exact words.
-- If asked about pricing or the product: mention n3xus.de presale naturally, not as a pitch dump.
+- If asked about pricing or the product: mention dirczahlmann.com naturally, not as a pitch dump.
 - Never repeat the same emoji twice in one response. Use them sparingly: 🔥 ⚡ ₿ 🎯 🚀 only.
 
 ${langInstruction}
-
+${topicLine}
 ## YOUR KNOWLEDGE BASE
 ${kb}
 
@@ -110,6 +123,39 @@ For most questions, follow this rhythm:
 4. **Forward pull** — offer next step or ask a clarifying question
 
 Stay sharp. Stay direct. BE Dirc.`;
+}
+
+// Build content blocks for current user turn — supports file attachments
+function buildUserContent(message, fileData, fileType, fileName) {
+  if (!fileData) {
+    return message;  // simple string
+  }
+  // Multimodal: combine file + text
+  const blocks = [];
+  if (fileType && fileType.startsWith('image/')) {
+    blocks.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: fileType,
+        data: fileData
+      }
+    });
+  } else if (fileType === 'application/pdf') {
+    blocks.push({
+      type: 'document',
+      source: {
+        type: 'base64',
+        media_type: 'application/pdf',
+        data: fileData
+      }
+    });
+  }
+  blocks.push({
+    type: 'text',
+    text: message || (fileName ? `Please analyze: ${fileName}` : 'Please analyze this.')
+  });
+  return blocks;
 }
 
 exports.handler = async (event) => {
@@ -138,32 +184,47 @@ exports.handler = async (event) => {
     }
 
     const body = JSON.parse(event.body || '{}');
-    const messages = body.messages || [];
-    const language = ['en','de','es'].includes(body.language) ? body.language : 'de';
+    const message = (body.message || '').toString().slice(0, 4000);
+    const language = ['en', 'de', 'es'].includes(body.language) ? body.language : 'de';
+    const topic = body.topic || null;
+    const conversationHistory = Array.isArray(body.conversationHistory) ? body.conversationHistory : [];
+    const fileData = body.fileData || null;
+    const fileType = body.fileType || null;
+    const fileName = body.fileName || null;
 
-    if (!messages.length) {
+    if (!message && !fileData) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'No messages provided' })
+        body: JSON.stringify({ error: 'No message or file provided' })
       };
     }
 
-    // Pass through messages as-is — content can be string or array of blocks
-    const anthropicMessages = messages
-      .filter(m => m.role === 'user' || m.role === 'assistant')
-      .map(m => ({ role: m.role, content: m.content }));
+    // Build messages array: prior history + current turn with optional file
+    const anthropicMessages = [];
+    for (const turn of conversationHistory.slice(-10)) {
+      if (turn && (turn.role === 'user' || turn.role === 'assistant') && turn.content) {
+        anthropicMessages.push({
+          role: turn.role,
+          content: String(turn.content).slice(0, 4000)
+        });
+      }
+    }
+    anthropicMessages.push({
+      role: 'user',
+      content: buildUserContent(message, fileData, fileType, fileName)
+    });
 
     const client = new Anthropic({ apiKey });
 
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      system: buildSystemPrompt(language),
+      system: buildSystemPrompt(language, topic),
       messages: anthropicMessages
     });
 
-    const reply = response.content
+    const replyText = response.content
       .filter(block => block.type === 'text')
       .map(block => block.text)
       .join('\n');
@@ -171,7 +232,11 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ reply })
+      body: JSON.stringify({
+        response: replyText,
+        reply: replyText,
+        model: response.model
+      })
     };
   } catch (err) {
     console.error('Chat function error:', err);

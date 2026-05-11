@@ -4,33 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DircBot — Your AI Coach</title>
-<meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebsmeisterschaft + 8 Unicorns. Dein persönlicher AI-Coach für Sales, Crypto & Wealth.">
-<meta property="og:title" content="DircBot — Your AI Coach">
-<meta property="og:description" content="8 AI-Modelle. 30 Jahre Meisterschaft. 8 Unicorns. Ein Bot.">
-<meta property="og:type" content="website">
+<meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebsmeisterschaft + 8 Unicorns.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
 <link rel="stylesheet" href="/assets/legal.css">
 </head>
-<body class="lang-de">
+<body class="lang-de mode-free">
 
-<!-- LOGO HEADER -->
 <header class="site-header">
-  <a href="/">
-    <img src="/assets/dirc_logo.svg" alt="Dirc Zahlmann">
-  </a>
+  <a href="/"><img src="/assets/dirc_logo.svg" alt="Dirc Zahlmann"></a>
 </header>
 
-<!-- LANG TOGGLE -->
 <div class="lang-toggle">
   <button onclick="setLang('en')" id="btn-en">EN</button>
   <button onclick="setLang('de')" id="btn-de" class="active">DE</button>
   <button onclick="setLang('es')" id="btn-es">ES</button>
 </div>
 
+<div class="tester-badge" id="testerBadge">
+  <div class="tester-badge-dot"></div>
+  <span data-lang="en">Tester Mode</span>
+  <span data-lang="de">Tester-Modus</span>
+  <span data-lang="es">Modo Tester</span>
+</div>
+
+<aside class="topic-sidebar" id="topicSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <span data-lang="en">Topics</span>
+      <span data-lang="de">Themen</span>
+      <span data-lang="es">Temas</span>
+    </div>
+  </div>
+  <nav class="sidebar-topics" id="sidebarTopics"></nav>
+  <div class="sidebar-footer">
+    <button class="new-chat-btn" onclick="newChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span data-lang="en">New Chat</span>
+      <span data-lang="de">Neuer Chat</span>
+      <span data-lang="es">Chat Nuevo</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main-content" id="mainContent">
 <div class="container">
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-text">
@@ -57,7 +76,17 @@
     </div>
   </section>
 
-  <!-- CHAT INTERFACE -->
+  <div class="topic-header" id="topicHeader">
+    <div class="topic-header-icon" id="topicHeaderIcon"></div>
+    <div class="topic-header-text">
+      <div class="topic-header-name" id="topicHeaderName"></div>
+      <div class="topic-header-intro" id="topicHeaderIntro"></div>
+    </div>
+    <button class="topic-header-clear" onclick="clearTopic()" title="Clear topic">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
   <div class="chat-wrapper">
     <div class="chat-header">
       <div class="chat-avatar">D</div>
@@ -69,6 +98,15 @@
           <span data-lang="es">En línea · 8 modelos de IA activos</span>
         </div>
       </div>
+      <div class="msg-counter-pill" id="msgCounterPill">
+        <span class="msg-counter-value" id="msgCounterValue">0</span>
+        <span class="msg-counter-divider">/</span>
+        <span class="msg-counter-max">500</span>
+      </div>
+    </div>
+
+    <div class="msg-progress" id="msgProgress">
+      <div class="msg-progress-fill" id="msgProgressFill"></div>
     </div>
 
     <div class="chat-body" id="chatBody">
@@ -80,6 +118,8 @@
         </div>
       </div>
     </div>
+
+    <div class="topic-suggestions" id="topicSuggestions"></div>
 
     <div class="question-area" id="questionArea">
       <div class="question-prompt">
@@ -114,44 +154,32 @@
           <div class="file-preview-size" id="filePreviewSize"></div>
         </div>
         <button class="file-preview-remove" onclick="removeAttachment()" title="Remove">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
 
     <div class="input-area">
       <form id="chatForm" onsubmit="sendMessage(event)">
-        <button type="button" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Attach file or photo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-          </svg>
+        <button type="button" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Attach file">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
         </button>
-        <input
-          type="file"
-          id="fileInput"
-          accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,application/pdf"
-          style="display:none"
-          onchange="handleFileSelect(event)"
-        >
-        <input
-          type="text"
-          id="userInput"
-          autocomplete="off"
-          data-placeholder-en="Ask DircBot anything..."
-          data-placeholder-de="Frag DircBot alles..."
-          data-placeholder-es="Pregúntale a DircBot..."
-          maxlength="500"
-        >
+        <button type="button" id="micBtn" onclick="toggleVoiceInput()" title="Voice input">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,application/pdf" style="display:none" onchange="handleFileSelect(event)">
+        <input type="text" id="userInput" autocomplete="off" data-placeholder-en="Ask DircBot anything..." data-placeholder-de="Frag DircBot alles..." data-placeholder-es="Pregúntale a DircBot..." maxlength="500">
         <button type="submit" id="sendBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </form>
+    </div>
+
+    <div class="voice-indicator" id="voiceIndicator">
+      <div class="voice-pulse"></div>
+      <span data-lang="en">Listening...</span>
+      <span data-lang="de">Höre zu...</span>
+      <span data-lang="es">Escuchando...</span>
     </div>
 
     <div class="counter">
@@ -161,7 +189,6 @@
     </div>
   </div>
 
-  <!-- CTA SECTION -->
   <div class="cta-section" id="ctaSection">
     <div class="cta-label">
       <span data-lang="en">You Just Met DircBot</span>
@@ -196,6 +223,12 @@
     </div>
 
     <div class="secondary-cta">
+      <button class="tester-cta-link" onclick="openTesterWall()">
+        <span data-lang="en">→ Have a tester code? Unlock 500 messages</span>
+        <span data-lang="de">→ Hast du einen Tester-Code? 500 Nachrichten freischalten</span>
+        <span data-lang="es">→ ¿Tienes un código de tester? Desbloquea 500 mensajes</span>
+      </button>
+      <br><br>
       <span data-lang="en">Or visit the full academy → </span>
       <span data-lang="de">Oder direkt zur vollen Academy → </span>
       <span data-lang="es">O ve directo a la academia completa → </span>
@@ -203,7 +236,6 @@
     </div>
   </div>
 
-  <!-- TRUST BAR -->
   <div class="trust-bar">
     <div class="trust-by">
       <span data-lang="en">Built by Dirc Zahlmann</span>
@@ -211,44 +243,85 @@
       <span data-lang="es">Construido por Dirc Zahlmann</span>
     </div>
     <div class="trust-stats">
-      <div class="stat"><div class="stat-num">8</div><div class="stat-label">
-        <span data-lang="en">Unicorns Built</span>
-        <span data-lang="de">Unicorns gebaut</span>
-        <span data-lang="es">Unicornios construidos</span>
-      </div></div>
-      <div class="stat"><div class="stat-num">30+</div><div class="stat-label">
-        <span data-lang="en">Years in Sales</span>
-        <span data-lang="de">Jahre Vertrieb</span>
-        <span data-lang="es">Años en ventas</span>
-      </div></div>
-      <div class="stat"><div class="stat-num">50+</div><div class="stat-label">
-        <span data-lang="en">Countries</span>
-        <span data-lang="de">Länder</span>
-        <span data-lang="es">Países</span>
-      </div></div>
-      <div class="stat"><div class="stat-num">8</div><div class="stat-label">
-        <span data-lang="en">AI Models</span>
-        <span data-lang="de">KI-Modelle</span>
-        <span data-lang="es">Modelos de IA</span>
-      </div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label"><span data-lang="en">Unicorns Built</span><span data-lang="de">Unicorns gebaut</span><span data-lang="es">Unicornios construidos</span></div></div>
+      <div class="stat"><div class="stat-num">30+</div><div class="stat-label"><span data-lang="en">Years in Sales</span><span data-lang="de">Jahre Vertrieb</span><span data-lang="es">Años en ventas</span></div></div>
+      <div class="stat"><div class="stat-num">50+</div><div class="stat-label"><span data-lang="en">Countries</span><span data-lang="de">Länder</span><span data-lang="es">Países</span></div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label"><span data-lang="en">AI Models</span><span data-lang="de">KI-Modelle</span><span data-lang="es">Modelos de IA</span></div></div>
     </div>
   </div>
 
 </div>
+</div>
 
-<!-- ============== SITE FOOTER WITH LEGAL ============== -->
+<div class="tester-wall" id="testerWall">
+  <div class="tester-wall-backdrop" onclick="closeTesterWall()"></div>
+  <div class="tester-wall-card">
+    <button class="tester-wall-close" onclick="closeTesterWall()" title="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="tester-wall-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2 class="tester-wall-title">
+      <span data-lang="en">Become a DircBot Tester</span>
+      <span data-lang="de">Werde DircBot Tester</span>
+      <span data-lang="es">Conviértete en Tester de DircBot</span>
+    </h2>
+    <p class="tester-wall-sub">
+      <span data-lang="en">Unlock <strong>500 messages</strong>, all 8 topic areas, voice input and chat history. Enter your tester code below.</span>
+      <span data-lang="de">Schalte <strong>500 Nachrichten</strong>, alle 8 Themen-Bereiche, Voice-Input und Chat-Verlauf frei. Gib deinen Tester-Code unten ein.</span>
+      <span data-lang="es">Desbloquea <strong>500 mensajes</strong>, las 8 áreas temáticas, entrada por voz e historial de chat. Ingresa tu código de tester abajo.</span>
+    </p>
+    <form id="testerCodeForm" onsubmit="submitTesterCode(event)">
+      <input type="text" id="testerCodeInput" placeholder="DIRC500-XXXX" autocomplete="off" maxlength="20" required>
+      <button type="submit" class="btn-primary">
+        <span data-lang="en">Unlock</span>
+        <span data-lang="de">Freischalten</span>
+        <span data-lang="es">Desbloquear</span>
+      </button>
+    </form>
+    <div class="tester-wall-error" id="testerWallError"></div>
+    <div class="tester-wall-howto">
+      <span data-lang="en">No code yet? Get one from Dirc on </span>
+      <span data-lang="de">Noch kein Code? Hol dir einen von Dirc auf </span>
+      <span data-lang="es">¿Aún sin código? Consigue uno de Dirc en </span>
+      <a href="https://dirczahlmann.com" target="_blank">dirczahlmann.com</a>
+    </div>
+  </div>
+</div>
+
+<div class="tester-wall" id="testerLimitWall">
+  <div class="tester-wall-backdrop"></div>
+  <div class="tester-wall-card">
+    <div class="tester-wall-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <h2 class="tester-wall-title">
+      <span data-lang="en">500 Messages Reached</span>
+      <span data-lang="de">500 Nachrichten erreicht</span>
+      <span data-lang="es">500 Mensajes alcanzados</span>
+    </h2>
+    <p class="tester-wall-sub">
+      <span data-lang="en">You've used your full test allocation. Want unlimited access plus courses, frameworks and live coaching?</span>
+      <span data-lang="de">Du hast deine Test-Quota voll genutzt. Willst du unbegrenzten Zugang plus Kurse, Frameworks und Live-Coaching?</span>
+      <span data-lang="es">Has usado tu cuota completa de prueba. ¿Quieres acceso ilimitado más cursos, frameworks y coaching en vivo?</span>
+    </p>
+    <a href="https://dirczahlmann.com" target="_blank" class="btn-primary" style="text-decoration:none;display:inline-block;margin-top:8px;">
+      <span data-lang="en">Join the Academy →</span>
+      <span data-lang="de">Zur Academy →</span>
+      <span data-lang="es">A la Academia →</span>
+    </a>
+  </div>
+</div>
+
 <footer class="site-footer">
   <div class="site-footer-inner">
-    <div class="site-footer-logo">
-      <img src="/assets/dirc_logo.svg" alt="Dirc Zahlmann">
-    </div>
-
+    <div class="site-footer-logo"><img src="/assets/dirc_logo.svg" alt="Dirc Zahlmann"></div>
     <div class="site-footer-disclaimer">
-      <span data-lang="en"><strong>⚠️ AI Disclaimer:</strong> DircBot uses AI to generate responses. Answers may contain errors and do not constitute financial, legal, tax, or medical advice. Crypto investments carry significant risk including total loss. Always verify information and consult qualified professionals for individual decisions.</span>
-      <span data-lang="de"><strong>⚠️ KI-Hinweis:</strong> DircBot generiert Antworten mit Hilfe von KI. Antworten können Fehler enthalten und stellen keine Finanz-, Rechts-, Steuer- oder Medizinberatung dar. Crypto-Investments sind mit erheblichen Risiken inkl. Totalverlust verbunden. Prüfe Informationen immer eigenständig und konsultiere für individuelle Entscheidungen qualifizierte Fachleute.</span>
-      <span data-lang="es"><strong>⚠️ Aviso de IA:</strong> DircBot usa IA para generar respuestas. Las respuestas pueden contener errores y no constituyen asesoramiento financiero, legal, fiscal o médico. Las inversiones en crypto conllevan riesgos importantes incluida la pérdida total. Verifica siempre la información y consulta a profesionales cualificados para decisiones individuales.</span>
+      <span data-lang="en"><strong>⚠️ AI Disclaimer:</strong> DircBot uses AI to generate responses. Answers may contain errors and do not constitute financial, legal, tax, or medical advice. Crypto investments carry significant risk including total loss.</span>
+      <span data-lang="de"><strong>⚠️ KI-Hinweis:</strong> DircBot generiert Antworten mit Hilfe von KI. Antworten können Fehler enthalten und stellen keine Finanz-, Rechts-, Steuer- oder Medizinberatung dar. Crypto-Investments sind mit erheblichen Risiken inkl. Totalverlust verbunden.</span>
+      <span data-lang="es"><strong>⚠️ Aviso de IA:</strong> DircBot usa IA para generar respuestas. Las respuestas pueden contener errores y no constituyen asesoramiento financiero, legal, fiscal o médico. Las inversiones en crypto conllevan riesgos importantes incluida la pérdida total.</span>
     </div>
-
     <div class="site-footer-links">
       <a href="/impressum.html"><span data-lang="en">Imprint</span><span data-lang="de">Impressum</span><span data-lang="es">Aviso Legal</span></a>
       <span>·</span>
@@ -256,25 +329,21 @@
       <span>·</span>
       <a href="/nutzungsbedingungen.html"><span data-lang="en">Terms</span><span data-lang="de">Nutzungsbedingungen</span><span data-lang="es">Condiciones</span></a>
       <span>·</span>
-      <a href="https://dirczahlmann.com/#legal/refund" target="_blank" rel="noopener"><span data-lang="en">Refund Policy</span><span data-lang="de">Rückerstattung</span><span data-lang="es">Reembolsos</span></a>
+      <a href="https://dirczahlmann.com/#legal/refund" target="_blank" rel="noopener"><span data-lang="en">Refund</span><span data-lang="de">Rückerstattung</span><span data-lang="es">Reembolsos</span></a>
       <span>·</span>
       <a href="https://dirczahlmann.com/#legal/withdrawal" target="_blank" rel="noopener"><span data-lang="en">Withdrawal</span><span data-lang="de">Widerruf</span><span data-lang="es">Retiro</span></a>
       <span>·</span>
       <a href="https://dirczahlmann.com" target="_blank" rel="noopener">dirczahlmann.com</a>
     </div>
-
-    <div class="site-footer-copy">
-      © <span id="year"></span> Dirc Zahlmann · Zahlmann Consulting International GmbH
-    </div>
+    <div class="site-footer-copy">© <span id="year"></span> Dirc Zahlmann · Zahlmann Consulting International GmbH</div>
   </div>
 </footer>
 
-<!-- ============== COOKIE / CONSENT BANNER ============== -->
 <div class="consent-banner" id="consentBanner">
   <p>
-    <span data-lang="en"><strong>Privacy notice:</strong> When using DircBot, your messages are sent to Anthropic (USA) for AI processing. We store your language preference locally in your browser. By continuing, you accept this processing. Details in our <a href="/datenschutz.html">Privacy Policy</a>.</span>
-    <span data-lang="de"><strong>Datenschutz-Hinweis:</strong> Bei der Nutzung von DircBot werden deine Nachrichten an Anthropic (USA) zur KI-Verarbeitung übermittelt. Wir speichern deine Spracheinstellung lokal in deinem Browser. Mit dem Fortfahren akzeptierst du diese Verarbeitung. Details in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</span>
-    <span data-lang="es"><strong>Aviso de privacidad:</strong> Al usar DircBot, tus mensajes se envían a Anthropic (EE.UU.) para el procesamiento de IA. Almacenamos tu preferencia de idioma localmente en tu navegador. Al continuar, aceptas este procesamiento. Detalles en nuestra <a href="/datenschutz.html">Política de Privacidad</a>.</span>
+    <span data-lang="en"><strong>Privacy notice:</strong> When using DircBot, your messages are sent to Anthropic (USA) for AI processing. We store your language preference and tester quota locally in your browser. By continuing, you accept this processing. Details in our <a href="/datenschutz.html">Privacy Policy</a>.</span>
+    <span data-lang="de"><strong>Datenschutz-Hinweis:</strong> Bei der Nutzung von DircBot werden deine Nachrichten an Anthropic (USA) zur KI-Verarbeitung übermittelt. Wir speichern Spracheinstellung und Tester-Quota lokal in deinem Browser. Mit dem Fortfahren akzeptierst du diese Verarbeitung. Details in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</span>
+    <span data-lang="es"><strong>Aviso de privacidad:</strong> Al usar DircBot, tus mensajes se envían a Anthropic (EE.UU.) para el procesamiento de IA. Almacenamos preferencia de idioma y cuota localmente en tu navegador. Al continuar, aceptas este procesamiento. Detalles en nuestra <a href="/datenschutz.html">Política de Privacidad</a>.</span>
   </p>
   <div class="consent-actions">
     <button class="consent-accept" onclick="acceptConsent()">
@@ -291,6 +360,7 @@
 </div>
 
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="/assets/topics.js"></script>
 <script src="/assets/app.js"></script>
 <script src="/assets/consent.js"></script>
 </body>
