@@ -167,6 +167,129 @@
       </div>
     </section>
 
+    <!-- COST CALCULATOR (NEW v8.5) -->
+    <section class="admin-section">
+      <h2>💰 Kosten-Kalkulator</h2>
+      <p class="admin-section-sub">Schätz deine API-Kosten basierend auf Modell, Tester-Anzahl und Nutzungsverhalten. Spiel mit den Inputs — Schätzung in Echtzeit.</p>
+
+      <div class="cost-calc-grid">
+        <div class="cost-calc-inputs">
+          <div class="cost-input-group">
+            <label>Modell</label>
+            <select id="costModel" onchange="onCostModelChange()">
+              <option value="haiku" data-in="1" data-out="5">Claude Haiku 4.5 — €1 in / €5 out per 1M</option>
+              <option value="sonnet46" data-in="3" data-out="15" selected>Claude Sonnet 4.6 — €3 in / €15 out per 1M (current)</option>
+              <option value="opus46" data-in="15" data-out="75">Claude Opus 4.6 — €15 in / €75 out per 1M</option>
+              <option value="custom">Custom (manuell)</option>
+            </select>
+          </div>
+
+          <div class="cost-input-row">
+            <div class="cost-input-group">
+              <label>Input-Preis <span class="cost-hint">per 1M tokens</span></label>
+              <input type="number" id="costInputPrice" value="3" min="0" step="0.1" onchange="recalcCost()">
+            </div>
+            <div class="cost-input-group">
+              <label>Output-Preis <span class="cost-hint">per 1M tokens</span></label>
+              <input type="number" id="costOutputPrice" value="15" min="0" step="0.1" onchange="recalcCost()">
+            </div>
+          </div>
+
+          <div class="cost-input-row">
+            <div class="cost-input-group">
+              <label>Ø Input-Tokens / Nachricht <span class="cost-hint">(System + KB + Frage)</span></label>
+              <input type="number" id="costInputTokens" value="2800" min="0" step="100" onchange="recalcCost()">
+            </div>
+            <div class="cost-input-group">
+              <label>Ø Output-Tokens / Nachricht <span class="cost-hint">(Antwort)</span></label>
+              <input type="number" id="costOutputTokens" value="600" min="0" step="50" onchange="recalcCost()">
+            </div>
+          </div>
+
+          <div class="cost-input-row">
+            <div class="cost-input-group">
+              <label>Ø Nachrichten / Tester</label>
+              <input type="number" id="costMsgPerTester" value="100" min="0" step="10" onchange="recalcCost()">
+            </div>
+            <div class="cost-input-group">
+              <label>Aktive Tester</label>
+              <input type="number" id="costTesters" value="50" min="0" step="1" onchange="recalcCost()">
+            </div>
+          </div>
+        </div>
+
+        <div class="cost-calc-results">
+          <div class="cost-result-card cost-result-primary">
+            <div class="cost-result-label">GESCHÄTZTE GESAMT-KOSTEN</div>
+            <div class="cost-result-value" id="costTotal">€0.00</div>
+            <div class="cost-result-meta" id="costTotalMeta">— Tester × — msgs</div>
+          </div>
+
+          <div class="cost-result-grid">
+            <div class="cost-result-card">
+              <div class="cost-result-label">Pro Tester</div>
+              <div class="cost-result-value-sm" id="costPerTester">€0.00</div>
+            </div>
+            <div class="cost-result-card">
+              <div class="cost-result-label">Pro Nachricht</div>
+              <div class="cost-result-value-sm" id="costPerMsg">€0.0000</div>
+            </div>
+            <div class="cost-result-card">
+              <div class="cost-result-label">Input vs Output</div>
+              <div class="cost-result-value-sm" id="costSplit">— / —</div>
+            </div>
+            <div class="cost-result-card">
+              <div class="cost-result-label">Total Tokens</div>
+              <div class="cost-result-value-sm" id="costTotalTokens">0</div>
+            </div>
+          </div>
+
+          <div class="cost-scenarios">
+            <div class="cost-scenarios-label">Schnell-Szenarien:</div>
+            <button class="cost-scenario-btn" onclick="setCostScenario(10, 50)">10 × 50</button>
+            <button class="cost-scenario-btn" onclick="setCostScenario(50, 100)">50 × 100</button>
+            <button class="cost-scenario-btn" onclick="setCostScenario(100, 200)">100 × 200</button>
+            <button class="cost-scenario-btn" onclick="setCostScenario(500, 500)">500 × 500 (Max)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cost-tip">
+        <strong>💡 Echtdaten:</strong> Diese Schätzung basiert auf Eingaben. Aktuelle Token-Verbrauchsdaten findest du im
+        <a href="https://console.anthropic.com/settings/usage" target="_blank">Anthropic Console → Usage</a>.
+        Variant B bringt Per-Tester-Token-Tracking direkt ins DircBot-Dashboard.
+      </div>
+    </section>
+
+    <!-- A/B PROMPT TESTING (Preview) -->
+    <section class="admin-section">
+      <h2>🧪 A/B Prompt-Testing <span class="badge-soon">PREVIEW</span></h2>
+      <p class="admin-section-sub">Teste zwei System-Prompt-Varianten gegeneinander. Welcher Style konvertiert besser zu Telegram/Akademie?</p>
+
+      <div class="ab-preview">
+        <div class="ab-variant">
+          <div class="ab-variant-header"><strong>Variante A</strong> <span class="ab-variant-tag">CURRENT</span></div>
+          <p>Aktueller Prompt: Pattern-Interrupt → 3-Step Framework → Forward-Pull. Strenger Dirc-Voice mit Funnel-Routing zu Telegram (@zahlmann) bei Service-Anfragen + Akademie bei Lernfragen.</p>
+          <div class="ab-variant-stats">
+            <span>📊 Tracking: <strong>Variant B benötigt</strong></span>
+          </div>
+        </div>
+        <div class="ab-variant ab-variant-b">
+          <div class="ab-variant-header"><strong>Variante B-Entwurf</strong> <span class="ab-variant-tag-soon">DRAFT</span></div>
+          <p>Eigener Prompt-Override (zusätzlich zur Base). Z.B. "mehr persönliche Anekdoten", "härteres Closing", oder "andere CTA-Verteilung".</p>
+          <textarea class="ab-variant-textarea" id="abVariantBPrompt" placeholder="z.B. 'Verwende mehr persönliche Anekdoten aus den 50 Ländern die ich operiert habe. Bei Service-Anfragen: schärferer Closing-Stil ohne Höflichkeitsfloskel.'" rows="4"></textarea>
+          <button class="ab-variant-save" onclick="saveVariantB()">💾 Lokal speichern</button>
+        </div>
+      </div>
+
+      <div class="ab-note">
+        🔧 <strong>Implementierungs-Plan:</strong> Echtes A/B-Testing braucht Variant B (Server-Side):
+        Tester wird per Code-Hash deterministisch zu Gruppe A oder B zugewiesen, Token-Verbrauch + Conversion-Events
+        (Telegram-Klick, Akademie-Klick) werden gemessen, statistische Signifikanz nach 30+ Conversations sichtbar.
+        Aktuell ist diese Section ein lokaler Drafting-Space.
+      </div>
+    </section>
+
     <!-- VARIANT B PREVIEW -->
     <section class="admin-section">
       <h2>🚀 Coming in Variant B</h2>

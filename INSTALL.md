@@ -1,104 +1,149 @@
-# DircBot v8.4 — Auto-Memory + Equinat-Style Layout
+# DircBot v8.5 — Funnel-Guardrail + Cost-Calc + Bug-Fix
 
-## 🎯 Was neu ist in v8.4
+## 🎯 Was neu ist in v8.5
 
-### Layout-Redesign (wie Equinat)
-- **Kein "Chat-Card" mehr** — der Bot ist jetzt **full-width app-shell** im Tester-Mode, nicht mehr eine kleine Box auf dunklem Hintergrund
-- **Sticky Top-Header** mit Bot-Name + Status + Counter (immer sichtbar beim Scrollen)
-- **Dünne Progress-Bar** direkt unterm Header
-- **Zentriertes Welcome-State** wenn noch kein Chat läuft: großes "D"-Avatar, Heading, Sub-Text, 4 Suggestion-Cards im 2×2 Grid (genau wie Equinat's PferdeBot Welcome)
-- **Sticky Bottom-Input** — Input-Bar bleibt immer unten, scrollt nicht weg
-- **Im Free-Mode** unverändert (3 Free-Messages mit Hero etc.)
+### 1. Bug-Fix: "Verbleibende Nachrichten 0/3" weg im Tester-Mode
+- Im Tester-Mode wird der untere Counter (`Verbleibende Nachrichten: 0/3`) jetzt komplett versteckt
+- Der **Counter im Top-Header** (z.B. `22/500`) wird korrekt angezeigt und bleibt sticky beim Scrollen
+- Das Top-Pill hat jetzt `margin-right: 200px` damit es nicht hinter dem TESTER-MODUS-Badge verschwindet
 
-### Auto-Memory (lernt automatisch!)
-- **Kein "Merken"-Button-Klick mehr nötig** — der Bot lernt eigenständig
-- Während dem Chat extrahiert der Bot wichtige Fakten über dich (Ziele, Business-Stage, Team-Size, MRR, Industry etc.) und speichert sie still im Hintergrund
-- Soft-Toast "+1 Memory saved" kurz zur Bestätigung
-- Im **Profil-Modal** siehst du jetzt "🧠 Was DircBot über dich weiß" — alle gelernten Memories, **direkt editierbar** (Click & Type), einzeln löschbar mit ✕, oder "Alle löschen"
-- Bot bekommt diese Memories bei jeder Folgefrage als Kontext → Antworten werden über Sessions hinweg immer personalisierter
-- Max 30 Memories (FIFO), dedupliziert
-- "Merken"-Button bleibt als optionales Backup für Insights die du händisch pinnen willst
+### 2. Conversion-Funnel-Guardrail (das Wichtigste)
+**Der Bot routet jetzt User je nach Intent automatisch:**
 
-### Technisch
-- System-Prompt instruiert Bot, optional `<<MEMORY>>...<<END_MEMORY>>` Block am Ende seiner Antwort zu emittieren
-- Frontend strippt den Block vor der Anzeige, parsed die Bullet-Lines, speichert dedup'd ins Profil
-- Profil-Memory wird bei jedem `/chat` Call als `userMemories`-Block in den System-Prompt injiziert
+| Intent | Trigger-Beispiele | Routing |
+|---|---|---|
+| 🔧 **Service/Build** | "kannst du mir einen Bot bauen", "AI-Agent fürs Business", "Custom Development" | **Telegram @zahlmann** (https://t.me/zahlmann) |
+| 📚 **Learning** | "wie lerne ich X", "empfiehl einen Kurs", "wo studier ich Y" | **dirczahlmann.com** + passender Track |
+| 🤝 **Pitch/Partnership** | "ich hab ein Projekt für dich", "Investment-Opportunity" | Telegram mit One-Pager-Anforderung |
+| 💬 **Tester-Feedback** | "du solltest hinzufügen", "Feature-Request" | Telegram mit "DircBot feedback" |
+| 🌐 **Casual** | Small Talk, allgemeine Fragen | Kein CTA, normale Antwort |
+
+**Topic → Track-Mapping** (in KB-File 11 anpassbar):
+- Sales/Closing → **Sales Mastery Track**
+- Crypto/Blockchain → **Crypto Operator Track**
+- Wealth/Family Office → **Wealth Architect Track**
+- Network Marketing → **Network Recovery Track**
+- Tokenization → **Tokenization Foundations**
+- Mindset/Leadership → **Leadership OS**
+- Scaling/Unicorns → **Unicorn Stages Track**
+- AI for Business → **AI Operator Track**
+- Agentic AI → **Agentic Builder Track**
+- Personal Coaching → **Inner Circle Coaching**
+
+**Critical Rules** (im System-Prompt verankert):
+- Max 1 CTA pro Antwort
+- CTA nie am Anfang — immer erst Framework + Value, dann am Ende routen
+- Keine wiederholten CTAs in aufeinanderfolgenden Turns
+- Wenn User sagt "lass uns hier weiter reden" → respektieren, kein Push
+- Stay DircBot voice — nicht salesy
+
+### 3. Kosten-Kalkulator im Admin
+Neue Section "💰 Kosten-Kalkulator" im Admin-Panel:
+- **Modell-Selector**: Haiku 4.5 / Sonnet 4.6 (current) / Opus 4.6 / Custom mit Auto-Preisen
+- **Eingaben**: Ø Input-Tokens, Ø Output-Tokens, Nachrichten pro Tester, Aktive Tester
+- **Live-Berechnung**: Gesamt-Kosten, Pro Tester, Pro Nachricht, Input/Output-Split, Total Tokens
+- **Quick-Szenarien-Buttons**: 10×50, 50×100, 100×200, 500×500 (Beta-Max)
+- Link zum Anthropic Console für Echtdaten
+
+**Standard-Werte** (gut zum Starten):
+- Sonnet 4.6 (€3 in / €15 out per 1M tokens)
+- 2800 input tokens / msg (System + KB + Frage)
+- 600 output tokens / msg
+- 100 msgs pro Tester
+- 50 Tester
+
+Output bei diesen Werten: ~€72 für 50 Tester × 100 Nachrichten = 5000 Nachrichten total
+
+### 4. A/B Prompt-Testing (Preview)
+Neue Section "🧪 A/B Prompt-Testing" im Admin:
+- **Variante A** = aktueller Live-Prompt (mit Funnel-Routing)
+- **Variante B-Entwurf** = freies Textfeld für deinen alternativen Prompt-Override
+- Lokal speicherbar (localStorage)
+- **Hinweis:** Echtes A/B-Testing mit Tracking braucht Variant B (server-side). Aktuell ist es ein Drafting-Space für deine Varianten-Ideen.
 
 ---
 
-## 🚀 Upload-Schritte (gleicher Flow wie immer)
+## 🚀 Upload-Steps
 
-1. GitHub: dircbot-v8 Inhalt überschreiben (35 Files)
-2. Commit: `v8.4: Equinat-style layout + auto-memory`
+1. GitHub: dircbot-v8 Inhalt überschreiben (36 Files — eine neue KB)
+2. Commit: `v8.5: Funnel guardrails, cost calc, counter fix`
 3. Auto-Deploy
-4. Hard-Refresh (`Cmd+Shift+R`)
+4. Hard-Refresh
 
-**Wichtig:** Die Env Vars `ANTHROPIC_API_KEY`, `NETLIFY_API_TOKEN`, `ADMIN_API_PASS` sollten alle schon gesetzt sein von v8.2/v8.3.
-
----
-
-## ✅ Test-Flow
-
-1. `dircbotDebug.reset()` → frisch starten
-2. 3 Free-Messages → Wall → DIRC500 → Profile-Modal poppt auf
-3. Profile anlegen → **Neuer Layout sollte erscheinen**:
-   - Oben: Header-Bar "DircBot · Online · 8 KI-Modelle aktiv" mit Counter rechts
-   - Drunter: Dünne Progress-Bar
-   - Mitte: Großes "D"-Logo + "Hey — ich bin DircBot" + Sub + 4 Suggestion-Cards (2×2)
-   - Unten: Input-Bar sticky
-4. Click auf eine Welcome-Card → Welcome verschwindet, Chat startet
-5. Erzähl dem Bot was Persönliches: "Ich baue gerade ein SaaS für HR-Teams in München, MRR ist bei 12k"
-6. Nach Bot-Antwort: Toast "🧠 +2 memories saved" oben
-7. Profil-Card in Sidebar klicken → Modal → Section "🧠 Was DircBot über dich weiß" zeigt die gespeicherten Memories
-8. Im selben Chat: Frag "Was würdest du für meine nächsten 90 Tage empfehlen?" → Bot referenziert das SaaS und die 12k MRR
+Keine neuen Env-Vars nötig — alles drin.
 
 ---
 
-## 📁 Files v8.4 (35 total)
+## ✅ Test-Flow für Funnel-Guardrail
+
+### Test 1: Service-Anfrage → Telegram
+1. Tester-Mode, beliebiges Topic
+2. Frag: *"Kannst du mir einen AI-Agenten für mein Recruiting-Business bauen?"*
+3. Bot antwortet mit Framework + **ends with** "Ping mich auf Telegram @zahlmann (https://t.me/zahlmann)"
+
+### Test 2: Learning → Akademie
+1. Frag: *"Wie kann ich Crypto richtig von Grund auf lernen?"*
+2. Bot antwortet mit Basics + **ends with** "Die Crypto Operator Track auf dirczahlmann.com geht das end-to-end"
+
+### Test 3: Casual → KEIN CTA
+1. Frag: *"Wer bist du eigentlich?"*
+2. Bot antwortet normal über sich — **kein** CTA am Ende
+
+### Test 4: Counter-Fix
+1. Tester-Mode aktiv
+2. Unten: KEIN "Verbleibende Nachrichten: 0/3" mehr
+3. Top-Header: zeigt korrektes "X/500" Pill
+
+### Test 5: Cost-Kalkulator
+1. Admin öffnen → "💰 Kosten-Kalkulator"
+2. Slider/Inputs spielen, Werte updaten live
+3. Quick-Szenarien testen: "100 × 200" → ~€292
+
+---
+
+## 📁 Files v8.5 (36 total)
 
 ```
-dircbot-v8/
-├── INSTALL.md                              ← diese Datei
-├── index.html                              ← welcome-state + memory-section markup
-├── tester-signup.html, admin.html
-├── impressum.html, datenschutz.html, nutzungsbedingungen.html
-├── netlify.toml, package.json, .env.example, .gitignore
-│
-├── assets/
-│   ├── topics.js                           ← 10 topics + daily tips
-│   ├── profile.js                          ← +extractMemoryBlock, saveAutoMemories, renderMemoriesList
-│   ├── app.js                              ← wired memory extraction; rebuilt welcome state
-│   ├── style.css                           ← +Equinat-style tester layout (~400 neue Zeilen)
-│   ├── admin.js, admin.css
-│   ├── tester-signup.css, legal.css, consent.js
-│   └── dirc_logo.svg, dirc_portrait_sharp.jpg
-│
-├── knowledge-base/                         ← 11 KB files
-│
-└── netlify/functions/
-    ├── chat.js                             ← +AUTO-MEMORY PROTOCOL instructions
-    └── admin-submissions.js
+knowledge-base/
+├── 00_identity.md
+├── 01_sales.md
+├── 02_crypto.md
+├── 03_scaling.md
+├── 04_wealth.md
+├── 05_product.md
+├── 06_no_go.md
+├── 07_languages.md
+├── 08_ventures_language.md
+├── 09_ai.md
+├── 10_agentic_ai.md
+└── 11_funnel_routing.md   ← NEU v8.5
 ```
+
+---
+
+## 🎨 KB-File 11 anpassen (Track-Namen)
+
+Die Track-Namen im Funnel sind **Platzhalter**. Wenn du echte Kurs-Namen hast bei dirczahlmann.com, einfach `knowledge-base/11_funnel_routing.md` und `netlify/functions/chat.js` (im Funnel-Block) updaten:
+
+```
+| Sales/Closing | **Dein-echter-Sales-Kurs-Name** |
+```
+
+Wenn du mir die echten Kurs-Namen + URLs schickst, ersetz ich's direkt im nächsten Update.
 
 ---
 
 ## 🐛 Troubleshooting
 
-**Welcome-State zeigt sich nicht zentriert**
-→ Browser muss `:has()` CSS unterstützen. Chrome/Safari/Edge/Firefox aktuelle Versionen tun das. Bei ganz altem Browser fällt es auf Top-aligned zurück (nicht schlimm).
+**Funnel-CTA kommt zu früh / zu oft**
+→ Tester-Feedback sammeln. KB-File 11 hat "max 1 CTA pro Antwort, nie am Anfang" — wenn der Bot trotzdem übertreibt, screenshoten und ich verschärfe die Rules.
 
-**"Memory saved" Toast erscheint nicht obwohl ich was Persönliches erzählt hab**
-→ Bot entscheidet was er für memorierenswert hält. Wenn die Aussage zu generisch war (z.B. "ich mag Crypto") emittiert er KEINEN MEMORY-Block. Probier was Konkretes: "Ich bin Solopreneur in Deutschland mit 8k MRR aus meinem SaaS".
+**Bot routet nicht zu Telegram bei klarer Service-Anfrage**
+→ Manchmal interpretiert er es als generelle Frage. Schau ob die Frage konkret genug ist. "Kannst du mir bauen" = klar. "Was ist ein Bot" = unklar (Lernfrage).
 
-**Memories im Profil-Modal weg**
-→ Browser-Storage gelöscht? `localStorage.getItem('dircbot-profile')` prüfen in DevTools.
-
-**Layout sieht im Free-Mode komisch aus**
-→ Free-Mode-Layout sollte unverändert sein. Nur Tester-Mode hat das neue App-Shell. Wenn doch was kaputt ist → Screenshot.
-
-**Im Profile-Modal überspringe ich erst, dann editiere ich später — Memories werden nicht gespeichert**
-→ Wenn kein Profil existiert (nur "skip" gedrückt) wird beim ersten Memory-Emit automatisch ein minimales Profil mit Name "Tester" angelegt. Du kannst es dann später bearbeiten.
+**Kosten-Kalkulator zeigt €0.00**
+→ Wahrscheinlich admin.js nicht geladen. Browser-Cache leeren oder URL-Parameter `?v=9` an admin.js erzwingen.
 
 ---
 
-Bei Bugs: Screenshot, ich seh's. 🔥
+Bei Bugs: Screenshot. 🔥

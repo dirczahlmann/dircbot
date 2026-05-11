@@ -2348,3 +2348,26 @@ body.mode-tester .tester-badge {
   background: rgba(239,68,68,0.12);
   color: #ef4444;
 }
+
+/* ============================================
+   V8.5: BUG FIX — hide bottom counter in tester mode
+   (top-right counter pill already shows tester progress)
+   ============================================ */
+body.mode-tester .counter {
+  display: none !important;
+}
+
+/* Ensure top counter pill is visible above other floating elements */
+body.mode-tester .msg-counter-pill {
+  display: flex !important;
+  margin-left: auto;
+  margin-right: 200px;  /* leave room for TESTER-MODUS badge + lang toggle */
+  position: relative;
+  z-index: 31;
+}
+
+@media (max-width: 1100px) {
+  body.mode-tester .msg-counter-pill {
+    margin-right: 0;
+  }
+}

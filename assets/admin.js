@@ -474,3 +474,91 @@ function escapeForAttr(text) {
   if (!text) return '';
   return String(text).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
+
+
+// ============== COST CALCULATOR (v8.5) ==============
+function onCostModelChange() {
+  const sel = document.getElementById('costModel');
+  if (!sel) return;
+  const opt = sel.options[sel.selectedIndex];
+  const inPrice = opt.getAttribute('data-in');
+  const outPrice = opt.getAttribute('data-out');
+  if (inPrice !== null && outPrice !== null && sel.value !== 'custom') {
+    document.getElementById('costInputPrice').value = inPrice;
+    document.getElementById('costOutputPrice').value = outPrice;
+  }
+  recalcCost();
+}
+
+function recalcCost() {
+  const inPrice = parseFloat(document.getElementById('costInputPrice')?.value || 0);
+  const outPrice = parseFloat(document.getElementById('costOutputPrice')?.value || 0);
+  const inTok = parseFloat(document.getElementById('costInputTokens')?.value || 0);
+  const outTok = parseFloat(document.getElementById('costOutputTokens')?.value || 0);
+  const msgPer = parseFloat(document.getElementById('costMsgPerTester')?.value || 0);
+  const testers = parseFloat(document.getElementById('costTesters')?.value || 0);
+
+  const totalMsgs = msgPer * testers;
+  const totalInputTokens = totalMsgs * inTok;
+  const totalOutputTokens = totalMsgs * outTok;
+
+  const costInput = (totalInputTokens / 1_000_000) * inPrice;
+  const costOutput = (totalOutputTokens / 1_000_000) * outPrice;
+  const total = costInput + costOutput;
+
+  const perTester = testers > 0 ? total / testers : 0;
+  const perMsg = totalMsgs > 0 ? total / totalMsgs : 0;
+  const inputPct = total > 0 ? Math.round(costInput / total * 100) : 0;
+  const outputPct = 100 - inputPct;
+
+  // Format numbers
+  const fmt = (n) => '€' + n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt4 = (n) => '€' + n.toLocaleString('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  const fmtNum = (n) => Math.round(n).toLocaleString('de-DE');
+
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  setText('costTotal', fmt(total));
+  setText('costTotalMeta', `${fmtNum(testers)} Tester × ${fmtNum(msgPer)} msgs = ${fmtNum(totalMsgs)} total`);
+  setText('costPerTester', fmt(perTester));
+  setText('costPerMsg', fmt4(perMsg));
+  setText('costSplit', `${inputPct}% in / ${outputPct}% out`);
+  setText('costTotalTokens', fmtNum(totalInputTokens + totalOutputTokens) + ' (' + fmtNum(totalInputTokens) + ' in / ' + fmtNum(totalOutputTokens) + ' out)');
+}
+
+function setCostScenario(testers, msgPerTester) {
+  document.getElementById('costTesters').value = testers;
+  document.getElementById('costMsgPerTester').value = msgPerTester;
+  recalcCost();
+}
+
+function saveVariantB() {
+  const text = document.getElementById('abVariantBPrompt')?.value || '';
+  try {
+    localStorage.setItem('dircbot-variant-b-prompt', text);
+    showToast('💾 Variant-B-Prompt lokal gespeichert');
+  } catch (e) {
+    showToast('❌ Speichern fehlgeschlagen');
+  }
+}
+
+function loadVariantB() {
+  try {
+    const saved = localStorage.getItem('dircbot-variant-b-prompt');
+    const ta = document.getElementById('abVariantBPrompt');
+    if (saved && ta) ta.value = saved;
+  } catch (e) {}
+}
+
+// Init cost calc + variant on admin panel show
+const _origShowAdminPanel = typeof showAdminPanel === 'function' ? showAdminPanel : null;
+function bootstrapAdminAddons() {
+  if (typeof recalcCost === 'function') recalcCost();
+  loadVariantB();
+}
+// Run after page loads, then again when admin panel is shown
+if (document.readyState !== 'loading') {
+  setTimeout(bootstrapAdminAddons, 100);
+} else {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(bootstrapAdminAddons, 100));
+}

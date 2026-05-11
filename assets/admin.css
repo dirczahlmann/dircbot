@@ -764,3 +764,332 @@ body.admin-page {
   border-color: rgba(239,68,68,0.4);
   color: #ef4444;
 }
+
+/* ============== V8.5: COST CALCULATOR ============== */
+.cost-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .cost-calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cost-calc-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cost-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cost-input-group label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a84c;
+}
+
+.cost-input-group input,
+.cost-input-group select {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #f0ede8;
+  padding: 10px 13px;
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.cost-input-group input:focus,
+.cost-input-group select:focus {
+  border-color: #e8420a;
+}
+
+.cost-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cost-hint {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(201,168,76,0.55);
+  font-size: 10.5px;
+  margin-left: 4px;
+}
+
+.cost-calc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cost-result-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.cost-result-card.cost-result-primary {
+  background: linear-gradient(135deg, rgba(232,66,10,0.1), rgba(232,66,10,0.04));
+  border: 1px solid rgba(232,66,10,0.3);
+  padding: 22px 18px;
+}
+
+.cost-result-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.55);
+  margin-bottom: 6px;
+}
+
+.cost-result-primary .cost-result-label {
+  color: #e8420a;
+}
+
+.cost-result-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  color: #f0ede8;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.cost-result-value-sm {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: #c9a84c;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.cost-result-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(240,237,232,0.5);
+}
+
+.cost-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cost-scenarios {
+  margin-top: 6px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 9px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.cost-scenarios-label {
+  width: 100%;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.5);
+  margin-bottom: 2px;
+}
+
+.cost-scenario-btn {
+  background: rgba(232,66,10,0.08);
+  border: 1px solid rgba(232,66,10,0.2);
+  color: #f0ede8;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cost-scenario-btn:hover {
+  background: rgba(232,66,10,0.18);
+  border-color: #e8420a;
+}
+
+.cost-tip {
+  margin-top: 22px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 9px;
+  font-size: 13px;
+  color: rgba(240,237,232,0.78);
+  line-height: 1.55;
+}
+
+.cost-tip a {
+  color: #c9a84c;
+  text-decoration: underline;
+}
+
+.cost-tip a:hover {
+  color: #e8420a;
+}
+
+/* ============== V8.5: A/B TESTING PREVIEW ============== */
+.badge-soon {
+  display: inline-block;
+  background: rgba(168,85,247,0.15);
+  color: #c084fc;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.ab-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+@media (max-width: 800px) {
+  .ab-preview { grid-template-columns: 1fr; }
+}
+
+.ab-variant {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.ab-variant-b {
+  border-color: rgba(168,85,247,0.25);
+  background: rgba(168,85,247,0.04);
+}
+
+.ab-variant-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: #f0ede8;
+  letter-spacing: 0.02em;
+}
+
+.ab-variant-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(16,185,129,0.15);
+  color: #34d399;
+  padding: 3px 9px;
+  border-radius: 5px;
+  letter-spacing: 0.15em;
+}
+
+.ab-variant-tag-soon {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(168,85,247,0.18);
+  color: #c084fc;
+  padding: 3px 9px;
+  border-radius: 5px;
+  letter-spacing: 0.15em;
+}
+
+.ab-variant p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(240,237,232,0.78);
+  margin-bottom: 10px;
+}
+
+.ab-variant-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(240,237,232,0.55);
+}
+
+.ab-variant-stats strong {
+  color: #c9a84c;
+}
+
+.ab-variant-textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #f0ede8;
+  padding: 11px 13px;
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.ab-variant-textarea:focus {
+  border-color: #a855f7;
+}
+
+.ab-variant-save {
+  background: rgba(168,85,247,0.12);
+  border: 1px solid rgba(168,85,247,0.3);
+  color: #c084fc;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ab-variant-save:hover {
+  background: rgba(168,85,247,0.22);
+  border-color: #a855f7;
+}
+
+.ab-note {
+  margin-top: 16px;
+  padding: 13px 17px;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid rgba(168,85,247,0.4);
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: rgba(240,237,232,0.7);
+  line-height: 1.55;
+}
