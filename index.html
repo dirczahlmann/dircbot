@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DircBot — Your AI Coach</title>
+<meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebsmeisterschaft + 8 Unicorns. Dein persönlicher AI-Coach für Sales, Crypto & Wealth.">
+<meta property="og:title" content="DircBot — Your AI Coach">
+<meta property="og:description" content="8 AI-Modelle. 30 Jahre Meisterschaft. 8 Unicorns. Ein Bot.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="lang-de">
+
+<!-- LANG TOGGLE -->
+<div class="lang-toggle">
+  <button onclick="setLang('en')" id="btn-en">EN</button>
+  <button onclick="setLang('de')" id="btn-de" class="active">DE</button>
+  <button onclick="setLang('es')" id="btn-es">ES</button>
+</div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-label">
+      <span data-lang="en">Live Demo · No Signup Required</span>
+      <span data-lang="de">Live-Demo · Keine Anmeldung nötig</span>
+      <span data-lang="es">Demo en vivo · Sin registro</span>
+    </div>
+    <h1>
+      <span data-lang="en">Talk to <span class="orange">DircBot</span><br>Right <span class="gold">Now</span></span>
+      <span data-lang="de">Sprich mit <span class="orange">DircBot</span><br>Genau <span class="gold">Jetzt</span></span>
+      <span data-lang="es">Habla con <span class="orange">DircBot</span><br>Ahora <span class="gold">Mismo</span></span>
+    </h1>
+    <p class="hero-sub">
+      <span data-lang="en">3 free messages. Real DircBot answers. Powered by Dirc's 30 years of mastery in sales, crypto & wealth building.</span>
+      <span data-lang="de">3 Nachrichten gratis. Echte DircBot-Antworten. Powered by Dircs 30 Jahren Meisterschaft in Vertrieb, Crypto & Wealth.</span>
+      <span data-lang="es">3 mensajes gratis. Respuestas reales de DircBot. Impulsado por los 30 años de maestría de Dirc en ventas, crypto y construcción de riqueza.</span>
+    </p>
+  </section>
+
+  <!-- CHAT INTERFACE -->
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <div class="chat-avatar">D</div>
+      <div style="flex:1;">
+        <div class="chat-title">DircBot</div>
+        <div class="chat-status">
+          <span data-lang="en">Online · Powered by 8 AI Models</span>
+          <span data-lang="de">Online · 8 KI-Modelle aktiv</span>
+          <span data-lang="es">En línea · 8 modelos de IA activos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="msg bot">
+        <div class="msg-bubble">
+          <span data-lang="en">Hey — I'm DircBot. 30 years of sales mastery, 15 years in crypto, 8 unicorns built. Ask me anything about sales, crypto, scaling or wealth — or send a photo/file you want me to analyze. 🔥</span>
+          <span data-lang="de">Hey — ich bin DircBot. 30 Jahre Vertriebsmeisterschaft, 15 Jahre Crypto, 8 Unicorns aufgebaut. Frag mich alles zu Vertrieb, Crypto, Skalierung oder Wealth — oder schick mir ein Foto/File zur Analyse. 🔥</span>
+          <span data-lang="es">Hey — soy DircBot. 30 años de maestría en ventas, 15 años en crypto, 8 unicornios construidos. Pregúntame lo que sea sobre ventas, crypto, escalado o riqueza — o envíame una foto/archivo para analizar. 🔥</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUGGESTED QUESTIONS (chips) -->
+    <div class="question-area" id="questionArea">
+      <div class="question-prompt">
+        <span data-lang="en">Or pick a question</span>
+        <span data-lang="de">Oder wähl eine Frage</span>
+        <span data-lang="es">O elige una pregunta</span>
+      </div>
+      <div class="chips">
+        <button class="chip" onclick="askSuggested(1)">
+          <span data-lang="en">My prospect said "I need to think about it." What do I do?</span>
+          <span data-lang="de">Mein Interessent sagt "Ich muss noch nachdenken." Was tun?</span>
+          <span data-lang="es">Mi prospecto dijo "Necesito pensarlo". ¿Qué hago?</span>
+        </button>
+        <button class="chip" onclick="askSuggested(2)">
+          <span data-lang="en">Should I DCA into Bitcoin at this level?</span>
+          <span data-lang="de">Soll ich auf diesem Level in Bitcoin DCA-en?</span>
+          <span data-lang="es">¿Debería hacer DCA en Bitcoin a este nivel?</span>
+        </button>
+        <button class="chip" onclick="askSuggested(3)">
+          <span data-lang="en">How do I scale my business to the next level?</span>
+          <span data-lang="de">Wie skaliere ich mein Business auf das nächste Level?</span>
+          <span data-lang="es">¿Cómo escalo mi negocio al siguiente nivel?</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FILE PREVIEW (shown when file is attached) -->
+    <div class="file-preview" id="filePreview">
+      <div class="file-preview-content">
+        <div class="file-preview-icon" id="filePreviewIcon">📎</div>
+        <div class="file-preview-info">
+          <div class="file-preview-name" id="filePreviewName"></div>
+          <div class="file-preview-size" id="filePreviewSize"></div>
+        </div>
+        <button class="file-preview-remove" onclick="removeAttachment()" title="Remove">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- INPUT BAR -->
+    <div class="input-area">
+      <form id="chatForm" onsubmit="sendMessage(event)">
+        <button type="button" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Attach file or photo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+          </svg>
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,application/pdf"
+          style="display:none"
+          onchange="handleFileSelect(event)"
+        >
+        <input
+          type="text"
+          id="userInput"
+          autocomplete="off"
+          data-placeholder-en="Ask DircBot anything..."
+          data-placeholder-de="Frag DircBot alles..."
+          data-placeholder-es="Pregúntale a DircBot..."
+          maxlength="500"
+        >
+        <button type="submit" id="sendBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="counter">
+      <span data-lang="en">Free messages left: <strong id="counter">3</strong> / 3</span>
+      <span data-lang="de">Verbleibende Nachrichten: <strong id="counter-de">3</strong> / 3</span>
+      <span data-lang="es">Mensajes gratis restantes: <strong id="counter-es">3</strong> / 3</span>
+    </div>
+  </div>
+
+  <!-- CTA SECTION -->
+  <div class="cta-section" id="ctaSection">
+    <div class="cta-label">
+      <span data-lang="en">You Just Met DircBot</span>
+      <span data-lang="de">Du hast DircBot gerade kennengelernt</span>
+      <span data-lang="es">Acabas de conocer a DircBot</span>
+    </div>
+    <h2>
+      <span data-lang="en">Want <span class="orange">Unlimited Access</span>?</span>
+      <span data-lang="de">Willst du <span class="orange">unbegrenzten Zugang</span>?</span>
+      <span data-lang="es">¿Quieres <span class="orange">acceso ilimitado</span>?</span>
+    </h2>
+    <p>
+      <span data-lang="en">Join the presale and get unlimited DircBot access, the 90-day income plan, ready-made content & live access to Dirc.</span>
+      <span data-lang="de">Sichere dir den Presale: unbegrenzter DircBot-Zugang, 90-Tage-Income-Plan, fertige Posts & Live-Zugang zu Dirc.</span>
+      <span data-lang="es">Únete a la preventa: acceso ilimitado a DircBot, plan de ingresos de 90 días, contenido listo y acceso en vivo a Dirc.</span>
+    </p>
+
+    <form class="email-form" id="emailForm" onsubmit="signUp(event)" netlify name="dircbot-leads" data-netlify="true">
+      <input type="hidden" name="form-name" value="dircbot-leads">
+      <input type="email" name="email" id="emailInput" required>
+      <button type="submit" class="btn-primary">
+        <span data-lang="en">Get Early Access</span>
+        <span data-lang="de">Early Access sichern</span>
+        <span data-lang="es">Conseguir acceso anticipado</span>
+      </button>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <span data-lang="en">✓ You're in. Dirc will personally welcome you in your inbox.</span>
+      <span data-lang="de">✓ Du bist drin. Dirc begrüßt dich persönlich in deiner Inbox.</span>
+      <span data-lang="es">✓ Estás dentro. Dirc te dará la bienvenida personalmente en tu bandeja de entrada.</span>
+    </div>
+
+    <div class="secondary-cta">
+      <span data-lang="en">Or jump to the full presale → </span>
+      <span data-lang="de">Oder direkt zum vollen Presale → </span>
+      <span data-lang="es">O ve directo a la preventa completa → </span>
+      <a href="https://n3xus.de" target="_blank">n3xus.de</a>
+    </div>
+  </div>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="trust-by">
+      <span data-lang="en">Built by Dirc Zahlmann</span>
+      <span data-lang="de">Gebaut von Dirc Zahlmann</span>
+      <span data-lang="es">Construido por Dirc Zahlmann</span>
+    </div>
+    <div class="trust-stats">
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">
+        <span data-lang="en">Unicorns Built</span>
+        <span data-lang="de">Unicorns gebaut</span>
+        <span data-lang="es">Unicornios construidos</span>
+      </div></div>
+      <div class="stat"><div class="stat-num">30+</div><div class="stat-label">
+        <span data-lang="en">Years in Sales</span>
+        <span data-lang="de">Jahre Vertrieb</span>
+        <span data-lang="es">Años en ventas</span>
+      </div></div>
+      <div class="stat"><div class="stat-num">50+</div><div class="stat-label">
+        <span data-lang="en">Countries</span>
+        <span data-lang="de">Länder</span>
+        <span data-lang="es">Países</span>
+      </div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">
+        <span data-lang="en">AI Models</span>
+        <span data-lang="de">KI-Modelle</span>
+        <span data-lang="es">Modelos de IA</span>
+      </div></div>
+    </div>
+    <div class="footer-links">
+      <a href="https://n3xus.de" target="_blank">n3xus.de</a> ·
+      <a href="https://t.me/dircbot" target="_blank">Telegram</a>
+    </div>
+  </div>
+
+</div>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>
