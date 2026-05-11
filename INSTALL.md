@@ -1,28 +1,27 @@
-# 🔥 DircBot — Hero Fix (v5)
+# 🔥 DircBot — Hero v6 (Portrait sichtbar)
 
-## ✅ Was gefixt wurde
+## ✅ Was sich ändert
 
-**Problem 1: Logo abgeschnitten** ✓
-- SVG viewBox vergrößert (420×70 statt 320×60)
-- Container hat jetzt explizite Breite (180px) statt nur Höhe
-- Verhindert dass Browser den Text abschneiden kann
+**Portrait ist jetzt richtig sichtbar:**
+- Geblurrt aber erkennbar (rechts im Hero)
+- Sanft fadet nach links ins Dunkel
+- Wirkt als ästhetisches Brand-Element
+- Dunkle Vignette + Text-Shadows sorgen dass Text lesbar bleibt
 
-**Problem 2: Portrait war zu dominant** ✓
-- Portrait jetzt als **geblurrter Hintergrund-Akzent** rechts (40px Blur, 22% Opazität)
-- Kreisförmig, abgedunkelt, mit screen-blend-mode
-- Wirkt nur als subtile Brand-Präsenz, kein dominantes Foto mehr
-- Inhalt steht weiterhin zentral im Vordergrund
+**Logo:**
+- Bleibt komplett lesbar wie vorher
 
-## 📦 Was im ZIP
+## 📦 Files
 
 ```
 assets/
-├── dirc_logo.svg        ← FIXED (größere viewBox)
-├── dirc_portrait.jpg    ← bleibt (wird jetzt als Background genutzt)
-├── style.css            ← FIXED (Portrait als subtiles BG)
-└── legal.css            ← FIXED (Logo-Container mit fester Breite)
+├── dirc_portrait_bg.jpg     ← NEU (vor-geblurrte Background-Version, 31 KB)
+├── dirc_portrait.jpg        ← bleibt (Fallback)
+├── dirc_logo.svg            ← bleibt
+├── style.css                ← FIXED (neuer Hero-Background)
+└── legal.css                ← bleibt
 
-index.html               ← FIXED (neues Hero-Markup)
+index.html                    ← bleibt (kein Markup-Change nötig)
 ```
 
 ## 🚀 Upload (1 Min)
@@ -31,14 +30,14 @@ index.html               ← FIXED (neues Hero-Markup)
 2. **github.com/dirczahlmann/dircbot** → **Add file** → **Upload files**
 3. Drag den Ordner-Inhalt rein
 4. Bei Duplikaten: **Replace existing file**
-5. Commit: `Fix logo cutoff, subtle portrait background`
-6. **Cmd+Shift+R** auf der Seite
+5. Commit: `Make portrait visible in hero background`
+6. **Cmd+Shift+R**
 
-## 🎯 Was du sehen solltest
+## 🎯 Was du sehen wirst
 
-- **Logo** "Dirc Zahlmann+" komplett lesbar oben links (mit orange +)
-- **Hero-Text** zentriert wie vorher
-- **Subtiler oranger/blauer Schimmer** rechts im Hintergrund (das ist das geblurrede Portrait)
-- Kein dominantes Foto mehr — alles harmonisch
+- Hero zeigt **dein echtes Portrait** rechts (geblurrt für Eleganz)
+- Linke Hälfte bleibt dunkel — Text optimal lesbar
+- Sanfter Übergang in der Mitte (mask-image)
+- Orange Glow + Text-Shadows für Premium-Look
 
-Das Portrait wirkt jetzt als **Brand-Atmosphäre**, nicht als Show-Stopper. 🎯
+So wirken Premium-Markenseiten wie Patek Philippe oder Hublot — Foto präsent aber elegant integriert, nicht plakativ. 🎯
