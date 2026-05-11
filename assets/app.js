@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
   applyMode();
   setupVoiceRecognition();
   updateCounters();
+
+  // If already in tester mode on load, render sidebar components
+  if (testerMode) {
+    setTimeout(() => {
+      if (typeof renderProfileCard === 'function') renderProfileCard();
+      if (typeof renderDailyFocus === 'function') renderDailyFocus();
+      if (typeof renderChatHistory === 'function') renderChatHistory();
+    }, 100);
+  }
 });
 
 function loadState() {
@@ -82,6 +91,19 @@ function enterTesterMode(code) {
   updateCounters();
   renderTopics();
   closeTesterWall();
+
+  // After entering tester mode, render profile + history + daily focus
+  if (typeof renderProfileCard === 'function') renderProfileCard();
+  if (typeof renderDailyFocus === 'function') renderDailyFocus();
+  if (typeof renderChatHistory === 'function') renderChatHistory();
+
+  // If no profile yet, prompt to create one
+  setTimeout(() => {
+    if (typeof hasProfile === 'function' && !hasProfile() && typeof openProfileModal === 'function') {
+      openProfileModal(false);
+    }
+  }, 500);
+
   setTimeout(() => {
     const cw = document.querySelector('.chat-wrapper');
     if (cw) cw.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -202,6 +224,7 @@ function renderTopicSuggestions(topic) {
 
 function newChat() {
   conversationHistory = [];
+  if (typeof currentChatId !== 'undefined') currentChatId = null;
   clearTopic();
   const cb = document.getElementById('chatBody');
   if (cb) {
@@ -213,6 +236,7 @@ function newChat() {
     };
     appendMessage('bot', wm[currentLang]);
   }
+  if (typeof renderChatHistory === 'function') renderChatHistory();
 }
 
 function updateCounters() {
@@ -293,6 +317,15 @@ async function callBot(text, fileData) {
       conversationHistory: conversationHistory.slice(-10),
       topic: currentTopic ? currentTopic.id : null
     };
+    // Inject user profile and memories
+    if (typeof getProfilePrompt === 'function') {
+      const profilePrompt = getProfilePrompt();
+      if (profilePrompt) payload.userContext = profilePrompt;
+    }
+    if (typeof getMemoriesPrompt === 'function') {
+      const memPrompt = getMemoriesPrompt();
+      if (memPrompt) payload.userMemories = memPrompt;
+    }
     if (fileData) {
       payload.fileData = fileData.data;
       payload.fileType = fileData.type;
@@ -310,6 +343,12 @@ async function callBot(text, fileData) {
     appendMessage('bot', botText);
     conversationHistory.push({ role: 'user', content: text });
     conversationHistory.push({ role: 'assistant', content: botText });
+
+    // Save to chat history
+    if (typeof appendToCurrentChat === 'function') {
+      appendToCurrentChat('user', text);
+      appendToCurrentChat('assistant', botText);
+    }
   } catch (err) {
     removeTyping(typingId);
     const em = {
@@ -386,6 +425,20 @@ function appendMessage(role, text, attachment) {
     tryBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span>' + labels.another + '</span>';
     tryBtn.onclick = () => tryAnother();
     actions.appendChild(tryBtn);
+
+    // Pin to Memory (only in tester mode with profile)
+    if (testerMode && typeof hasProfile === 'function' && hasProfile()) {
+      const pinLabel = { en: 'Save', de: 'Merken', es: 'Guardar' }[currentLang];
+      const pinBtn = document.createElement('button');
+      pinBtn.className = 'msg-action-btn';
+      pinBtn.title = { en: 'Save to memory', de: 'In Memory speichern', es: 'Guardar en memoria' }[currentLang];
+      pinBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17l-5.5 3 1-6L3 9.5l6-.5L12 4l3 5 6 .5-4.5 4.5 1 6z"/></svg><span>' + pinLabel + '</span>';
+      pinBtn.onclick = () => {
+        if (typeof pinToMemory === 'function') pinToMemory(text, pinBtn);
+      };
+      actions.appendChild(pinBtn);
+    }
+
     msgDiv.appendChild(actions);
   }
   cb.appendChild(msgDiv);

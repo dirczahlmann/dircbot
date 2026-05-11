@@ -1,182 +1,159 @@
-# DircBot v8.1 — Tester Signup Page + Admin Panel
+# DircBot v8.2 — Profile + Memory + Chat-Verlauf + Live Submissions
 
-**Was in diesem Update neu ist (v8.1 vs v8):**
+## 🎯 Was neu ist in v8.2
 
-- 🛠️ **Action-Buttons-Fix** — Kopieren/Teilen/Andere Antwort sind jetzt kleine Boxen UNTER der Antwort, nicht mehr senkrechte Balken rechts
-- 📝 **`/tester-signup.html`** — Vollwertige Landing Page für Tester-Bewerbungen (Equinat-Style)
-- 🛡️ **`/admin.html`** — Passwortgeschütztes Admin-Panel mit Email-Generator
-- 🔗 **Verlinkungen** — Tester-Wall und CTA-Sektion linken jetzt zur Signup-Page
+### Tester-Wall redesigned
+- **Primary CTA:** "Apply as Beta Tester" → leitet auf `/tester-signup` (großer orange Button)
+- **Secondary:** Kleines Eingabefeld für bereits freigeschaltete Tester (ohne DIRC500-Hint)
+- Klare Trennung mit "Already approved?" Divider
 
----
+### Profile-System (wie Equinat's Pferd-Profile)
+- Beim ersten Tester-Code-Eintritt: **Profile-Modal** öffnet sich automatisch
+- Felder: Name (Pflicht), Hauptziel (Pflicht), Schwerpunkt-Topic, Business-Stage, Top 3 Prioritäten
+- Profil-Card sichtbar in Sidebar — Click → Bearbeiten
+- Bot bekommt das Profil als Kontext und antwortet personalisiert ("Anna, basierend auf deinem Solopreneur-Status...")
 
-## 🌐 Drei URLs nach dem Deploy
+### Memory-System
+- Neuer **"Merken" Button** unter jeder Bot-Antwort (Stern-Icon, nur im Tester-Mode mit Profil)
+- Klicken → Antwort wird im Profil als Memory gespeichert (max 20)
+- Bei jedem Future-Call gibt Bot Memories als zusätzlichen Kontext mit
+- Memory bleibt zwischen Sessions
 
-| URL | Wer? | Was? |
-|-----|------|------|
-| `dircbot.netlify.app/` | Alle | Bot mit 3 Free-Messages + Tester-Code-Eingabe |
-| `dircbot.netlify.app/tester-signup.html` | Interessenten | Bewerbung als Beta-Tester (Form → Netlify Forms) |
-| `dircbot.netlify.app/admin.html` | Nur Dirc | Code-Verwaltung + Email-Generator |
+### Daily Focus Widget
+- Sidebar oben: **"✦ Today's Focus"** Card mit täglich rotierendem Tip + Action
+- Basiert auf Profile-Focus-Area (oder rotiert durch alle 8 Topics nach Wochentag)
+- 7 Tipps pro Topic = 1 für jeden Tag der Woche
+- "Mit DircBot besprechen" Button → öffnet neuen Chat mit dem Topic + Frage
 
----
+### Chat-Verlauf
+- Sidebar zeigt **"Meine Chats"** Section unten
+- Jede Conversation wird automatisch gespeichert (Title = erste User-Message)
+- Gruppiert: Heute · Diese Woche · Älter
+- Click → Chat wieder laden, weitermachen wo man aufgehört hat
+- Hover → Delete-Button
+- Max 100 Chats (älteste werden überschrieben)
 
-## 🔐 Admin-Passwort
-
-**Default:** `dirczahlmann2026`
-
-⚠️ **Wichtig:** Das Passwort ist im JS-Source-Code sichtbar (Frontend-only). Das ist **keine echte Security**, nur Obscurity. Wer den Source liest, findet das Passwort. Für echte Security: später Netlify Identity.
-
-**Passwort ändern:** Öffne `assets/admin.js`, Zeile 7:
-```js
-const ADMIN_PASSWORD = 'dirczahlmann2026';
-```
-Ändere den String. Deploy. Fertig.
-
-**Wo wird das Passwort gespeichert?** SessionStorage im Browser — gilt nur für die aktuelle Browser-Session. Logout oder Tab schließen → wieder Passwort nötig.
-
----
-
-## 📝 Admin-Panel Features
-
-Auf `dircbot.netlify.app/admin.html`:
-
-1. **📊 Übersicht** — Stats über Codes, Quotas, Themen
-2. **📧 Tester-Bewerbungen** — Direkt-Link zu Netlify Forms Dashboard
-3. **🔑 Tester-Codes-Liste** — Alle 10 Codes als Cards mit Copy-Button
-4. **✉️ Email-Generator** — Tester-Name + Code wählen → fertige Welcome-Email in DE/EN/ES generieren und kopieren
-5. **⚡ Quick Actions** — Links zu Netlify, GitHub, Anthropic Console, Academy
-6. **🚀 Variant B Preview** — Was später kommt (serverseitige Quota, etc.)
-
-**Email-Generator-Flow:**
-1. Vorname eintippen: z.B. "Anna"
-2. Code wählen: z.B. "DIRC500"
-3. Sprache wählen: DE/EN/ES
-4. "📝 Email generieren" klicken
-5. "📋 Kopieren" klicken
-6. In Email-Client einfügen → an Tester senden
-
-Die generierte Email enthält: Code, URL, Anleitung, Feature-Liste, Feedback-Bitte, Signatur.
+### Live Submissions im Admin
+- Admin-Panel hat jetzt einen **"📬 Tester-Bewerbungen"** Bereich
+- Lädt direkt aus Netlify Forms API (alle Forms, alle Submissions)
+- Jede Bewerbung als Card mit:
+  - Name, Email, Telegram, Instagram, Land, Interesse, Herausforderung, Motivation
+  - Status-Badge (NEU / FREIGESCHALTET / ABGELEHNT)
+  - **"✓ Welcome-Email"** Button: Pre-fill Email-Generator, generiert Code-Email, markiert als Approved
+  - **"💬 Telegram öffnen"** Button: Deep-Link zum Telegram-Chat
+  - **"📋 Email kopieren"** Button: Email in Zwischenablage
+  - **"✕ Ablehnen"** Button
 
 ---
 
-## 📝 Tester-Signup Landing Page Flow
+## ⚠️ ZWEI ENV VARS NÖTIG für die Live-Submissions
 
-Auf `dircbot.netlify.app/tester-signup.html`:
+Das Admin-Panel braucht **2 neue Environment-Variables** auf Netlify:
 
-1. Hero: "Bau die Zukunft mit mir" mit Stats (50 Plätze · 500 Nachrichten · 0€ · 8 Themen)
-2. 4-Schritte-Prozess (Bewerbung → Freischaltung → Testen → Nach der Beta)
-3. Feature-Grid (6 Topic-Cards)
-4. Affiliate-Teaser
-5. Bewerbungs-Formular mit Feldern:
-   - Vorname, Nachname (Pflicht)
-   - Email (Pflicht)
-   - Telegram-Handle (Pflicht)
-   - Instagram-Handle (optional)
-   - Hauptinteresse (Dropdown der 8 Topics, Pflicht)
-   - Land/Region (optional)
-   - Größte Herausforderung (Pflicht)
-   - Motivation (optional)
-   - Consent-Checkboxes (Datenschutz, AI-Disclaimer, Affiliate, Marketing)
-6. Submit → Netlify Forms → Email an dich
-7. Success-State: "Bewerbung eingegangen! Antwort in 48h."
+### 1. `NETLIFY_API_TOKEN`
+Zugriff auf Netlify Forms API.
 
-**Dein Workflow:**
-1. Du bekommst Email von Netlify mit Bewerbungs-Daten
-2. Du screenst und entscheidest
-3. Du gehst zum Admin-Panel → Email-Generator
-4. Generierst die Welcome-Email mit Code
-5. Schickst sie an den Tester
+**So bekommst du den Token:**
+1. Geh auf https://app.netlify.com/user/applications
+2. Scroll zu "Personal access tokens"
+3. Klick **"New access token"**
+4. Name: "DircBot Admin"
+5. Description: "Read forms for admin panel"
+6. Klick "Generate token"
+7. **Kopier den Token sofort** (wird nur einmal angezeigt!)
 
----
+### 2. `ADMIN_API_PASS`
+Schützt die Admin-Function von missbrauch. Wähl ein starkes Passwort, z.B. `dirc-admin-2026-secret-x9k2`
 
-## 🚀 Upload-Schritte (gleich wie vorher)
+**Beide hinzufügen:**
+1. Netlify → Site Settings → Build & deploy → Environment variables
+2. **Add a variable** für jedes:
+   - Key: `NETLIFY_API_TOKEN`, Value: dein-token-von-oben
+   - Key: `ADMIN_API_PASS`, Value: dein-starkes-passwort
+3. Save
+4. Trigger redeploy (Deploys → Trigger deploy)
 
-**Option 1: GitHub (empfohlen)**
-1. https://github.com/dirczahlmann/dircbot
-2. "Add file" → "Upload files"
-3. Inhalt von `dircbot-v8/` reinziehen (alle 28 Files inkl. neue `tester-signup.html`, `admin.html`, `assets/admin.js`, `assets/admin.css`, `assets/tester-signup.css`)
-4. Commit: `v8.1: Tester signup page + admin panel + action button fix`
-5. Netlify deployed automatisch
-
-**Option 2: Direct-Drop zu Netlify**
-1. https://app.netlify.com/sites/dircbot/deploys
-2. Drag den `dircbot-v8/`-Ordner rein
-3. Fertig in 30 Sek
-
-**Nach dem Deploy:**
-- **Hard-Refresh** im Browser: `Cmd+Shift+R` (Mac) / `Ctrl+Shift+R` (Win)
-- Test: Geh auf `dircbot.netlify.app/admin.html` → Passwort eingeben → Panel öffnet sich
-- Test: Geh auf `dircbot.netlify.app/tester-signup.html` → Form sollte sauber aussehen
+**Wichtig:** Diese Passwörter sind anders als das `ADMIN_PASSWORD` in `assets/admin.js`:
+- `ADMIN_PASSWORD` (in JS): Schützt den Admin-Panel-Login → `dirczahlmann2026`
+- `ADMIN_API_PASS` (Env Var): Schützt die Submissions-API → wird beim ersten "Bewerbungen laden" abgefragt
+- `NETLIFY_API_TOKEN` (Env Var): Wird intern benutzt, nicht angefasst
 
 ---
 
-## 🔑 Tester-Codes (unverändert)
+## 🚀 Upload (gleiche Schritte wie immer)
 
-```
-DIRC500            Universal Master
-DIRCBETA           Beta Wave
-DIRCINSIDER        Inner Circle
-LAUNCH2026         Launch Campaign
-UNICORN8           8 Unicorns Reference
-SALESGENT          Sales Gentleman
-CRYPTO2011         Year Started in Crypto
-TOKEN500           Tokenization Theme
-DZACADEMY          Academy Members
-PRESALE500         Presale Connection
-```
-
-Bearbeiten in `assets/topics.js`, Suche nach `VALID_TESTER_CODES`.
+1. GitHub: https://github.com/dirczahlmann/dircbot
+2. "Add file" → "Upload files" → ALLES aus `dircbot-v8/` reinziehen (32 Files)
+3. Commit: `v8.2: Profile + memory + chat history + live submissions`
+4. Netlify deployed in ~2 Min
+5. **Environment Variables setzen** (siehe oben — ohne klappt "Bewerbungen laden" im Admin nicht)
+6. Hard-Refresh im Browser: `Cmd+Shift+R`
 
 ---
 
-## 📁 File-Übersicht v8.1
+## ✅ Test-Flow
+
+1. `dircbotDebug.reset()` in Console → Frischer Start
+2. 3 Free-Messages testen → Wall sollte primär **"Apply as Beta Tester"** zeigen
+3. Code `DIRC500` ins Secondary-Feld eingeben → Tester-Mode + **Profile-Modal poppt auf**
+4. Profile anlegen: Name "Test", Goal "100k MRR", Focus "Sales" → speichern
+5. Sidebar checken: Daily Focus oben + Profile Card + Topics + Chats unten
+6. Frage stellen → Bot antwortet personalisiert mit Namen
+7. Auf der Antwort: "Merken" klicken → Memory gespeichert
+8. Neue Frage → Bot referenziert die Memory
+9. "New Chat" klicken → fresh start, alter Chat in Sidebar
+10. Alten Chat in Sidebar anklicken → lädt sich wieder
+
+---
+
+## 📁 Files v8.2
 
 ```
 dircbot-v8/
-├── INSTALL.md
-├── index.html                      ← Updated: Link zur Signup-Page
-├── tester-signup.html              ← NEU: Bewerbungs-Page
-├── admin.html                      ← NEU: Admin-Panel
-├── impressum.html
-├── datenschutz.html
-├── nutzungsbedingungen.html
-├── netlify.toml
-├── package.json
-├── .env.example
-├── .gitignore
+├── INSTALL.md                              ← Diese Datei
+├── index.html                              ← Updated: Sidebar v2, Profile Modal, Wall redesign
+├── tester-signup.html                      (unchanged)
+├── admin.html                              ← Updated: Live submissions section
+├── impressum.html, datenschutz.html, nutzungsbedingungen.html
+├── netlify.toml, package.json, .env.example, .gitignore
 │
 ├── assets/
-│   ├── topics.js                   ← Codes-Liste
-│   ├── app.js                      ← Bot Logic
-│   ├── style.css                   ← Updated: Action-Button-Fix
-│   ├── consent.js
-│   ├── legal.css
-│   ├── tester-signup.css           ← NEU
-│   ├── admin.js                    ← NEU: mit Email-Templates
-│   ├── admin.css                   ← NEU
-│   ├── dirc_logo.svg
-│   └── dirc_portrait_sharp.jpg
+│   ├── topics.js                           ← Extended: +Daily Tips, getDailyTip()
+│   ├── profile.js                          ← NEU: Profile, Memory, History, Daily
+│   ├── app.js                              ← Updated: Hooks für profile/history/memory
+│   ├── style.css                           ← Extended: +600 Lines neue UI
+│   ├── admin.js                            ← Extended: +loadSubmissions, render, actions
+│   ├── admin.css                           ← Extended: +submission cards CSS
+│   ├── tester-signup.css                   (unchanged)
+│   ├── legal.css, consent.js               (unchanged)
+│   ├── dirc_logo.svg, dirc_portrait_sharp.jpg
 │
-├── knowledge-base/                 (8 Files, unchanged)
+├── knowledge-base/                         (unchanged)
 │
-└── netlify/functions/chat.js       (unchanged)
+└── netlify/functions/
+    ├── chat.js                             ← Updated: userContext + userMemories
+    └── admin-submissions.js                ← NEU: fetch from Netlify Forms API
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-**Action-Buttons immer noch senkrecht?**
-→ Hard-Refresh: `Cmd+Shift+R`. Das v8.1 CSS hat `!important` overrides die das Layout erzwingen.
+**"Bewerbungen laden" zeigt Fehler "NETLIFY_API_TOKEN not configured"**
+→ Env Variable noch nicht gesetzt. Schritt 2 oben prüfen.
 
-**Admin-Panel akzeptiert Passwort nicht?**
-→ Default: `dirczahlmann2026` (kleinbuchstaben, kein Space, mit der Jahreszahl 2026)
+**"Unauthorized" beim Submissions-Laden**
+→ Falsches ADMIN_API_PASS eingegeben. Browser: `sessionStorage.removeItem('dircbot-admin-api-pass')` → Reload → richtiges PW eintippen.
 
-**Tester-Signup Form geht nicht durch?**
-→ Netlify muss das `form-name=dircbot-tester-signup` Form erkannt haben. Bei erstem Deploy kann das ein paar Minuten dauern. Check: https://app.netlify.com/sites/dircbot/forms
+**Profile-Modal poppt nicht auf nach Tester-Code-Eingabe**
+→ Schon ein Profil im localStorage. `localStorage.removeItem('dircbot-profile')` + Reload.
 
-**Bewerbungen kommen nicht per Email?**
-→ Netlify Forms → Settings → Form notifications. Email-Adresse hinzufügen.
+**Chat-Verlauf wird nicht gespeichert**
+→ Inkognito-Modus? localStorage geht da nicht. Normaler Browser nutzen.
+
+**Daily Focus zeigt nichts**
+→ Wahrscheinlich vor `topics.js` geladen. Reload nochmal.
 
 ---
 
-**Bei Problemen:** Screenshot in den Chat — ich seh sofort was los ist. 🔧
+**Bei Bugs:** Screenshot in den Chat, ich seh's. 🔥

@@ -286,3 +286,191 @@ function showToast(msg) {
   toast.classList.add('visible');
   setTimeout(() => toast.classList.remove('visible'), 2500);
 }
+
+
+// ============== LIVE SUBMISSIONS FROM NETLIFY FORMS API ==============
+async function loadSubmissions() {
+  const statusEl = document.getElementById('submissionsStatus');
+  const listEl = document.getElementById('submissionsList');
+  if (!statusEl || !listEl) return;
+
+  statusEl.innerHTML = '<div class="admin-loading">⏳ Lade Bewerbungen...</div>';
+  listEl.innerHTML = '';
+
+  // Use the admin API password (set via Netlify env var ADMIN_API_PASS).
+  // We prompt the user to enter it once per session for the API call.
+  let apiPass = sessionStorage.getItem('dircbot-admin-api-pass');
+  if (!apiPass) {
+    apiPass = prompt('Admin-API-Passwort (ADMIN_API_PASS aus Netlify Env Vars):');
+    if (!apiPass) {
+      statusEl.innerHTML = '<div class="admin-error">❌ Kein API-Passwort eingegeben.</div>';
+      return;
+    }
+    sessionStorage.setItem('dircbot-admin-api-pass', apiPass);
+  }
+
+  try {
+    const res = await fetch('/.netlify/functions/admin-submissions', {
+      headers: { 'x-admin-pass': apiPass }
+    });
+
+    if (res.status === 401) {
+      sessionStorage.removeItem('dircbot-admin-api-pass');
+      statusEl.innerHTML = '<div class="admin-error">❌ Falsches API-Passwort. Klick nochmal "Bewerbungen laden".</div>';
+      return;
+    }
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      statusEl.innerHTML = `<div class="admin-error">❌ Fehler: ${errData.error || res.status}<br><small>${errData.detail || ''}</small></div>`;
+      return;
+    }
+
+    const data = await res.json();
+    renderSubmissions(data);
+    statusEl.innerHTML = '';
+  } catch (err) {
+    console.error('Submissions load error:', err);
+    statusEl.innerHTML = `<div class="admin-error">❌ Network-Fehler: ${err.message}</div>`;
+  }
+}
+
+function renderSubmissions(data) {
+  const listEl = document.getElementById('submissionsList');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  if (!data.forms || data.forms.length === 0) {
+    listEl.innerHTML = '<div class="admin-loading">📭 Noch keine Forms gefunden.</div>';
+    return;
+  }
+
+  data.forms.forEach(form => {
+    const formHeader = document.createElement('div');
+    formHeader.className = 'admin-form-header';
+    formHeader.innerHTML = `
+      <h3>${form.form_name} <span class="admin-form-count">${form.submission_count}</span></h3>
+    `;
+    listEl.appendChild(formHeader);
+
+    if (form.submissions.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'admin-loading';
+      empty.textContent = 'Noch keine Einsendungen.';
+      listEl.appendChild(empty);
+      return;
+    }
+
+    form.submissions.forEach(sub => {
+      const card = renderSubmissionCard(sub, form.form_name);
+      listEl.appendChild(card);
+    });
+  });
+}
+
+function renderSubmissionCard(submission, formName) {
+  const d = submission.data || {};
+  const card = document.createElement('div');
+  card.className = 'admin-submission-card';
+
+  const firstName = d.first_name || d.firstName || d.name || 'Tester';
+  const lastName = d.last_name || d.lastName || '';
+  const fullName = (firstName + ' ' + lastName).trim();
+  const email = d.email || '';
+  const telegram = d.telegram || '';
+  const instagram = d.instagram || '';
+  const country = d.country || '';
+  const interest = d.primary_interest || '';
+  const challenge = d.challenge || '';
+  const motivation = d.motivation || '';
+  const created = new Date(submission.created_at).toLocaleString('de-DE');
+
+  // Status from localStorage
+  const statusKey = 'dircbot-submission-status-' + submission.id;
+  const currentStatus = localStorage.getItem(statusKey) || 'new';
+
+  card.innerHTML = `
+    <div class="admin-submission-header">
+      <div>
+        <div class="admin-submission-name">${escapeHtml2(fullName)}</div>
+        <div class="admin-submission-date">${created}</div>
+      </div>
+      <div class="admin-submission-status status-${currentStatus}">${statusLabel(currentStatus)}</div>
+    </div>
+    <div class="admin-submission-body">
+      <div class="admin-submission-fields">
+        ${email ? `<div class="admin-sub-field"><span>📧 Email</span><strong>${escapeHtml2(email)}</strong></div>` : ''}
+        ${telegram ? `<div class="admin-sub-field"><span>💬 Telegram</span><strong>${escapeHtml2(telegram)}</strong></div>` : ''}
+        ${instagram ? `<div class="admin-sub-field"><span>📷 Instagram</span><strong>${escapeHtml2(instagram)}</strong></div>` : ''}
+        ${country ? `<div class="admin-sub-field"><span>🌍 Land</span><strong>${escapeHtml2(country)}</strong></div>` : ''}
+        ${interest ? `<div class="admin-sub-field"><span>🎯 Interesse</span><strong>${escapeHtml2(interest)}</strong></div>` : ''}
+      </div>
+      ${challenge ? `<div class="admin-sub-text"><strong>Herausforderung:</strong><br>${escapeHtml2(challenge)}</div>` : ''}
+      ${motivation ? `<div class="admin-sub-text"><strong>Motivation:</strong><br>${escapeHtml2(motivation)}</div>` : ''}
+    </div>
+    <div class="admin-submission-actions">
+      <button class="admin-btn admin-btn-primary" onclick="approveAndGenerateEmail('${escapeForAttr(firstName)}', '${escapeForAttr(email)}', '${submission.id}')">
+        ✓ Welcome-Email
+      </button>
+      ${telegram ? `<a href="https://t.me/${telegram.replace('@', '')}" target="_blank" class="admin-btn">💬 Telegram öffnen</a>` : ''}
+      ${email ? `<button class="admin-btn" onclick="copyEmailAddress('${escapeForAttr(email)}')">📋 Email kopieren</button>` : ''}
+      <button class="admin-btn admin-btn-subtle" onclick="setSubmissionStatus('${submission.id}', 'rejected', this)">✕ Ablehnen</button>
+    </div>
+  `;
+  return card;
+}
+
+function statusLabel(status) {
+  return {
+    'new': 'NEU',
+    'approved': '✓ FREIGESCHALTET',
+    'rejected': '✕ ABGELEHNT'
+  }[status] || 'NEU';
+}
+
+function setSubmissionStatus(id, status, btn) {
+  localStorage.setItem('dircbot-submission-status-' + id, status);
+  // Re-render this card's status
+  if (btn) {
+    const card = btn.closest('.admin-submission-card');
+    if (card) {
+      const statusEl = card.querySelector('.admin-submission-status');
+      if (statusEl) {
+        statusEl.className = 'admin-submission-status status-' + status;
+        statusEl.textContent = statusLabel(status);
+      }
+    }
+  }
+}
+
+function approveAndGenerateEmail(firstName, email, submissionId) {
+  // Pre-fill the email generator with this person's data
+  document.getElementById('emailFirstName').value = firstName;
+  generateEmail();
+  // Mark as approved
+  setSubmissionStatus(submissionId, 'approved', null);
+  // Re-render to update visual
+  loadSubmissions();
+  // Scroll to email generator
+  const emailTool = document.querySelector('.admin-email-tool');
+  if (emailTool) emailTool.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showToast(`✉️ Email generiert für ${firstName}. Code dann kopieren und schicken an ${email}.`);
+}
+
+function copyEmailAddress(email) {
+  navigator.clipboard.writeText(email).then(() => {
+    showToast(`📋 ${email} kopiert!`);
+  });
+}
+
+function escapeHtml2(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function escapeForAttr(text) {
+  if (!text) return '';
+  return String(text).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}

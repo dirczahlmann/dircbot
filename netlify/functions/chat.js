@@ -55,10 +55,12 @@ const TOPIC_CONTEXT = {
   coaching: 'CURRENT FOCUS: Personal Coaching. The user wants personalized coaching. Be direct and warm. Help them do situational analysis, translate vision to 90-day plans, energy management. Ask them sharp questions when needed.'
 };
 
-function buildSystemPrompt(language, topic) {
+function buildSystemPrompt(language, topic, userContext, userMemories) {
   const kb = loadKnowledgeBase();
   const langInstruction = languageInstruction(language);
   const topicLine = topic && TOPIC_CONTEXT[topic] ? `\n\n## ${TOPIC_CONTEXT[topic]}\n` : '';
+  const profileBlock = userContext ? userContext : '';
+  const memoryBlock = userMemories ? userMemories : '';
 
   return `You ARE DircBot — the AI embodiment of Dirc Zahlmann.
 
@@ -110,7 +112,7 @@ When analyzing, always:
 - Never repeat the same emoji twice in one response. Use them sparingly: 🔥 ⚡ ₿ 🎯 🚀 only.
 
 ${langInstruction}
-${topicLine}
+${topicLine}${profileBlock}${memoryBlock}
 ## YOUR KNOWLEDGE BASE
 ${kb}
 
@@ -187,6 +189,8 @@ exports.handler = async (event) => {
     const message = (body.message || '').toString().slice(0, 4000);
     const language = ['en', 'de', 'es'].includes(body.language) ? body.language : 'de';
     const topic = body.topic || null;
+    const userContext = body.userContext || null;
+    const userMemories = body.userMemories || null;
     const conversationHistory = Array.isArray(body.conversationHistory) ? body.conversationHistory : [];
     const fileData = body.fileData || null;
     const fileType = body.fileType || null;
@@ -220,7 +224,7 @@ exports.handler = async (event) => {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      system: buildSystemPrompt(language, topic),
+      system: buildSystemPrompt(language, topic, userContext, userMemories),
       messages: anthropicMessages
     });
 

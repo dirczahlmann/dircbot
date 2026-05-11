@@ -1,0 +1,458 @@
+// ============== DIRCBOT PROFILE + HISTORY + MEMORY ==============
+// All data stored in localStorage (Variant A)
+// Variant B will move this to server-side per-tester
+
+// ============== PROFILE ==============
+let userProfile = null;
+
+const STAGES = {
+  en: [
+    { v: 'starting', label: 'Just starting out' },
+    { v: 'side-hustle', label: 'Side hustle / Part-time' },
+    { v: 'solopreneur', label: 'Full-time solopreneur' },
+    { v: 'small-team', label: 'Small team (2-10)' },
+    { v: 'scaling', label: 'Scaling business (10-50)' },
+    { v: 'established', label: 'Established (50+)' }
+  ],
+  de: [
+    { v: 'starting', label: 'Gerade am Anfang' },
+    { v: 'side-hustle', label: 'Side Hustle / Nebenberuflich' },
+    { v: 'solopreneur', label: 'Vollzeit Solopreneur' },
+    { v: 'small-team', label: 'Kleines Team (2-10)' },
+    { v: 'scaling', label: 'Skalierendes Business (10-50)' },
+    { v: 'established', label: 'Etabliert (50+)' }
+  ],
+  es: [
+    { v: 'starting', label: 'Empezando' },
+    { v: 'side-hustle', label: 'Trabajo extra / Tiempo parcial' },
+    { v: 'solopreneur', label: 'Emprendedor a tiempo completo' },
+    { v: 'small-team', label: 'Equipo pequeño (2-10)' },
+    { v: 'scaling', label: 'Negocio escalando (10-50)' },
+    { v: 'established', label: 'Establecido (50+)' }
+  ]
+};
+
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem('dircbot-profile');
+    if (raw) {
+      userProfile = JSON.parse(raw);
+      return userProfile;
+    }
+  } catch (e) { console.warn('Profile load:', e); }
+  return null;
+}
+
+function saveProfile(profile) {
+  userProfile = profile;
+  try {
+    localStorage.setItem('dircbot-profile', JSON.stringify(profile));
+  } catch (e) { console.warn('Profile save:', e); }
+}
+
+function hasProfile() {
+  return userProfile && userProfile.name && userProfile.primaryGoal;
+}
+
+function openProfileModal(isEdit) {
+  const modal = document.getElementById('profileModal');
+  if (!modal) return;
+
+  // Populate stages dropdown
+  const stageSelect = document.getElementById('profileStage');
+  if (stageSelect) {
+    stageSelect.innerHTML = '<option value="">—</option>';
+    const stages = STAGES[currentLang] || STAGES.en;
+    stages.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.v;
+      opt.textContent = s.label;
+      stageSelect.appendChild(opt);
+    });
+  }
+
+  // Populate focus area dropdown
+  const focusSelect = document.getElementById('profileFocus');
+  if (focusSelect) {
+    focusSelect.innerHTML = '<option value="">—</option>';
+    if (typeof TOPICS !== 'undefined') {
+      TOPICS.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name[currentLang];
+        focusSelect.appendChild(opt);
+      });
+    }
+  }
+
+  // Pre-fill if editing
+  if (isEdit && userProfile) {
+    document.getElementById('profileName').value = userProfile.name || '';
+    document.getElementById('profileGoal').value = userProfile.primaryGoal || '';
+    document.getElementById('profileFocus').value = userProfile.focusArea || '';
+    document.getElementById('profileStage').value = userProfile.stage || '';
+    document.getElementById('profilePriorities').value = (userProfile.priorities || []).join('\n');
+  }
+
+  // Toggle "skip" button visibility (only on first creation)
+  const skipBtn = document.getElementById('profileSkipBtn');
+  if (skipBtn) skipBtn.style.display = isEdit ? 'none' : 'inline-flex';
+
+  // Modal title
+  const title = document.getElementById('profileModalTitle');
+  if (title) {
+    title.textContent = isEdit
+      ? { en: 'Edit Your Profile', de: 'Profil bearbeiten', es: 'Editar Perfil' }[currentLang]
+      : { en: 'Welcome — set up your profile', de: 'Willkommen — richte dein Profil ein', es: 'Bienvenido — configura tu perfil' }[currentLang];
+  }
+
+  modal.classList.add('visible');
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById('profileModal');
+  if (modal) modal.classList.remove('visible');
+}
+
+function skipProfile() {
+  closeProfileModal();
+}
+
+function submitProfile(e) {
+  e.preventDefault();
+  const name = document.getElementById('profileName').value.trim();
+  const goal = document.getElementById('profileGoal').value.trim();
+  const focus = document.getElementById('profileFocus').value;
+  const stage = document.getElementById('profileStage').value;
+  const prioritiesRaw = document.getElementById('profilePriorities').value.trim();
+  const priorities = prioritiesRaw
+    ? prioritiesRaw.split('\n').map(s => s.trim()).filter(s => s.length).slice(0, 3)
+    : [];
+
+  if (!name || !goal) {
+    const err = document.getElementById('profileError');
+    if (err) err.textContent = { en: 'Name and primary goal are required.', de: 'Name und Hauptziel sind Pflicht.', es: 'Nombre y meta principal son obligatorios.' }[currentLang];
+    return;
+  }
+
+  const profile = {
+    name: name,
+    primaryGoal: goal,
+    focusArea: focus,
+    stage: stage,
+    priorities: priorities,
+    memories: (userProfile && userProfile.memories) || [],
+    createdAt: (userProfile && userProfile.createdAt) || Date.now(),
+    updatedAt: Date.now()
+  };
+
+  saveProfile(profile);
+  closeProfileModal();
+  renderProfileCard();
+  renderDailyFocus();
+}
+
+function renderProfileCard() {
+  const card = document.getElementById('sidebarProfileCard');
+  if (!card) return;
+  if (!hasProfile()) {
+    card.innerHTML = `
+      <button class="profile-create-btn" onclick="openProfileModal(false)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <span>${{en:'Create Profile',de:'Profil anlegen',es:'Crear Perfil'}[currentLang]}</span>
+      </button>
+    `;
+    return;
+  }
+  const focusTopic = TOPICS.find(t => t.id === userProfile.focusArea);
+  card.innerHTML = `
+    <div class="profile-card-inner" onclick="openProfileModal(true)">
+      <div class="profile-avatar">${userProfile.name.charAt(0).toUpperCase()}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escapeHtml(userProfile.name)}</div>
+        <div class="profile-meta">${focusTopic ? focusTopic.name[currentLang] : (userProfile.primaryGoal.slice(0, 24) + (userProfile.primaryGoal.length > 24 ? '…' : ''))}</div>
+      </div>
+      <svg class="profile-edit-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </div>
+  `;
+}
+
+// ============== DAILY FOCUS WIDGET ==============
+function renderDailyFocus() {
+  const widget = document.getElementById('dailyFocusWidget');
+  if (!widget) return;
+
+  // Determine which topic to use
+  let topicId = userProfile && userProfile.focusArea ? userProfile.focusArea : null;
+  if (!topicId) {
+    // Default rotation through all topics based on day-of-week
+    const dow = new Date().getDay();
+    const topicKeys = Object.keys(DAILY_TIPS);
+    topicId = topicKeys[dow % topicKeys.length];
+  }
+  const topic = TOPICS.find(t => t.id === topicId);
+  const tip = getDailyTip(topicId, currentLang);
+  if (!tip || !topic) {
+    widget.style.display = 'none';
+    return;
+  }
+
+  const labels = {
+    en: { today: "Today's Focus", action: 'Action' },
+    de: { today: 'Heute fokussieren', action: 'Action' },
+    es: { today: 'Foco de hoy', action: 'Acción' }
+  }[currentLang];
+
+  widget.innerHTML = `
+    <div class="daily-focus-header">
+      <span class="daily-focus-label">✦ ${labels.today}</span>
+      <span class="daily-focus-topic" style="color:${topic.color};">${topic.name[currentLang]}</span>
+    </div>
+    <div class="daily-focus-tip">${escapeHtml(tip.tip)}</div>
+    <div class="daily-focus-action">
+      <span class="daily-focus-action-label">${labels.action}:</span>
+      <span>${escapeHtml(tip.action)}</span>
+    </div>
+    <button class="daily-focus-go" onclick="startDailyFocusChat('${topicId}', ${JSON.stringify(tip.tip).replace(/"/g,'&quot;')}, ${JSON.stringify(tip.action).replace(/"/g,'&quot;')})">
+      <span>${{en:'Discuss with DircBot',de:'Mit DircBot besprechen',es:'Hablar con DircBot'}[currentLang]}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  `;
+  widget.style.display = 'block';
+}
+
+function startDailyFocusChat(topicId, tip, action) {
+  if (typeof selectTopic === 'function') {
+    selectTopic(topicId);
+  }
+  setTimeout(() => {
+    const msg = { en: `Help me work on this today: "${action}" — give me a tactical 3-step plan.`, de: `Hilf mir das heute anzugehen: "${action}" — gib mir einen taktischen 3-Schritte-Plan.`, es: `Ayúdame a trabajar esto hoy: "${action}" — dame un plan táctico de 3 pasos.` }[currentLang];
+    if (typeof askQuestion === 'function') askQuestion(msg);
+  }, 300);
+}
+
+// ============== CHAT HISTORY ==============
+let allChats = [];
+let currentChatId = null;
+
+function loadChats() {
+  try {
+    const raw = localStorage.getItem('dircbot-chats');
+    if (raw) {
+      allChats = JSON.parse(raw);
+      return allChats;
+    }
+  } catch (e) { console.warn('Chats load:', e); }
+  allChats = [];
+  return [];
+}
+
+function saveChats() {
+  try {
+    // Keep only last 100 chats to prevent localStorage overflow
+    if (allChats.length > 100) allChats = allChats.slice(0, 100);
+    localStorage.setItem('dircbot-chats', JSON.stringify(allChats));
+  } catch (e) { console.warn('Chats save:', e); }
+}
+
+function createNewChat(firstMessage, topicId) {
+  const chat = {
+    id: 'chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+    title: firstMessage ? truncateTitle(firstMessage) : (currentLang === 'de' ? 'Neuer Chat' : currentLang === 'es' ? 'Chat Nuevo' : 'New Chat'),
+    topic: topicId || null,
+    messages: [],
+    created: Date.now(),
+    updated: Date.now()
+  };
+  allChats.unshift(chat);
+  currentChatId = chat.id;
+  saveChats();
+  return chat;
+}
+
+function truncateTitle(text) {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return clean.length > 42 ? clean.slice(0, 42) + '…' : clean;
+}
+
+function getCurrentChat() {
+  if (!currentChatId) return null;
+  return allChats.find(c => c.id === currentChatId);
+}
+
+function appendToCurrentChat(role, content) {
+  let chat = getCurrentChat();
+  if (!chat) {
+    chat = createNewChat(role === 'user' ? content : null, currentTopic ? currentTopic.id : null);
+  }
+  chat.messages.push({ role: role, content: content, timestamp: Date.now() });
+  // Update title from first user message if it's still default
+  if (role === 'user' && (!chat.title || chat.title === 'Neuer Chat' || chat.title === 'New Chat' || chat.title === 'Chat Nuevo')) {
+    chat.title = truncateTitle(content);
+  }
+  chat.updated = Date.now();
+  saveChats();
+  renderChatHistory();
+}
+
+function loadChat(chatId) {
+  const chat = allChats.find(c => c.id === chatId);
+  if (!chat) return;
+  currentChatId = chatId;
+  if (typeof conversationHistory !== 'undefined') {
+    conversationHistory = chat.messages.map(m => ({ role: m.role, content: m.content }));
+  }
+  // If chat has a topic, select it
+  if (chat.topic && typeof selectTopic === 'function') {
+    selectTopic(chat.topic);
+  } else if (typeof clearTopic === 'function') {
+    clearTopic();
+  }
+  // Render messages in chat body
+  const cb = document.getElementById('chatBody');
+  if (cb) {
+    cb.innerHTML = '';
+    chat.messages.forEach(m => {
+      if (typeof appendMessage === 'function') {
+        appendMessage(m.role, m.content);
+      }
+    });
+  }
+  // Hide topic suggestions if any messages exist
+  const sug = document.getElementById('topicSuggestions');
+  if (sug && chat.messages.length > 0) sug.classList.remove('visible');
+
+  renderChatHistory();
+}
+
+function deleteChat(chatId, event) {
+  if (event) event.stopPropagation();
+  if (!confirm({ en: 'Delete this chat?', de: 'Diesen Chat löschen?', es: '¿Borrar este chat?' }[currentLang])) return;
+  allChats = allChats.filter(c => c.id !== chatId);
+  if (currentChatId === chatId) {
+    currentChatId = null;
+    if (typeof newChat === 'function') newChat();
+  }
+  saveChats();
+  renderChatHistory();
+}
+
+function renderChatHistory() {
+  const container = document.getElementById('chatHistoryList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (allChats.length === 0) {
+    container.innerHTML = `<div class="chat-history-empty">${{en:'No chats yet',de:'Noch keine Chats',es:'Sin chats aún'}[currentLang]}</div>`;
+    return;
+  }
+
+  // Group by time
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+  const sevenDays = 7 * oneDay;
+  const groups = { today: [], week: [], older: [] };
+  allChats.forEach(c => {
+    const age = now - (c.updated || c.created);
+    if (age < oneDay) groups.today.push(c);
+    else if (age < sevenDays) groups.week.push(c);
+    else groups.older.push(c);
+  });
+
+  const groupLabels = {
+    en: { today: 'Today', week: 'This week', older: 'Older' },
+    de: { today: 'Heute', week: 'Diese Woche', older: 'Älter' },
+    es: { today: 'Hoy', week: 'Esta semana', older: 'Más viejo' }
+  }[currentLang];
+
+  ['today', 'week', 'older'].forEach(g => {
+    if (groups[g].length === 0) return;
+    const groupEl = document.createElement('div');
+    groupEl.className = 'chat-history-group';
+    groupEl.innerHTML = `<div class="chat-history-group-label">${groupLabels[g]}</div>`;
+    groups[g].forEach(chat => {
+      const item = document.createElement('div');
+      item.className = 'chat-history-item' + (chat.id === currentChatId ? ' active' : '');
+      const topic = chat.topic ? TOPICS.find(t => t.id === chat.topic) : null;
+      const iconColor = topic ? topic.color : 'rgba(240,237,232,0.4)';
+      item.innerHTML = `
+        <div class="chat-history-item-icon" style="color:${iconColor};">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div class="chat-history-item-title">${escapeHtml(chat.title)}</div>
+        <button class="chat-history-item-delete" onclick="deleteChat('${chat.id}', event)" title="Delete">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      `;
+      item.onclick = () => loadChat(chat.id);
+      groupEl.appendChild(item);
+    });
+    container.appendChild(groupEl);
+  });
+}
+
+// ============== MEMORY (pinned messages) ==============
+function pinToMemory(text, button) {
+  if (!userProfile) {
+    showToast({ en: 'Create profile first', de: 'Erst Profil anlegen', es: 'Crea perfil primero' }[currentLang]);
+    return;
+  }
+  if (!userProfile.memories) userProfile.memories = [];
+  if (userProfile.memories.length >= 20) {
+    showToast({ en: 'Memory full (max 20)', de: 'Memory voll (max 20)', es: 'Memoria llena' }[currentLang]);
+    return;
+  }
+  // Truncate long memories
+  const memory = text.length > 400 ? text.slice(0, 400) + '…' : text;
+  if (userProfile.memories.includes(memory)) {
+    showToast({ en: 'Already saved', de: 'Schon gespeichert', es: 'Ya guardado' }[currentLang]);
+    return;
+  }
+  userProfile.memories.push(memory);
+  saveProfile(userProfile);
+
+  if (button) {
+    const original = button.innerHTML;
+    button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>' + { en: 'Saved!', de: 'Gespeichert!', es: '¡Guardado!' }[currentLang] + '</span>';
+    button.classList.add('success');
+    setTimeout(() => {
+      button.innerHTML = original;
+      button.classList.remove('success');
+    }, 2000);
+  }
+}
+
+function getMemoriesPrompt() {
+  if (!userProfile || !userProfile.memories || userProfile.memories.length === 0) return '';
+  return '\n\nUSER MEMORIES (things they asked you to remember):\n' + userProfile.memories.map((m, i) => `${i + 1}. ${m}`).join('\n');
+}
+
+function getProfilePrompt() {
+  if (!hasProfile()) return '';
+  let p = '\n\nUSER PROFILE:';
+  p += `\n- Name: ${userProfile.name}`;
+  p += `\n- Primary goal: ${userProfile.primaryGoal}`;
+  if (userProfile.focusArea) {
+    const t = TOPICS.find(t => t.id === userProfile.focusArea);
+    if (t) p += `\n- Current focus area: ${t.name.en}`;
+  }
+  if (userProfile.stage) p += `\n- Business stage: ${userProfile.stage}`;
+  if (userProfile.priorities && userProfile.priorities.length) {
+    p += `\n- Top priorities: ${userProfile.priorities.join('; ')}`;
+  }
+  p += '\n\nAddress them by name occasionally. Reference their goal/stage in advice. Make every response personal to their context.';
+  return p;
+}
+
+// ============== UTIL ==============
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+  loadProfile();
+  loadChats();
+});

@@ -72,18 +72,22 @@
       </div>
     </section>
 
-    <!-- SIGNUPS LINK -->
+    <!-- SIGNUPS SECTION (live from Netlify Forms API) -->
     <section class="admin-section">
-      <h2>📧 Tester-Bewerbungen</h2>
-      <div class="admin-action-card">
-        <p>Alle Bewerbungen von <code>/tester-signup</code> landen automatisch im Netlify Forms Dashboard.</p>
-        <a href="https://app.netlify.com/sites/dircbot/forms" target="_blank" class="admin-btn admin-btn-primary">
-          → Bewerbungen ansehen (Netlify)
-        </a>
-        <a href="https://app.netlify.com/sites/dircbot/forms/dircbot-leads/submissions" target="_blank" class="admin-btn">
-          → Email-Leads (Hauptseite)
+      <h2>📬 Tester-Bewerbungen</h2>
+      <p class="admin-section-sub">Bewerbungen von <code>/tester-signup</code>. Antworten direkt von hier per Email / Telegram.</p>
+
+      <div class="admin-submissions-controls">
+        <button class="admin-btn admin-btn-primary" onclick="loadSubmissions()">
+          🔄 Bewerbungen laden
+        </button>
+        <a href="https://app.netlify.com/sites/dircbot/forms" target="_blank" class="admin-btn">
+          ↗ Netlify Forms Dashboard
         </a>
       </div>
+
+      <div id="submissionsStatus" class="admin-submissions-status"></div>
+      <div id="submissionsList" class="admin-submissions-list"></div>
     </section>
 
     <!-- TESTER CODES LIST -->

@@ -30,21 +30,33 @@
 
 <aside class="topic-sidebar" id="topicSidebar">
   <div class="sidebar-header">
-    <div class="sidebar-title">
-      <span data-lang="en">Topics</span>
-      <span data-lang="de">Themen</span>
-      <span data-lang="es">Temas</span>
-    </div>
-  </div>
-  <nav class="sidebar-topics" id="sidebarTopics"></nav>
-  <div class="sidebar-footer">
-    <button class="new-chat-btn" onclick="newChat()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <button class="sidebar-newchat-btn" onclick="newChat()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span data-lang="en">New Chat</span>
       <span data-lang="de">Neuer Chat</span>
       <span data-lang="es">Chat Nuevo</span>
     </button>
   </div>
+
+  <!-- Daily Focus Widget -->
+  <div class="sidebar-daily-focus" id="dailyFocusWidget" style="display:none;"></div>
+
+  <!-- Profile Card -->
+  <div class="sidebar-profile" id="sidebarProfileCard"></div>
+
+  <div class="sidebar-section-divider">
+    <span data-lang="en">Topics</span>
+    <span data-lang="de">Themen</span>
+    <span data-lang="es">Temas</span>
+  </div>
+  <nav class="sidebar-topics" id="sidebarTopics"></nav>
+
+  <div class="sidebar-section-divider">
+    <span data-lang="en">My Chats</span>
+    <span data-lang="de">Meine Chats</span>
+    <span data-lang="es">Mis Chats</span>
+  </div>
+  <div class="sidebar-chat-history" id="chatHistoryList"></div>
 </aside>
 
 <div class="main-content" id="mainContent">
@@ -269,17 +281,30 @@
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h2 class="tester-wall-title">
-      <span data-lang="en">Become a DircBot Tester</span>
-      <span data-lang="de">Werde DircBot Tester</span>
-      <span data-lang="es">Conviértete en Tester de DircBot</span>
+      <span data-lang="en">You've used your 3 free messages</span>
+      <span data-lang="de">Deine 3 Gratis-Nachrichten sind aufgebraucht</span>
+      <span data-lang="es">Has usado tus 3 mensajes gratis</span>
     </h2>
     <p class="tester-wall-sub">
-      <span data-lang="en">Unlock <strong>500 messages</strong>, all 8 topic areas, voice input and chat history. Enter your tester code below.</span>
-      <span data-lang="de">Schalte <strong>500 Nachrichten</strong>, alle 8 Themen-Bereiche, Voice-Input und Chat-Verlauf frei. Gib deinen Tester-Code unten ein.</span>
-      <span data-lang="es">Desbloquea <strong>500 mensajes</strong>, las 8 áreas temáticas, entrada por voz e historial de chat. Ingresa tu código de tester abajo.</span>
+      <span data-lang="en">Apply to become a <strong>Beta Tester</strong> and unlock <strong>500 messages</strong>, all 8 topic areas, voice input, chat history and a personal profile.</span>
+      <span data-lang="de">Bewirb dich als <strong>Beta-Tester</strong> und schalte <strong>500 Nachrichten</strong> frei — alle 8 Themen, Voice-Input, Chat-Verlauf und persönliches Profil.</span>
+      <span data-lang="es">Solicita ser <strong>Beta Tester</strong> y desbloquea <strong>500 mensajes</strong>, las 8 áreas temáticas, entrada por voz, historial y perfil personal.</span>
     </p>
+
+    <a href="/tester-signup.html" class="tester-wall-primary-cta">
+      <span data-lang="en">✦ Apply as Beta Tester →</span>
+      <span data-lang="de">✦ Jetzt als Beta-Tester bewerben →</span>
+      <span data-lang="es">✦ Aplicar como Beta-Tester →</span>
+    </a>
+
+    <div class="tester-wall-divider">
+      <span data-lang="en">Already approved?</span>
+      <span data-lang="de">Schon freigeschaltet?</span>
+      <span data-lang="es">¿Ya aprobado?</span>
+    </div>
+
     <form id="testerCodeForm" onsubmit="submitTesterCode(event)">
-      <input type="text" id="testerCodeInput" placeholder="Code z.B. DIRC500" autocomplete="off" maxlength="20" required>
+      <input type="text" id="testerCodeInput" placeholder="" autocomplete="off" maxlength="20" required aria-label="Tester code">
       <button type="submit" class="btn-primary">
         <span data-lang="en">Unlock</span>
         <span data-lang="de">Freischalten</span>
@@ -287,11 +312,6 @@
       </button>
     </form>
     <div class="tester-wall-error" id="testerWallError"></div>
-    <div class="tester-wall-howto">
-      <span data-lang="en">No code yet? <a href="/tester-signup.html" target="_blank">Apply as a Tester</a></span>
-      <span data-lang="de">Noch kein Code? <a href="/tester-signup.html" target="_blank">Jetzt als Tester bewerben</a></span>
-      <span data-lang="es">¿Aún sin código? <a href="/tester-signup.html" target="_blank">Aplica como Tester</a></span>
-    </div>
   </div>
 </div>
 
@@ -364,8 +384,88 @@
   </div>
 </div>
 
+<!-- ============== PROFILE MODAL ============== -->
+<div class="profile-modal" id="profileModal">
+  <div class="profile-modal-backdrop" onclick="closeProfileModal()"></div>
+  <div class="profile-modal-card">
+    <button class="profile-modal-close" onclick="closeProfileModal()" title="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2 class="profile-modal-title" id="profileModalTitle">Welcome — set up your profile</h2>
+    <p class="profile-modal-sub">
+      <span data-lang="en">Help DircBot give you personalized answers. Takes 60 seconds.</span>
+      <span data-lang="de">Hilf DircBot dir personalisierte Antworten zu geben. Dauert 60 Sekunden.</span>
+      <span data-lang="es">Ayuda a DircBot a darte respuestas personalizadas. 60 segundos.</span>
+    </p>
+
+    <form id="profileForm" onsubmit="submitProfile(event)">
+      <div class="profile-form-group">
+        <label>
+          <span data-lang="en">Your Name ✦</span>
+          <span data-lang="de">Dein Name ✦</span>
+          <span data-lang="es">Tu Nombre ✦</span>
+        </label>
+        <input type="text" id="profileName" required maxlength="50">
+      </div>
+
+      <div class="profile-form-group">
+        <label>
+          <span data-lang="en">Your Primary Goal (one sentence) ✦</span>
+          <span data-lang="de">Dein Hauptziel (ein Satz) ✦</span>
+          <span data-lang="es">Tu Meta Principal (una frase) ✦</span>
+        </label>
+        <input type="text" id="profileGoal" required maxlength="200" data-ph-en="e.g. Build my first SaaS to €10k MRR" data-ph-de="z.B. Mein erstes SaaS auf 10k MRR bringen" data-ph-es="ej. Construir mi primer SaaS a 10k MRR">
+      </div>
+
+      <div class="profile-form-row">
+        <div class="profile-form-group">
+          <label>
+            <span data-lang="en">Current Focus Area</span>
+            <span data-lang="de">Aktueller Schwerpunkt</span>
+            <span data-lang="es">Área de enfoque</span>
+          </label>
+          <select id="profileFocus"></select>
+        </div>
+        <div class="profile-form-group">
+          <label>
+            <span data-lang="en">Business Stage</span>
+            <span data-lang="de">Business-Stage</span>
+            <span data-lang="es">Etapa</span>
+          </label>
+          <select id="profileStage"></select>
+        </div>
+      </div>
+
+      <div class="profile-form-group">
+        <label>
+          <span data-lang="en">Top 3 Priorities (one per line)</span>
+          <span data-lang="de">Top 3 Prioritäten (eine pro Zeile)</span>
+          <span data-lang="es">Top 3 Prioridades (una por línea)</span>
+        </label>
+        <textarea id="profilePriorities" rows="3" maxlength="500"></textarea>
+      </div>
+
+      <div class="profile-modal-error" id="profileError"></div>
+
+      <div class="profile-modal-actions">
+        <button type="button" class="profile-modal-skip" id="profileSkipBtn" onclick="skipProfile()">
+          <span data-lang="en">Skip for now</span>
+          <span data-lang="de">Überspringen</span>
+          <span data-lang="es">Saltar</span>
+        </button>
+        <button type="submit" class="btn-primary">
+          <span data-lang="en">Save Profile →</span>
+          <span data-lang="de">Profil speichern →</span>
+          <span data-lang="es">Guardar Perfil →</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 <script src="/assets/topics.js?v=8"></script>
+<script src="/assets/profile.js?v=8"></script>
 <script src="/assets/app.js?v=8"></script>
 <script src="/assets/consent.js?v=8"></script>
 </body>
