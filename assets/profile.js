@@ -226,11 +226,41 @@ function renderDailyFocus() {
       ? userProfile.primaryGoal.slice(0, 68) + '…'
       : userProfile.primaryGoal;
     const stageLabel = userProfile.stage ? `<span class="daily-focus-stage">${escapeHtml(userProfile.stage)}</span>` : '';
-    const ctxLine = {
-      en: 'One concrete step closer today. The bot picks based on your full context.',
-      de: 'Ein konkreter Schritt näher heute. Der Bot pickt basierend auf deinem ganzen Kontext.',
-      es: 'Un paso concreto más cerca hoy. El bot elige según tu contexto completo.'
-    }[currentLang];
+
+    // Check if user already generated a plan today
+    const today = todayISODate();
+    const plans = getDailyPlans();
+    const todaysPlan = plans.find(p => p.date === today);
+    const streakBadge = typeof getDailyPlansBadgeHtml === 'function' ? getDailyPlansBadgeHtml() : '';
+
+    let ctxLine;
+    let ctaLabel;
+    if (todaysPlan) {
+      ctxLine = {
+        en: `Today's plan is set. Continue working on it or re-generate based on progress.`,
+        de: `Heutiger Plan steht. Arbeite weiter daran oder generiere neu basierend auf Fortschritt.`,
+        es: `El plan de hoy está listo. Continúa o regenera según el progreso.`
+      }[currentLang];
+      ctaLabel = {
+        en: 'Update plan',
+        de: 'Plan updaten',
+        es: 'Actualizar plan'
+      }[currentLang];
+    } else if (plans.length > 0) {
+      ctxLine = {
+        en: `Building on your last ${Math.min(plans.length, 7)} days. Next step today.`,
+        de: `Baut auf deinen letzten ${Math.min(plans.length, 7)} Tagen auf. Nächster Schritt heute.`,
+        es: `Construye sobre tus últimos ${Math.min(plans.length, 7)} días.`
+      }[currentLang];
+      ctaLabel = labels.cta;
+    } else {
+      ctxLine = {
+        en: 'One concrete step closer today. The bot picks based on your full context.',
+        de: 'Ein konkreter Schritt näher heute. Der Bot pickt basierend auf deinem ganzen Kontext.',
+        es: 'Un paso concreto más cerca hoy. El bot elige según tu contexto completo.'
+      }[currentLang];
+      ctaLabel = labels.cta;
+    }
 
     widget.innerHTML = `
       <div class="daily-focus-header">
@@ -238,15 +268,16 @@ function renderDailyFocus() {
         <span class="daily-focus-topic" style="color:${topic.color};">${topic.name[currentLang]}</span>
       </div>
       <div class="daily-focus-goal-block">
-        <div class="daily-focus-goal-label">${labels.goal}</div>
+        <div class="daily-focus-goal-label">${labels.goal}${streakBadge}</div>
         <div class="daily-focus-goal-text">${escapeHtml(goalShort)}</div>
         ${stageLabel}
       </div>
       <div class="daily-focus-ctxline">${ctxLine}</div>
       <button class="daily-focus-go" onclick="startDailyFocusChat('${topicId}', '', '')">
-        <span>${labels.cta}</span>
+        <span>${ctaLabel}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
+      ${plans.length > 0 ? `<button class="daily-focus-history-btn" onclick="openDailyPlanHistory()">${{en:'View history',de:'Verlauf ansehen',es:'Ver historial'}[currentLang]} →</button>` : ''}
     `;
     widget.style.display = 'block';
     return;
@@ -280,6 +311,12 @@ function startDailyFocusChat(topicId, tip, action) {
     const topicName = topic ? topic.name[currentLang] : topicId;
     const hasProf = hasProfile();
 
+    // Mark next response as a daily plan so we can save it for tomorrow's progression
+    window.__pendingDailyPlan = { topicId: topicId, topicName: topicName, date: todayISODate() };
+
+    // Build previous-plans context (last 7 days) so bot builds on yesterday's plan
+    const prevPlansBlock = formatPreviousPlansForPrompt(7);
+
     // If profile exists, ask the bot for a PERSONALIZED daily action based on profile.
     // Otherwise fall back to the static tip.
     let msg;
@@ -299,9 +336,9 @@ function startDailyFocusChat(topicId, tip, action) {
       const ctxEN = ctxBitsEN.join('; ');
 
       msg = {
-        en: `Given my context (${ctxEN}), what's the ONE most-impactful thing I should focus on TODAY in the ${topicName} area to move closer to my goal? Be specific to MY situation — not generic. Give me a 3-step plan I can execute today.`,
-        de: `Mit meinem Kontext (${ctxDE}) — was ist das EINE wirkungsvollste das ich HEUTE im Bereich ${topicName} angehen sollte um meinem Ziel näher zu kommen? Spezifisch für MEINE Situation — nicht generisch. Gib mir einen 3-Schritte-Plan den ich heute ausführen kann.`,
-        es: `Con mi contexto (${ctxEN}), ¿cuál es la UNA cosa más impactante en la que debo enfocarme HOY en ${topicName} para acercarme a mi meta? Específico a MI situación. Plan de 3 pasos para hoy.`
+        en: `Given my context (${ctxEN}), what's the ONE most-impactful thing I should focus on TODAY in the ${topicName} area to move closer to my goal? Be specific to MY situation — not generic. Give me a 3-step plan I can execute today.${prevPlansBlock.en}`,
+        de: `Mit meinem Kontext (${ctxDE}) — was ist das EINE wirkungsvollste das ich HEUTE im Bereich ${topicName} angehen sollte um meinem Ziel näher zu kommen? Spezifisch für MEINE Situation — nicht generisch. Gib mir einen 3-Schritte-Plan den ich heute ausführen kann.${prevPlansBlock.de}`,
+        es: `Con mi contexto (${ctxEN}), ¿cuál es la UNA cosa más impactante en la que debo enfocarme HOY en ${topicName} para acercarme a mi meta? Específico a MI situación. Plan de 3 pasos para hoy.${prevPlansBlock.es}`
       }[currentLang];
     } else {
       msg = {
@@ -312,6 +349,92 @@ function startDailyFocusChat(topicId, tip, action) {
     }
     if (typeof askQuestion === 'function') askQuestion(msg);
   }, 300);
+}
+
+// ============== DAILY PLAN HISTORY (v8.11) ==============
+function todayISODate() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getDailyPlans() {
+  if (!userProfile) return [];
+  if (!userProfile.dailyPlans) userProfile.dailyPlans = [];
+  return userProfile.dailyPlans;
+}
+
+function saveDailyPlan(topicId, topicName, planText) {
+  if (!userProfile) return;
+  if (!userProfile.dailyPlans) userProfile.dailyPlans = [];
+  const date = todayISODate();
+  // Replace existing entry for today if any (user might re-request same day)
+  const existingIdx = userProfile.dailyPlans.findIndex(p => p.date === date && p.topicId === topicId);
+  // Extract concise summary from plan text (first 280 chars, clean of markdown)
+  const summary = planText
+    .replace(/[*#_`]/g, '')          // strip markdown
+    .replace(/\n+/g, ' ')             // single line
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 280);
+  const entry = {
+    date: date,
+    topicId: topicId,
+    topicName: topicName,
+    summary: summary,
+    fullPlan: planText.slice(0, 1500),  // store up to 1500 chars
+    timestamp: Date.now()
+  };
+  if (existingIdx >= 0) {
+    userProfile.dailyPlans[existingIdx] = entry;
+  } else {
+    userProfile.dailyPlans.push(entry);
+  }
+  // Keep only last 30 entries
+  if (userProfile.dailyPlans.length > 30) {
+    userProfile.dailyPlans = userProfile.dailyPlans.slice(-30);
+  }
+  userProfile.updatedAt = Date.now();
+  saveProfile(userProfile);
+}
+
+// Build text block of previous plans for injection into the question
+function formatPreviousPlansForPrompt(maxDays) {
+  if (!userProfile || !userProfile.dailyPlans || userProfile.dailyPlans.length === 0) {
+    return { en: '', de: '', es: '' };
+  }
+  const sortedPlans = [...userProfile.dailyPlans].sort((a, b) => b.timestamp - a.timestamp);
+  const recent = sortedPlans.slice(0, maxDays);
+  const linesEn = recent.map(p => `  - ${p.date} (${p.topicName}): ${p.summary}`).join('\n');
+  const linesDe = recent.map(p => `  - ${p.date} (${p.topicName}): ${p.summary}`).join('\n');
+  return {
+    en: `\n\nMY PREVIOUS DAILY PLANS (most recent first):\n${linesEn}\n\nBuild on this progression. Reference what I worked on recently. Today's plan should be the natural next step — not a restart.`,
+    de: `\n\nMEINE LETZTEN DAILY-PLÄNE (neueste zuerst):\n${linesDe}\n\nBau darauf auf. Beziehe dich auf das was ich kürzlich gemacht habe. Der heutige Plan soll der natürliche nächste Schritt sein — kein Neustart.`,
+    es: `\n\nMIS PLANES DIARIOS PREVIOS (más recientes primero):\n${linesEn}\n\nConstruye sobre esta progresión. Hoy debe ser el siguiente paso natural.`
+  };
+}
+
+// Render small history badge in daily focus widget
+function getDailyPlansBadgeHtml() {
+  const plans = getDailyPlans();
+  if (plans.length === 0) return '';
+  const labels = {
+    en: 'Day',
+    de: 'Tag',
+    es: 'Día'
+  }[currentLang];
+  // Streak: count consecutive days from today backwards
+  let streak = 0;
+  let checkDate = new Date();
+  const planDates = new Set(plans.map(p => p.date));
+  while (planDates.has(checkDate.getFullYear() + '-' + String(checkDate.getMonth()+1).padStart(2,'0') + '-' + String(checkDate.getDate()).padStart(2,'0'))) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+  if (streak === 0) {
+    // No plan today, but show total count
+    return `<span class="daily-focus-streak" title="${plans.length} ${labels === 'Day' ? 'plans' : labels === 'Tag' ? 'Pläne' : 'planes'}">${plans.length}</span>`;
+  }
+  return `<span class="daily-focus-streak" title="${streak} ${labels === 'Day' ? 'day streak' : labels === 'Tag' ? 'Tage-Streak' : 'racha'}">🔥 ${streak}</span>`;
 }
 
 // ============== CHAT HISTORY ==============
@@ -468,11 +591,20 @@ function renderChatHistory() {
       item.className = 'chat-history-item' + (chat.id === currentChatId ? ' active' : '');
       const topic = chat.topic ? TOPICS.find(t => t.id === chat.topic) : null;
       const iconColor = topic ? topic.color : 'rgba(240,237,232,0.4)';
+      // Project assignment indicator (small colored dot if chat is in a project)
+      const chatProj = chat.projectId ? allProjects.find(p => p.id === chat.projectId) : null;
+      const projDotHtml = chatProj
+        ? `<span class="chat-history-item-projdot" style="background:${chatProj.color};" title="${escapeHtml(chatProj.title)}"></span>`
+        : '';
       item.innerHTML = `
         <div class="chat-history-item-icon" style="color:${iconColor};">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </div>
         <div class="chat-history-item-title">${escapeHtml(chat.title)}</div>
+        ${projDotHtml}
+        <button class="chat-history-item-move" onclick="openMoveToProjectMenu('${chat.id}', event)" title="Move to project">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </button>
         <button class="chat-history-item-delete" onclick="deleteChat('${chat.id}', event)" title="Delete">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
@@ -972,4 +1104,139 @@ function confirmDeleteProject(projectId) {
   renderProjects();
   renderProjectContext();
   renderChatHistory();
+}
+
+
+// ============== CHAT → PROJECT MOVE (v8.11) ==============
+function moveChatToProject(chatId, projectId) {
+  const chat = allChats.find(c => c.id === chatId);
+  if (!chat) return;
+  if (projectId === null) {
+    delete chat.projectId;
+  } else {
+    chat.projectId = projectId;
+  }
+  chat.updated = Date.now();
+  saveChats();
+  renderChatHistory();
+  closeMoveToProjectMenu();
+}
+
+function openMoveToProjectMenu(chatId, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  // Close any existing popup
+  closeMoveToProjectMenu();
+
+  const chat = allChats.find(c => c.id === chatId);
+  if (!chat) return;
+
+  const labels = {
+    en: { title: 'Move to project', none: 'No project (remove)', empty: 'No projects yet. Create one first.' },
+    de: { title: 'In Projekt verschieben', none: 'Kein Projekt (entfernen)', empty: 'Noch keine Projekte. Erst eins erstellen.' },
+    es: { title: 'Mover a proyecto', none: 'Sin proyecto (quitar)', empty: 'Sin proyectos aún. Crea uno primero.' }
+  }[currentLang];
+
+  const menu = document.createElement('div');
+  menu.id = 'moveToProjectMenu';
+  menu.className = 'move-to-project-menu';
+  let html = `<div class="move-menu-title">${labels.title}</div>`;
+  html += `<button class="move-menu-item" onclick="moveChatToProject('${chatId}', null)">
+    <span class="move-menu-dot" style="background:rgba(240,237,232,0.4);"></span>
+    <span>${labels.none}</span>
+  </button>`;
+  if (allProjects.length === 0) {
+    html += `<div class="move-menu-empty">${labels.empty}</div>`;
+  } else {
+    allProjects.forEach(p => {
+      const isCurrent = chat.projectId === p.id;
+      html += `<button class="move-menu-item${isCurrent ? ' active' : ''}" onclick="moveChatToProject('${chatId}', '${p.id}')">
+        <span class="move-menu-dot" style="background:${p.color};"></span>
+        <span>${escapeHtml(p.title)}</span>
+        ${isCurrent ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="margin-left:auto;"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+      </button>`;
+    });
+  }
+  menu.innerHTML = html;
+
+  // Position near the click point
+  document.body.appendChild(menu);
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuW = 220;
+  const menuH = menu.offsetHeight;
+  let left = rect.left;
+  let top = rect.bottom + 6;
+  // Prevent overflow
+  if (left + menuW > window.innerWidth - 12) left = window.innerWidth - menuW - 12;
+  if (top + menuH > window.innerHeight - 12) top = rect.top - menuH - 6;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', closeMoveToProjectMenu, { once: true });
+  }, 50);
+}
+
+function closeMoveToProjectMenu() {
+  const m = document.getElementById('moveToProjectMenu');
+  if (m) m.remove();
+}
+
+// ============== DAILY PLAN HISTORY MODAL (v8.11) ==============
+function openDailyPlanHistory() {
+  const plans = getDailyPlans();
+  if (plans.length === 0) return;
+  const sortedPlans = [...plans].sort((a, b) => b.timestamp - a.timestamp);
+
+  const labels = {
+    en: { title: 'Your Plan History', sub: 'Every daily plan you generated. The bot uses these to build progressive next steps.', close: 'Close', empty: 'No plans yet.' },
+    de: { title: 'Dein Plan-Verlauf', sub: 'Jeder Daily-Plan den du generiert hast. Der Bot nutzt diese um darauf aufzubauen.', close: 'Schließen', empty: 'Noch keine Pläne.' },
+    es: { title: 'Tu Historial de Planes', sub: 'Cada plan diario. El bot los usa para construir progresión.', close: 'Cerrar', empty: 'Sin planes aún.' }
+  }[currentLang];
+
+  let modal = document.getElementById('dailyPlanHistoryModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'dailyPlanHistoryModal';
+    modal.className = 'project-modal';
+    document.body.appendChild(modal);
+  }
+  const entriesHtml = sortedPlans.map(p => {
+    const topic = TOPICS.find(t => t.id === p.topicId);
+    const color = topic ? topic.color : '#e8420a';
+    return `
+      <div class="dph-entry" style="--entry-color:${color};">
+        <div class="dph-entry-header">
+          <span class="dph-entry-date">${p.date}</span>
+          <span class="dph-entry-topic" style="color:${color};">${escapeHtml(p.topicName)}</span>
+        </div>
+        <div class="dph-entry-summary">${escapeHtml(p.summary)}</div>
+      </div>
+    `;
+  }).join('');
+
+  modal.innerHTML = `
+    <div class="project-modal-content" style="max-width:600px;max-height:80vh;display:flex;flex-direction:column;">
+      <button class="project-modal-close" onclick="closeDailyPlanHistory()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h3>${labels.title}</h3>
+      <p class="project-modal-sub">${labels.sub}</p>
+      <div class="dph-list">
+        ${entriesHtml || `<div class="move-menu-empty">${labels.empty}</div>`}
+      </div>
+      <div class="project-modal-footer">
+        <button class="project-modal-btn project-modal-btn-cancel" onclick="closeDailyPlanHistory()">${labels.close}</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('visible');
+}
+
+function closeDailyPlanHistory() {
+  const m = document.getElementById('dailyPlanHistoryModal');
+  if (m) m.classList.remove('visible');
 }

@@ -217,6 +217,42 @@ function renderTopicSuggestions(topic) {
   const container = document.getElementById('topicSuggestions');
   if (!container) return;
   container.innerHTML = '';
+
+  // Highlight card: today's tip for this topic (rotates daily)
+  if (typeof getDailyTip === 'function') {
+    const tip = getDailyTip(topic.id, currentLang);
+    if (tip) {
+      const labels = {
+        en: { badge: 'Today', action: 'Action' },
+        de: { badge: 'Heute aktuell', action: 'Action' },
+        es: { badge: 'Hoy', action: 'Acción' }
+      }[currentLang];
+      const highlight = document.createElement('div');
+      highlight.className = 'topic-highlight-card';
+      highlight.style.setProperty('--topic-color', topic.color);
+      highlight.innerHTML = `
+        <div class="topic-highlight-badge">🔥 ${labels.badge}</div>
+        <div class="topic-highlight-tip">${escapeHtml(tip.tip)}</div>
+        <button class="topic-highlight-action">
+          <span class="topic-highlight-action-label">${labels.action}:</span>
+          <span class="topic-highlight-action-text">${escapeHtml(tip.action)}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      `;
+      highlight.querySelector('.topic-highlight-action').onclick = () => {
+        const msg = {
+          en: `Help me execute today's action: "${tip.action}" — give me a tactical 3-step plan.`,
+          de: `Hilf mir bei der heutigen Action: "${tip.action}" — gib mir einen taktischen 3-Schritte-Plan.`,
+          es: `Ayúdame con la acción de hoy: "${tip.action}" — dame un plan táctico de 3 pasos.`
+        }[currentLang];
+        askQuestion(msg);
+        container.classList.remove('visible');
+      };
+      container.appendChild(highlight);
+    }
+  }
+
+  // Normal suggestion cards
   topic.suggestions.forEach(s => {
     const card = document.createElement('button');
     card.className = 'topic-suggestion-card';
@@ -407,6 +443,15 @@ async function callBot(text, fileData) {
     // After bot message, render memory-confirmation chips (if any new memories)
     if (newlyAddedMemories.length > 0) {
       renderMemoryChips(newlyAddedMemories);
+    }
+
+    // If this response is a daily-plan response, save it to profile history
+    if (window.__pendingDailyPlan && typeof saveDailyPlan === 'function') {
+      const dp = window.__pendingDailyPlan;
+      saveDailyPlan(dp.topicId, dp.topicName, displayText);
+      window.__pendingDailyPlan = null;
+      // Refresh daily focus widget (it can now show streak / build-on indicator)
+      if (typeof renderDailyFocus === 'function') renderDailyFocus();
     }
 
     conversationHistory.push({ role: 'user', content: text });

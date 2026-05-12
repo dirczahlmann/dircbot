@@ -1,84 +1,76 @@
-# DircBot v8.10 — Logo-Icon + Bessere Texte + Projects + Topic-Bar
+# DircBot v8.11 — Chat→Projekt + Daily-Plan-History + Topic-Highlights
 
-## 🎯 Was neu ist in v8.10
+## 🎯 Was neu ist in v8.11
 
-### 1. 🎨 DIRCBOT-Icon im Chat-Header
-Statt dem orange-Kreis mit "D" zeigt der Chat-Header jetzt das **DIRCBOT-Logo-Icon** (metallisches D mit orange Flash, aus dem Logo gecroppt) in einem stylischen Rahmen mit Glow-Effekt.
+### 1. 📂 Chats in Projekte verschieben
+Auf jedem Chat-Eintrag in der Sidebar erscheint im Hover ein **Ordner-Icon** (zwischen Title und Delete). Klick → Popup-Menü mit:
+- **"Kein Projekt (entfernen)"** — falls Chat aktuell in einem Projekt ist
+- Liste aller Projekte (mit farbigem Dot)
+- Aktuelles Projekt mit ✓ markiert
 
-File: `assets/dircbot_icon.png` (68 KB, 218×256 px)
+Klick auf einen Eintrag verschiebt den Chat sofort und der **Projekt-Farbpunkt** erscheint klein neben dem Chat-Title als visueller Indikator.
 
-### 2. 📝 "Meisterschaft" → natürliches Deutsch
-Wo es vorher hieß "30 Jahre Vertriebsmeisterschaft" steht jetzt situativ:
-- **"30 Jahre Vertriebs-Expertise"** (Hauptvariante)
-- "30 Jahren echter Praxis" (Signup)
-- "30 Jahren Praxis in Vertrieb, Crypto & Wealth" (Hero-Subtext)
-- "30 Jahren Real-World-Erfahrung" (Why DircBot?)
-- "30 Jahre Praxis-Wissen" (Admin)
+So kannst du auch alte Chats nachträglich in Projekte sortieren.
 
-Alle 7 Stellen ersetzt — klingt jetzt natürlich und ist trotzdem aussagekräftig.
+### 2. 📅 Daily-Plan-Verlauf — Bot baut auf gestern auf
 
-### 3. 📂 Projects-Feature
-User können jetzt **eigene Projekte erstellen** und Chats nach Vorhaben gruppieren.
+**Was passiert beim Klick auf "Hol meinen Plan":**
+1. System merkt sich: User generiert gerade einen Daily-Plan für Topic X
+2. **Vorherige Pläne (letzte 7 Tage)** werden in die Frage injiziert
+3. Bot sieht: "User hat gestern das gemacht, vor 2 Tagen jenes" → baut darauf auf
+4. Antwort wird automatisch in `userProfile.dailyPlans` gespeichert
 
-**Wie es funktioniert:**
-- Sidebar zeigt neue Sektion **"Projekte"** mit `+`-Button zum Erstellen
-- Beim Erstellen: Name + optional Projekt-Ziel + Farbe wählen
-- Wenn ein Projekt aktiv ist: neue Chats werden **automatisch** diesem Projekt zugeordnet
-- Chat-History wird nach aktivem Projekt **gefiltert** (nur Chats aus diesem Projekt)
-- "All Chats" Pseudo-Projekt → zeigt alles
-- Über dem Chat-Header: **Projekt-Kontext-Bar** zeigt aktuelles Projekt + "Verlassen"-Button
-- Edit-Icon beim Hover → Name/Ziel/Farbe ändern oder Projekt löschen
-- Bot bekommt **Projekt-Kontext im System-Prompt** → Antworten sind projekt-bezogen
+**Was du im Widget siehst:**
+- **🔥 Streak-Badge** (z.B. "🔥 5") wenn du 5 Tage in Folge einen Plan gemacht hast
+- **"Heutiger Plan steht"** wenn schon ein Plan für heute existiert → Button wird "Plan updaten"
+- **"Baut auf deinen letzten 7 Tagen auf"** als Hinweis-Text
+- **"Verlauf ansehen →"** Button öffnet Modal mit allen Plänen
 
-**Beispiel-Workflow:**
-1. Projekt "Side-Hustle Crypto-Beratung" erstellen mit Ziel "5k/Monat in 6 Monaten"
-2. Aktiv → alle neuen Chats landen darin
-3. Bot weiß: User arbeitet an diesem Projekt → Antworten beziehen sich darauf
-4. Anderes Projekt aktivieren → andere Chat-Liste, anderer Kontext
+**Modal:** Chronologische Liste aller Pläne, je mit Datum, Topic-Farbe, Zusammenfassung.
 
-**Storage:** `dircbot-projects` (localStorage), Chats bekommen `projectId`
+**Storage:** `userProfile.dailyPlans` Array (max 30 Einträge, FIFO).
 
-### 4. 🎨 Topic-Bar oben — color-coded + flex-wrap
-Topics sind jetzt **oben** mit Color-Coding zurück, diesmal richtig:
+### 3. 🔥 Heute-Highlight pro Topic
+Beim Klick auf ein Topic erscheint nun **ZUERST eine Highlight-Card** über den normalen Suggestion-Cards:
 
-- **Color-coded Background** (jedes Topic in seiner Farbe — `color-mix` macht subtilen Tint)
-- **Kurze Labels** (`short`-Field in topics.js, z.B. "Vertrieb" statt "Vertrieb & Closing")
-- **flex-wrap** → bei wenig Platz wickeln sie auf 2 Zeilen, kein horizontaler Scroll
-- **Hover-Glow** + **Active-State** mit voller Topic-Farbe + Glow
-- Sidebar-Topic-Section ist weg (zugunsten von Projekten an der Stelle)
+```
+┌─[Topic-Color Border]──────────────────────┐
+│ 🔥 HEUTE AKTUELL                          │
+│ Schweizer Legal-Framework führt           │
+│ weltweit bei Tokenisierung.               │
+│ ┌────────────────────────────────────┐    │
+│ │ ACTION: Wenn du baust: explorer   →│    │
+│ │ das DLT-Gesetz. 30min Reading.    │    │
+│ └────────────────────────────────────┘    │
+└───────────────────────────────────────────┘
+```
 
-Auf Desktop: alle 10 in einer Zeile.
-Auf Tablet/Mobile: wrap in 2 Zeilen.
+Rotiert täglich (deterministisch per Tag-des-Jahres) — jedes der 10 Topics hat 7 Highlights, also alle 7 Tage andere.
+
+Klick auf Action-Button → schickt direkt die "Hilf mir das anzugehen" Frage an den Bot mit dem konkreten Action-Text.
 
 ---
 
 ## 🚀 Upload + Test
 
-1. GitHub: 39 Files (1 neu: dircbot_icon.png)
+1. GitHub: 39 Files (keine neuen Files diesmal)
 2. Auto-Deploy + Hard-Refresh
 
 ### Test-Flow
-1. **Header-Icon**: DIRCBOT-D-Symbol statt "D"-Text ✓
-2. **Topic-Bar oben**: 10 color-coded Pills, fits screen ✓
-3. **Sidebar**: New Chat / Daily / Profile / **Projekte** / Meine Chats
-4. **Projekt erstellen**: `+` neben "Projekte" → Modal → Name + Ziel + Farbe → Speichern
-5. **Projekt-Kontext-Bar**: über dem Chat erscheint farbiger Balken mit Projekt-Name
-6. **Neue Nachricht senden**: landet im Projekt; Bot bezieht sich aufs Projekt-Ziel
-7. **All Chats anklicken**: Filter aus, alle Chats sichtbar
-8. **Meisterschaft-Check**: nirgends mehr zu finden, durchgehend natürliches Deutsch ✓
+1. **Chat verschieben**: Hover über einen Chat in Sidebar → Ordner-Icon erscheint → klick → Projekt wählen → Farbpunkt erscheint am Chat ✓
+2. **Daily-Plan-History**: 
+   - Daily Focus → "Hol meinen Plan" → Bot antwortet → Antwort wird gespeichert
+   - Widget zeigt jetzt 🔥 1 (Day-Streak)
+   - Beim nächsten Klick injiziert er den letzten Plan in die Frage
+   - Bot antwortet im Stil "Gestern hast du X gemacht — heute ist der nächste Schritt..."
+   - "Verlauf ansehen" → Modal mit allen Plänen
+3. **Heute-Highlight**: Klick auf Topic in Top-Bar → Highlight-Card erscheint mit Tagestipp + Action ✓
 
 ---
 
-## 📁 Files v8.10 (39 total — +1 neu)
+## 📁 Files v8.11 (39 total)
 
-Neu:
-- `assets/dircbot_icon.png` 🆕
-
-Modified:
-- `index.html` — Header-img statt "D", topic-bar div, Projekte-Sektion, Meisterschaft-Texte
-- `assets/topics.js` — `short`-Field je Topic
-- `assets/app.js` — renderTopics → top-bar, renderProjects-init, Project-Context-Prompt-Injection
-- `assets/profile.js` — Komplettes Projects-Modul (~250 Zeilen): CRUD, Modal, Context-Bar, Chat-Filter
-- `assets/style.css` — Topic-Pills CSS, Projekte-Sidebar CSS, Project-Context-Bar CSS, Project-Modal CSS, Chat-Avatar img
-- `netlify/functions/chat.js` — `projectContext` Parameter im System-Prompt
-- `tester-signup.html` — Meisterschaft → natürliches DE
+Keine neuen Files. Modified:
+- `assets/profile.js` — Daily-Plan-History (Save/Load/Modal), Chat-Move (Menu/Function), Streak-Badge
+- `assets/app.js` — Topic-Highlight Card in renderTopicSuggestions, pendingDailyPlan flag + save
+- `assets/style.css` — Highlight-Card CSS, Move-Menu CSS, Streak-Badge CSS, History-Modal CSS, Chat-projDot CSS
