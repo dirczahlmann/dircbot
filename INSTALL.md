@@ -1,76 +1,50 @@
-# DircBot v8.11 — Chat→Projekt + Daily-Plan-History + Topic-Highlights
+# DircBot v8.12 — Polish: Suggestion-Cards matchen Highlight-Card
 
-## 🎯 Was neu ist in v8.11
+## 🎯 Was neu ist in v8.12
 
-### 1. 📂 Chats in Projekte verschieben
-Auf jedem Chat-Eintrag in der Sidebar erscheint im Hover ein **Ordner-Icon** (zwischen Title und Delete). Klick → Popup-Menü mit:
-- **"Kein Projekt (entfernen)"** — falls Chat aktuell in einem Projekt ist
-- Liste aller Projekte (mit farbigem Dot)
-- Aktuelles Projekt mit ✓ markiert
+### Suggestion-Cards visuell aufgewertet
+Vorher: Generische dunkle Boxen mit dünnem grauen Border → wirkten unfertig neben der bunten Highlight-Card.
 
-Klick auf einen Eintrag verschiebt den Chat sofort und der **Projekt-Farbpunkt** erscheint klein neben dem Chat-Title als visueller Indikator.
+Jetzt: Suggestion-Cards bekommen **denselben Look** wie die Highlight-Card:
+- **Topic-Color Border-Akzent** links (3px Strich, 0.55 opacity)
+- **Subtiler Topic-Color Gradient** im Background (nur ca 5% Tint)
+- **Topic-Color Border** (auch nur 18% Tint, dezent)
+- **Hover**: Color-Tint wird kräftiger, Border voller, Box-Shadow mit Topic-Color, Akzent-Strich links wird voll opaque
 
-So kannst du auch alte Chats nachträglich in Projekte sortieren.
+### Highlight-Card spannt jetzt volle Breite
+Vorher: Highlight-Card war "Spalte 1" im 2-Spalten-Grid → die ersten Suggestion-Cards quetschen sich rechts daneben rein → unsauberes Layout.
 
-### 2. 📅 Daily-Plan-Verlauf — Bot baut auf gestern auf
-
-**Was passiert beim Klick auf "Hol meinen Plan":**
-1. System merkt sich: User generiert gerade einen Daily-Plan für Topic X
-2. **Vorherige Pläne (letzte 7 Tage)** werden in die Frage injiziert
-3. Bot sieht: "User hat gestern das gemacht, vor 2 Tagen jenes" → baut darauf auf
-4. Antwort wird automatisch in `userProfile.dailyPlans` gespeichert
-
-**Was du im Widget siehst:**
-- **🔥 Streak-Badge** (z.B. "🔥 5") wenn du 5 Tage in Folge einen Plan gemacht hast
-- **"Heutiger Plan steht"** wenn schon ein Plan für heute existiert → Button wird "Plan updaten"
-- **"Baut auf deinen letzten 7 Tagen auf"** als Hinweis-Text
-- **"Verlauf ansehen →"** Button öffnet Modal mit allen Plänen
-
-**Modal:** Chronologische Liste aller Pläne, je mit Datum, Topic-Farbe, Zusammenfassung.
-
-**Storage:** `userProfile.dailyPlans` Array (max 30 Einträge, FIFO).
-
-### 3. 🔥 Heute-Highlight pro Topic
-Beim Klick auf ein Topic erscheint nun **ZUERST eine Highlight-Card** über den normalen Suggestion-Cards:
+Jetzt: `grid-column: 1 / -1` → Highlight-Card spannt **volle Breite** über den 2x2 Suggestion-Cards. Sauberes Hierarchie:
 
 ```
-┌─[Topic-Color Border]──────────────────────┐
-│ 🔥 HEUTE AKTUELL                          │
-│ Schweizer Legal-Framework führt           │
-│ weltweit bei Tokenisierung.               │
-│ ┌────────────────────────────────────┐    │
-│ │ ACTION: Wenn du baust: explorer   →│    │
-│ │ das DLT-Gesetz. 30min Reading.    │    │
-│ └────────────────────────────────────┘    │
-└───────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│ 🔥 HEUTE AKTUELL                                │
+│ [Highlight Tipp]                                │
+│ [ACTION-Button]                                 │
+└─────────────────────────────────────────────────┘
+┌─────────────────────┐  ┌─────────────────────┐
+│ Suggestion 1        │  │ Suggestion 2        │
+└─────────────────────┘  └─────────────────────┘
+┌─────────────────────┐  ┌─────────────────────┐
+│ Suggestion 3        │  │ Suggestion 4        │
+└─────────────────────┘  └─────────────────────┘
 ```
 
-Rotiert täglich (deterministisch per Tag-des-Jahres) — jedes der 10 Topics hat 7 Highlights, also alle 7 Tage andere.
-
-Klick auf Action-Button → schickt direkt die "Hilf mir das anzugehen" Frage an den Bot mit dem konkreten Action-Text.
+Alle 5 Karten haben jetzt **konsistentes Color-Coding** in der jeweiligen Topic-Farbe → visuell zusammenhängend.
 
 ---
 
 ## 🚀 Upload + Test
 
-1. GitHub: 39 Files (keine neuen Files diesmal)
-2. Auto-Deploy + Hard-Refresh
-
-### Test-Flow
-1. **Chat verschieben**: Hover über einen Chat in Sidebar → Ordner-Icon erscheint → klick → Projekt wählen → Farbpunkt erscheint am Chat ✓
-2. **Daily-Plan-History**: 
-   - Daily Focus → "Hol meinen Plan" → Bot antwortet → Antwort wird gespeichert
-   - Widget zeigt jetzt 🔥 1 (Day-Streak)
-   - Beim nächsten Klick injiziert er den letzten Plan in die Frage
-   - Bot antwortet im Stil "Gestern hast du X gemacht — heute ist der nächste Schritt..."
-   - "Verlauf ansehen" → Modal mit allen Plänen
-3. **Heute-Highlight**: Klick auf Topic in Top-Bar → Highlight-Card erscheint mit Tagestipp + Action ✓
+1. GitHub upload + Hard-Refresh
+2. Klick auf ein Topic in der Top-Bar
+3. **Heute-Highlight** oben, volle Breite, in Topic-Farbe ✓
+4. **4 Suggestion-Cards** darunter mit Topic-Farben-Akzent ✓
+5. Hover → Cards animieren mit Topic-Color-Glow ✓
 
 ---
 
-## 📁 Files v8.11 (39 total)
+## 📁 Files v8.12 (39 total — keine neuen)
 
-Keine neuen Files. Modified:
-- `assets/profile.js` — Daily-Plan-History (Save/Load/Modal), Chat-Move (Menu/Function), Streak-Badge
-- `assets/app.js` — Topic-Highlight Card in renderTopicSuggestions, pendingDailyPlan flag + save
-- `assets/style.css` — Highlight-Card CSS, Move-Menu CSS, Streak-Badge CSS, History-Modal CSS, Chat-projDot CSS
+Modified:
+- `assets/style.css` — topic-suggestion-card v2 (Color-Akzent), highlight-card grid-column span

@@ -939,10 +939,13 @@ body.mode-free .topic-suggestions {
   display:grid;
 }
 .topic-suggestion-card {
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.08);
+  position: relative;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--topic-color) 5%, rgba(255,255,255,0.025)) 0%,
+    rgba(255,255,255,0.02) 100%);
+  border: 1px solid color-mix(in srgb, var(--topic-color) 18%, rgba(255,255,255,0.06));
   color:#f0ede8;
-  padding:14px 16px;
+  padding:14px 16px 14px 18px;
   border-radius:10px;
   text-align:left;
   font-family:'Inter',sans-serif;
@@ -950,13 +953,31 @@ body.mode-free .topic-suggestions {
   font-weight:500;
   line-height:1.5;
   cursor:pointer;
-  transition:all 0.15s;
+  transition:all 0.18s ease;
   --topic-color:#e8420a;
+  overflow: hidden;
+}
+.topic-suggestion-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--topic-color);
+  opacity: 0.55;
+  transition: opacity 0.18s ease;
 }
 .topic-suggestion-card:hover {
-  background:rgba(232,66,10,0.08);
-  border-color:var(--topic-color);
-  transform:translateY(-1px);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--topic-color) 12%, rgba(255,255,255,0.04)) 0%,
+    color-mix(in srgb, var(--topic-color) 4%, rgba(255,255,255,0.02)) 100%);
+  border-color: color-mix(in srgb, var(--topic-color) 45%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--topic-color) 12%, transparent);
+}
+.topic-suggestion-card:hover::before {
+  opacity: 1;
 }
 @media (max-width:600px) {
   .topic-suggestions { grid-template-columns:1fr; }
@@ -3046,13 +3067,14 @@ body.mode-tester .project-context-bar.visible {
    V8.11: TOPIC HIGHLIGHT CARD (Today's tip per category)
    ============================================ */
 .topic-highlight-card {
+  grid-column: 1 / -1;  /* spans full grid width above the 2x2 suggestion cards */
   background: linear-gradient(135deg, 
     color-mix(in srgb, var(--topic-color) 12%, rgba(15,15,15,0.6)) 0%, 
     color-mix(in srgb, var(--topic-color) 4%, rgba(15,15,15,0.4)) 100%);
   border: 1px solid color-mix(in srgb, var(--topic-color) 35%, rgba(255,255,255,0.05));
   border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
+  padding: 16px 18px 16px 22px;
+  margin-bottom: 4px;
   position: relative;
   overflow: hidden;
 }
