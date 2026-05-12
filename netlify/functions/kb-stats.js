@@ -1,12 +1,15 @@
-// ============== ADMIN: KB Stats ==============
-// Returns metadata about loaded knowledge base (MD + PDF files, token counts).
+// ============== ADMIN: KB Stats (v8.15) ==============
+// Returns metadata about loaded knowledge base (MD + PDF files from repo + Blobs).
 // Requires header "x-admin-pass" matching ADMIN_API_PASS env var.
 
 const fs = require('fs');
 const path = require('path');
 
+let getStoreFn = null;
+try { getStoreFn = require('@netlify/blobs').getStore; } catch (e) { /* not available */ }
+
 function estimateTokens(text) {
-  return Math.ceil(text.length / 4);
+  return Math.ceil((text || '').length / 4);
 }
 
 exports.handler = async (event) => {
@@ -28,38 +31,31 @@ exports.handler = async (event) => {
 
   const kbDir = path.join(__dirname, '..', '..', 'knowledge-base');
   const pdfDir = path.join(kbDir, 'pdfs');
-  const stats = { md: [], pdf: [], totalTokens: 0, budgetLimit: 80000 };
+  const stats = { md: [], pdf: [], blobs: [], totalTokens: 0, budgetLimit: 80000 };
 
-  // Markdown files
+  // === Repo MDs ===
   try {
-    const files = fs.readdirSync(kbDir)
-      .filter(f => f.endsWith('.md'))
-      .sort();
+    const files = fs.readdirSync(kbDir).filter(f => f.endsWith('.md')).sort();
     for (const file of files) {
       const content = fs.readFileSync(path.join(kbDir, file), 'utf-8');
       const tokens = estimateTokens(content);
-      stats.md.push({ file, tokens, chars: content.length });
+      stats.md.push({ file, tokens, chars: content.length, source: 'repo' });
       stats.totalTokens += tokens;
     }
-  } catch (e) {
-    stats.mdError = e.message;
-  }
+  } catch (e) { stats.mdError = e.message; }
 
-  // PDF files — list metadata only (no parsing here, that's lazy-loaded by chat.js)
+  // === Repo PDFs (legacy) ===
   let pdfParse = null;
   try { pdfParse = require('pdf-parse'); } catch (e) { stats.pdfParseAvailable = false; }
   if (pdfParse) stats.pdfParseAvailable = true;
 
   if (fs.existsSync(pdfDir)) {
     try {
-      const pdfFiles = fs.readdirSync(pdfDir)
-        .filter(f => f.toLowerCase().endsWith('.pdf'))
-        .sort();
+      const pdfFiles = fs.readdirSync(pdfDir).filter(f => f.toLowerCase().endsWith('.pdf')).sort();
       for (const file of pdfFiles) {
         const filePath = path.join(pdfDir, file);
         const fileStat = fs.statSync(filePath);
-        let pdfInfo = { file, sizeKB: Math.round(fileStat.size / 1024) };
-        // If pdf-parse is available, parse to get token count
+        let pdfInfo = { file, sizeKB: Math.round(fileStat.size / 1024), source: 'repo' };
         if (pdfParse) {
           try {
             const buf = fs.readFileSync(filePath);
@@ -76,11 +72,24 @@ exports.handler = async (event) => {
         }
         stats.pdf.push(pdfInfo);
       }
+    } catch (e) { stats.pdfError = e.message; }
+  }
+
+  // === Blob KB Files (managed via admin UI) ===
+  if (getStoreFn) {
+    try {
+      const store = getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+      const indexRaw = await store.get('__index', { type: 'json' });
+      const index = Array.isArray(indexRaw) ? indexRaw : [];
+      for (const entry of index) {
+        stats.blobs.push({ ...entry, source: 'blob' });
+        if (entry.active !== false) {
+          stats.totalTokens += entry.tokens || 0;
+        }
+      }
     } catch (e) {
-      stats.pdfError = e.message;
+      stats.blobsError = e.message;
     }
-  } else {
-    stats.pdfDirExists = false;
   }
 
   stats.withinBudget = stats.totalTokens <= stats.budgetLimit;

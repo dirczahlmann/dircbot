@@ -8,23 +8,29 @@ const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
 
+// Lazy require of @netlify/blobs (may not exist in local dev without netlify dev)
+let getStoreFn = null;
+try { getStoreFn = require('@netlify/blobs').getStore; } catch (e) { /* netlify-blobs unavailable */ }
+
 // Cache KB across warm invocations
 let cachedKB = null;
 let kbStats = null; // metadata: per-file token estimates, useful for admin
+let kbCacheExpiry = 0; // refresh blob KB every 30s so admin uploads show up
 
 // Rough token estimate: ~4 chars per token for english/german text (Anthropic's tokenizer ratio)
 function estimateTokens(text) {
   return Math.ceil(text.length / 4);
 }
 
-// PDF parsing is async — we load PDFs once and cache the result
 // Hard budget: don't let total KB exceed 80k tokens (leaves 120k+ for chat history, output, system base)
 const KB_TOKEN_BUDGET = 80000;
 
 let pdfParsePromise = null;
 async function loadKnowledgeBase() {
-  if (cachedKB) return cachedKB;
-  if (pdfParsePromise) return pdfParsePromise; // in-flight load, dedupe parallel callers
+  const now = Date.now();
+  // Cache valid for 30s — so newly-uploaded files via admin UI propagate quickly without overwhelming Blobs API
+  if (cachedKB && now < kbCacheExpiry) return cachedKB;
+  if (pdfParsePromise && now < kbCacheExpiry) return pdfParsePromise;
 
   pdfParsePromise = (async () => {
     const kbDir = path.join(__dirname, '..', '..', 'knowledge-base');
@@ -32,7 +38,7 @@ async function loadKnowledgeBase() {
     let combined = '';
     let perFile = [];
 
-    // === 1. Markdown files (existing flow) ===
+    // === 1. Markdown files from repo (existing flow, immutable per deploy) ===
     try {
       const files = fs.readdirSync(kbDir)
         .filter(f => f.endsWith('.md'))
@@ -41,17 +47,16 @@ async function loadKnowledgeBase() {
         const content = fs.readFileSync(path.join(kbDir, file), 'utf-8');
         const tokens = estimateTokens(content);
         combined += `\n\n## File: ${file}\n${content}`;
-        perFile.push({ file: file, type: 'md', tokens: tokens, chars: content.length });
+        perFile.push({ file: file, type: 'md', source: 'repo', tokens: tokens, chars: content.length });
       }
     } catch (err) {
       console.error('KB markdown load error:', err);
     }
 
-    // === 2. PDF files (NEW v8.13) ===
+    // === 2. PDF files from repo (legacy, kept for back-compat) ===
     let pdfParse = null;
     try { pdfParse = require('pdf-parse'); } catch (e) {
-      // pdf-parse not installed in this environment — skip silently
-      console.warn('pdf-parse not available, PDFs will be skipped:', e.message);
+      console.warn('pdf-parse not available, PDFs from repo will be skipped:', e.message);
     }
 
     if (pdfParse && fs.existsSync(pdfDir)) {
@@ -62,8 +67,7 @@ async function loadKnowledgeBase() {
         let usedTokens = estimateTokens(combined);
         for (const file of pdfFiles) {
           if (usedTokens >= KB_TOKEN_BUDGET) {
-            console.warn(`KB budget reached (${KB_TOKEN_BUDGET} tokens) — skipping ${file} and remaining PDFs.`);
-            perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'budget' });
+            perFile.push({ file: file, type: 'pdf', source: 'repo', skipped: true, reason: 'budget' });
             continue;
           }
           try {
@@ -71,43 +75,78 @@ async function loadKnowledgeBase() {
             const data = await pdfParse(buf);
             const text = (data.text || '').trim();
             if (!text) {
-              perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'empty (likely scanned/OCR needed)' });
+              perFile.push({ file: file, type: 'pdf', source: 'repo', skipped: true, reason: 'empty' });
               continue;
             }
             const fileTokens = estimateTokens(text);
-            // If adding this single file would massively overflow budget, truncate it
             const remainingBudget = KB_TOKEN_BUDGET - usedTokens;
             let textToAdd = text;
-            let truncated = false;
             if (fileTokens > remainingBudget) {
-              // Truncate to remaining budget (rough: tokens * 4 = chars)
               textToAdd = text.slice(0, remainingBudget * 4) + '\n\n[...truncated due to KB budget...]';
-              truncated = true;
             }
             const niceTitle = file.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ');
-            combined += `\n\n## PDF: ${niceTitle} (source file: ${file}, ${data.numpages || '?'} pages)\n${textToAdd}`;
+            combined += `\n\n## PDF: ${niceTitle} (${data.numpages || '?'} pages)\n${textToAdd}`;
             usedTokens = estimateTokens(combined);
             perFile.push({
-              file: file,
-              type: 'pdf',
-              tokens: estimateTokens(textToAdd),
-              chars: textToAdd.length,
-              pages: data.numpages,
-              truncated: truncated
+              file: file, type: 'pdf', source: 'repo',
+              tokens: estimateTokens(textToAdd), chars: textToAdd.length, pages: data.numpages
             });
           } catch (pdfErr) {
-            console.error(`PDF parse error for ${file}:`, pdfErr.message);
-            perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'parse error: ' + pdfErr.message });
+            perFile.push({ file: file, type: 'pdf', source: 'repo', skipped: true, reason: pdfErr.message });
           }
         }
       } catch (err) {
-        console.error('KB PDF load error:', err);
+        console.error('KB repo PDF load error:', err);
+      }
+    }
+
+    // === 3. Files from Netlify Blobs (uploaded via admin UI, the canonical store) ===
+    if (getStoreFn) {
+      try {
+        const store = getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+        const indexRaw = await store.get('__index', { type: 'json' });
+        const index = Array.isArray(indexRaw) ? indexRaw : [];
+        let usedTokens = estimateTokens(combined);
+        // Sort by upload time (oldest first) for deterministic ordering
+        const active = index.filter(f => f.active !== false).sort((a, b) => (a.uploadedAt || 0) - (b.uploadedAt || 0));
+        for (const entry of active) {
+          if (usedTokens >= KB_TOKEN_BUDGET) {
+            perFile.push({ file: entry.fileName, type: entry.type, source: 'blob', skipped: true, reason: 'budget' });
+            continue;
+          }
+          try {
+            const content = await store.get(entry.id);
+            if (!content) {
+              perFile.push({ file: entry.fileName, type: entry.type, source: 'blob', skipped: true, reason: 'missing content' });
+              continue;
+            }
+            const remainingBudget = KB_TOKEN_BUDGET - usedTokens;
+            const fileTokens = estimateTokens(content);
+            let textToAdd = content;
+            if (fileTokens > remainingBudget) {
+              textToAdd = content.slice(0, remainingBudget * 4) + '\n\n[...truncated due to KB budget...]';
+            }
+            combined += `\n\n## ${entry.type === 'pdf' ? 'PDF' : 'KB'}: ${entry.title || entry.fileName}\n${textToAdd}`;
+            usedTokens = estimateTokens(combined);
+            perFile.push({
+              file: entry.fileName, type: entry.type, source: 'blob',
+              tokens: estimateTokens(textToAdd), title: entry.title, id: entry.id
+            });
+          } catch (blobErr) {
+            console.warn(`Blob fetch error for ${entry.id}:`, blobErr.message);
+            perFile.push({ file: entry.fileName, source: 'blob', skipped: true, reason: blobErr.message });
+          }
+        }
+      } catch (err) {
+        // Blobs not yet provisioned for this site — that's fine, just skip
+        console.warn('Blob KB unavailable (first time? blobs not yet initialised):', err.message);
       }
     }
 
     if (!combined) combined = 'KB unavailable. Use core identity only.';
 
     cachedKB = combined;
+    kbCacheExpiry = Date.now() + 30000; // 30s cache (lets admin uploads propagate quickly)
     kbStats = {
       totalTokens: estimateTokens(combined),
       totalChars: combined.length,
@@ -121,6 +160,14 @@ async function loadKnowledgeBase() {
 }
 
 function getKbStats() { return kbStats; }
+
+// Allow admin endpoints to force KB cache invalidation after upload/delete
+function invalidateKbCache() {
+  cachedKB = null;
+  kbCacheExpiry = 0;
+  pdfParsePromise = null;
+}
+module.exports.invalidateKbCache = invalidateKbCache;
 
 function languageInstruction(language) {
   switch (language) {

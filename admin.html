@@ -46,11 +46,12 @@
     <h1 class="admin-title">DircBot Control Center</h1>
     <p class="admin-subtitle">Tester-Verwaltung · Email-Templates · Stats</p>
 
-    <!-- KNOWLEDGE BASE (v8.13) -->
+    <!-- KNOWLEDGE BASE MANAGEMENT (v8.15) -->
     <section class="admin-section">
-      <h2>📚 Wissensbasis (MD + PDF)</h2>
-      <p class="admin-section-sub">Dateien aus <code>knowledge-base/</code> die der Bot in jeden Chat einspeist. PDFs gehen in den Unterordner <code>pdfs/</code>.</p>
+      <h2>📚 Wissensbasis-Manager</h2>
+      <p class="admin-section-sub">Upload PDFs oder Markdown-Files für die Bot-Wissensbasis. Limit: <strong>20 Files</strong> total, <strong>10 MB</strong> pro File, <strong>80.000 Tokens</strong> Budget. Files werden in Netlify Blobs gespeichert (kein Git-Commit nötig).</p>
 
+      <!-- Budget bar -->
       <div class="kb-budget-bar">
         <div class="kb-budget-label">
           <span><strong id="kbTokens">—</strong> / 80.000 Tokens</span>
@@ -62,27 +63,67 @@
         <p class="kb-budget-hint" id="kbBudgetHint">Lädt...</p>
       </div>
 
-      <div class="kb-files-grid">
-        <div class="kb-files-col">
-          <h3>📄 Markdown</h3>
-          <div id="kbMdList" class="kb-list">—</div>
+      <!-- Upload zone -->
+      <div class="kb-upload-zone" id="kbUploadZone">
+        <input type="file" id="kbFileInput" accept=".pdf,.md,.txt" multiple style="display:none;">
+        <div class="kb-upload-inner">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="kb-upload-title">PDFs oder MD-Files droppen</div>
+          <div class="kb-upload-sub">oder klicken zum Auswählen · max. 10 MB pro Datei</div>
+          <button class="kb-upload-btn" onclick="document.getElementById('kbFileInput').click()">Datei wählen</button>
         </div>
-        <div class="kb-files-col">
-          <h3>📕 PDF</h3>
-          <div id="kbPdfList" class="kb-list">—</div>
-        </div>
+        <div id="kbUploadProgress" class="kb-upload-progress" style="display:none;"></div>
       </div>
 
-      <div class="kb-howto">
-        <strong>💡 So fügst du PDFs hinzu:</strong>
-        <ol>
-          <li>Drop PDFs in <code>knowledge-base/pdfs/</code> auf GitHub (drag-and-drop im Browser)</li>
-          <li>Commit → Netlify deployt automatisch</li>
-          <li>Refresh diese Seite → neue PDFs erscheinen unten + im Token-Counter</li>
-        </ol>
-        <p>⚠️ <strong>Limit 80k Tokens</strong> total. Bei Überschreitung werden spätere PDFs abgeschnitten. Bei 50+ PDFs solltest du auf RAG umsteigen (frag Claude).</p>
+      <!-- Active files list -->
+      <div class="kb-section-divider">
+        <span data-lang="en">Active Files</span>
+        <span data-lang="de">Aktive Files</span>
+        <span data-lang="es">Archivos Activos</span>
+        <span class="kb-section-count" id="kbActiveCount">0</span>
       </div>
+      <div id="kbActiveList" class="kb-managed-list">
+        <div class="kb-empty">Lädt...</div>
+      </div>
+
+      <!-- Inactive files list (collapsed by default) -->
+      <details class="kb-inactive-details" id="kbInactiveDetails" style="display:none;">
+        <summary>
+          <span>Deaktivierte Files</span>
+          <span class="kb-section-count" id="kbInactiveCount">0</span>
+        </summary>
+        <div id="kbInactiveList" class="kb-managed-list"></div>
+      </details>
+
+      <!-- Repo files (legacy, read-only) -->
+      <details class="kb-repo-details">
+        <summary>
+          <span>Repo-Files (im GitHub-Repo, read-only)</span>
+        </summary>
+        <div class="kb-files-grid">
+          <div class="kb-files-col">
+            <h3>📄 Markdown im Repo</h3>
+            <div id="kbMdList" class="kb-list">—</div>
+          </div>
+          <div class="kb-files-col">
+            <h3>📕 PDF im Repo (legacy)</h3>
+            <div id="kbPdfList" class="kb-list">—</div>
+          </div>
+        </div>
+      </details>
     </section>
+
+    <!-- Preview modal -->
+    <div id="kbPreviewModal" class="kb-preview-modal">
+      <div class="kb-preview-content">
+        <button class="kb-preview-close" onclick="closeKbPreview()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h3 id="kbPreviewTitle">Preview</h3>
+        <div class="kb-preview-meta" id="kbPreviewMeta"></div>
+        <pre class="kb-preview-text" id="kbPreviewText"></pre>
+      </div>
+    </div>
 
     <!-- CACHE STATS (v8.14) -->
     <section class="admin-section">

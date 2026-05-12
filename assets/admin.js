@@ -756,3 +756,330 @@ function renderCacheStats(stats) {
     }
   }
 }
+
+
+// ============== KB MANAGEMENT (v8.15) ==============
+// Upload, list, delete, toggle, preview KB files stored in Netlify Blobs
+
+const KB_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+function initKbManager() {
+  const dropZone = document.getElementById('kbUploadZone');
+  const fileInput = document.getElementById('kbFileInput');
+  if (!dropZone || !fileInput) return;
+
+  // File input change
+  fileInput.addEventListener('change', (e) => {
+    handleKbFiles(Array.from(e.target.files));
+    fileInput.value = ''; // reset
+  });
+
+  // Drag & drop
+  ['dragenter', 'dragover'].forEach(ev => {
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drag-over');
+    });
+  });
+  dropZone.addEventListener('drop', (e) => {
+    const files = Array.from(e.dataTransfer.files);
+    handleKbFiles(files);
+  });
+}
+
+async function handleKbFiles(files) {
+  if (!files.length) return;
+  const validFiles = [];
+  const errors = [];
+
+  for (const file of files) {
+    const ext = file.name.toLowerCase().split('.').pop();
+    if (!['pdf', 'md', 'txt'].includes(ext)) {
+      errors.push(`${file.name}: nicht unterstützt (nur PDF/MD/TXT)`);
+      continue;
+    }
+    if (file.size > KB_MAX_FILE_SIZE) {
+      errors.push(`${file.name}: zu groß (${Math.round(file.size / 1024 / 1024)}MB, max 10MB)`);
+      continue;
+    }
+    validFiles.push(file);
+  }
+
+  if (errors.length) {
+    alert('Fehler:\n' + errors.join('\n'));
+  }
+  if (!validFiles.length) return;
+
+  // Upload sequentially with progress UI
+  const progress = document.getElementById('kbUploadProgress');
+  progress.style.display = 'block';
+  progress.innerHTML = '';
+
+  for (let i = 0; i < validFiles.length; i++) {
+    const file = validFiles[i];
+    const row = document.createElement('div');
+    row.className = 'kb-upload-progress-row';
+    row.innerHTML = `
+      <span class="kb-progress-name">${escapeHtmlAdmin(file.name)}</span>
+      <span class="kb-progress-status" id="kbProg-${i}">⏳ wird verarbeitet…</span>
+    `;
+    progress.appendChild(row);
+
+    try {
+      const base64 = await fileToBase64(file);
+      const result = await uploadKbFile(file.name, base64, file.name.endsWith('.pdf') ? 'pdf' : 'md');
+      if (result.error) {
+        document.getElementById(`kbProg-${i}`).innerHTML = `❌ ${escapeHtmlAdmin(result.error)}`;
+        document.getElementById(`kbProg-${i}`).className = 'kb-progress-status error';
+      } else {
+        document.getElementById(`kbProg-${i}`).innerHTML = `✅ ${result.file.tokens.toLocaleString('de-DE')} Tokens`;
+        document.getElementById(`kbProg-${i}`).className = 'kb-progress-status success';
+      }
+    } catch (e) {
+      document.getElementById(`kbProg-${i}`).innerHTML = `❌ ${escapeHtmlAdmin(e.message)}`;
+      document.getElementById(`kbProg-${i}`).className = 'kb-progress-status error';
+    }
+  }
+
+  // Reload list + budget
+  await loadKbStats();
+
+  // Auto-hide progress after 5s if no errors
+  setTimeout(() => {
+    const hasErrors = progress.querySelector('.kb-progress-status.error');
+    if (!hasErrors) {
+      progress.style.display = 'none';
+      progress.innerHTML = '';
+    }
+  }, 5000);
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // strip data URL prefix
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadKbFile(fileName, base64Data, fileType) {
+  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  if (!apiPass) return { error: 'Admin-Pass fehlt. Erst Submissions laden.' };
+  const res = await fetch('/.netlify/functions/kb-manage?action=upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-pass': apiPass
+    },
+    body: JSON.stringify({ fileName, fileType, fileData: base64Data })
+  });
+  return await res.json();
+}
+
+async function deleteKbFile(id, fileName) {
+  if (!confirm(`Wirklich löschen: "${fileName}"?`)) return;
+  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const res = await fetch(`/.netlify/functions/kb-manage?action=delete&id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-pass': apiPass }
+  });
+  const data = await res.json();
+  if (data.error) {
+    alert('Fehler: ' + data.error);
+  } else {
+    await loadKbStats();
+  }
+}
+
+async function toggleKbFile(id) {
+  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const res = await fetch(`/.netlify/functions/kb-manage?action=toggle&id=${encodeURIComponent(id)}`, {
+    method: 'POST',
+    headers: { 'x-admin-pass': apiPass }
+  });
+  const data = await res.json();
+  if (data.error) {
+    alert('Fehler: ' + data.error);
+  } else {
+    await loadKbStats();
+  }
+}
+
+async function previewKbFile(id, title) {
+  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const res = await fetch(`/.netlify/functions/kb-manage?action=preview&id=${encodeURIComponent(id)}`, {
+    headers: { 'x-admin-pass': apiPass }
+  });
+  const data = await res.json();
+  if (data.error) {
+    alert('Fehler: ' + data.error);
+    return;
+  }
+  const modal = document.getElementById('kbPreviewModal');
+  document.getElementById('kbPreviewTitle').textContent = title || data.file.title || data.file.fileName;
+  document.getElementById('kbPreviewMeta').innerHTML = `
+    <span>${data.file.tokens?.toLocaleString('de-DE') || '—'} Tokens</span>
+    <span>·</span>
+    <span>${data.file.type.toUpperCase()}</span>
+    ${data.file.pages ? `<span>·</span><span>${data.file.pages} Seiten</span>` : ''}
+    ${data.file.sizeKB ? `<span>·</span><span>${data.file.sizeKB} KB</span>` : ''}
+  `;
+  const previewText = data.preview + (data.truncated ? '\n\n[...gekürzt, voller Text im Bot verfügbar...]' : '');
+  document.getElementById('kbPreviewText').textContent = previewText;
+  modal.classList.add('visible');
+}
+
+function closeKbPreview() {
+  const modal = document.getElementById('kbPreviewModal');
+  if (modal) modal.classList.remove('visible');
+}
+
+// Override the existing renderKbStats to handle the new blob list section
+const _originalRenderKbStats = typeof renderKbStats === 'function' ? renderKbStats : null;
+function renderKbStatsV15(stats) {
+  // Budget bar (same as before)
+  const tokensEl = document.getElementById('kbTokens');
+  const pctEl = document.getElementById('kbBudgetPct');
+  const fillEl = document.getElementById('kbBudgetFill');
+  const hintEl = document.getElementById('kbBudgetHint');
+
+  if (tokensEl) tokensEl.textContent = stats.totalTokens.toLocaleString('de-DE');
+  if (pctEl) pctEl.textContent = stats.budgetUsedPct + '%';
+  if (fillEl) {
+    fillEl.style.width = Math.min(stats.budgetUsedPct, 100) + '%';
+    if (stats.budgetUsedPct < 50) fillEl.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+    else if (stats.budgetUsedPct < 80) fillEl.style.background = 'linear-gradient(90deg, #c9a84c, #f59e0b)';
+    else fillEl.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+  }
+  if (hintEl) {
+    if (!stats.pdfParseAvailable) {
+      hintEl.innerHTML = '⚠️ <strong>pdf-parse Modul nicht verfügbar.</strong> Wird beim nächsten Deploy automatisch installiert.';
+    } else if (stats.budgetUsedPct >= 95) {
+      hintEl.innerHTML = '🔴 <strong>Budget fast voll!</strong> Reduziere Files oder steige auf RAG um.';
+    } else if (stats.budgetUsedPct >= 80) {
+      hintEl.innerHTML = '⚠️ Budget bei ' + stats.budgetUsedPct + '%. Bei weiteren Files auf RAG umsteigen erwägen.';
+    } else if (stats.totalTokens === 0) {
+      hintEl.innerHTML = '👇 Lade deine ersten Files hoch — Drop sie in die Zone unten.';
+    } else {
+      const estCost = 0.0017 + (stats.totalTokens * 0.3 / 1000000); // with caching
+      hintEl.innerHTML = `✅ Im sicheren Bereich. API-Cost pro Nachricht (mit Caching): ca. $${estCost.toFixed(4)}`;
+    }
+  }
+
+  // Repo MD/PDF lists (read-only)
+  const mdList = document.getElementById('kbMdList');
+  if (mdList) {
+    mdList.innerHTML = stats.md.length === 0
+      ? '<div class="kb-empty">Keine MD-Files im Repo.</div>'
+      : stats.md.map(f => `
+        <div class="kb-file-row">
+          <span class="kb-file-name">${escapeHtmlAdmin(f.file)}</span>
+          <span class="kb-file-tokens">${f.tokens.toLocaleString('de-DE')} tok</span>
+        </div>
+      `).join('');
+  }
+
+  const pdfList = document.getElementById('kbPdfList');
+  if (pdfList) {
+    pdfList.innerHTML = stats.pdf.length === 0
+      ? '<div class="kb-empty">Keine PDFs im Repo.</div>'
+      : stats.pdf.map(f => {
+        let detail = f.error ? '<span class="kb-file-err">Fehler</span>'
+          : f.empty ? '<span class="kb-file-err">Leer (OCR?)</span>'
+          : f.tokens ? `${f.tokens.toLocaleString('de-DE')} tok · ${f.pages || '?'} S.`
+          : `${f.sizeKB} KB`;
+        return `<div class="kb-file-row"><span class="kb-file-name">${escapeHtmlAdmin(f.file)}</span><span class="kb-file-tokens">${detail}</span></div>`;
+      }).join('');
+  }
+
+  // Blob KB files (managed via UI) — split into active and inactive
+  const blobs = stats.blobs || [];
+  const active = blobs.filter(f => f.active !== false);
+  const inactive = blobs.filter(f => f.active === false);
+
+  document.getElementById('kbActiveCount').textContent = active.length;
+  document.getElementById('kbInactiveCount').textContent = inactive.length;
+  document.getElementById('kbInactiveDetails').style.display = inactive.length > 0 ? 'block' : 'none';
+
+  const activeList = document.getElementById('kbActiveList');
+  const inactiveList = document.getElementById('kbInactiveList');
+
+  const renderRow = (file, isActive) => {
+    const typeIcon = file.type === 'pdf' ? '📕' : '📄';
+    return `
+      <div class="kb-managed-row ${isActive ? '' : 'inactive'}">
+        <div class="kb-managed-icon">${typeIcon}</div>
+        <div class="kb-managed-main">
+          <div class="kb-managed-title">${escapeHtmlAdmin(file.title || file.fileName)}</div>
+          <div class="kb-managed-meta">
+            <span>${(file.tokens || 0).toLocaleString('de-DE')} tok</span>
+            ${file.pages ? `· <span>${file.pages} Seiten</span>` : ''}
+            ${file.sizeKB ? `· <span>${file.sizeKB} KB</span>` : ''}
+            · <span>${formatRelTime(file.uploadedAt)}</span>
+          </div>
+        </div>
+        <div class="kb-managed-actions">
+          <button class="kb-action-btn" onclick="previewKbFile('${file.id}', '${escapeHtmlAdmin(file.title || file.fileName).replace(/'/g, "\\'")}')" title="Preview">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="kb-action-btn ${isActive ? 'active-toggle' : ''}" onclick="toggleKbFile('${file.id}')" title="${isActive ? 'Deaktivieren' : 'Aktivieren'}">
+            ${isActive
+              ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'}
+          </button>
+          <button class="kb-action-btn danger" onclick="deleteKbFile('${file.id}', '${escapeHtmlAdmin(file.fileName).replace(/'/g, "\\'")}')" title="Löschen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  if (activeList) {
+    activeList.innerHTML = active.length === 0
+      ? '<div class="kb-empty">Noch keine Files aktiv. Drop deine ersten PDFs/MDs oben rein.</div>'
+      : active.map(f => renderRow(f, true)).join('');
+  }
+
+  if (inactiveList) {
+    inactiveList.innerHTML = inactive.length === 0
+      ? ''
+      : inactive.map(f => renderRow(f, false)).join('');
+  }
+}
+
+function formatRelTime(timestamp) {
+  if (!timestamp) return '—';
+  const diff = Date.now() - timestamp;
+  const min = Math.floor(diff / 60000);
+  const hr = Math.floor(diff / 3600000);
+  const day = Math.floor(diff / 86400000);
+  if (min < 1) return 'gerade eben';
+  if (min < 60) return `vor ${min} min`;
+  if (hr < 24) return `vor ${hr} h`;
+  if (day < 7) return `vor ${day} d`;
+  return new Date(timestamp).toLocaleDateString('de-DE');
+}
+
+// Hook into loadKbStats to call our v15 renderer
+window.renderKbStats = renderKbStatsV15;
+
+// Init drop zone after admin shows
+const _origShowAdmin = typeof showAdmin === 'function' ? showAdmin : null;
+window.showAdmin = function() {
+  if (_origShowAdmin) _origShowAdmin();
+  setTimeout(initKbManager, 100);
+};
