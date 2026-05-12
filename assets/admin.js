@@ -568,21 +568,27 @@ if (document.readyState !== 'loading') {
 
 // ============== KB STATS (v8.13) ==============
 async function loadKbStats() {
-  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const apiPass = getAdminApiPass();
   if (!apiPass) return;
   try {
     const res = await fetch('/.netlify/functions/kb-stats', {
       headers: { 'x-admin-pass': apiPass }
     });
+    if (res.status === 401) {
+      clearAdminApiPass();
+      document.getElementById('kbBudgetHint').innerHTML = '🔴 <strong>Falsches API-Passwort.</strong> <a href="#" onclick="loadKbStats(); return false;">Nochmal versuchen</a>';
+      return;
+    }
     if (!res.ok) {
       console.warn('KB stats fetch failed:', res.status);
-      document.getElementById('kbBudgetHint').textContent = 'Stats konnten nicht geladen werden.';
+      document.getElementById('kbBudgetHint').textContent = 'Stats konnten nicht geladen werden (HTTP ' + res.status + ').';
       return;
     }
     const stats = await res.json();
     renderKbStats(stats);
   } catch (e) {
     console.error('KB stats error:', e);
+    document.getElementById('kbBudgetHint').textContent = 'Netzwerk-Fehler: ' + e.message;
   }
 }
 
@@ -763,6 +769,23 @@ function renderCacheStats(stats) {
 
 const KB_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
+// Centralized admin-api-pass getter that auto-prompts if not set yet.
+// Uses sessionStorage (matches admin-submissions flow). Returns null if user cancels.
+function getAdminApiPass() {
+  let pass = sessionStorage.getItem('dircbot-admin-api-pass');
+  if (!pass) {
+    pass = prompt('Admin-API-Passwort (ADMIN_API_PASS aus Netlify Env Vars):');
+    if (!pass) return null;
+    sessionStorage.setItem('dircbot-admin-api-pass', pass);
+  }
+  return pass;
+}
+
+// Clear stored pass (called when API returns 401)
+function clearAdminApiPass() {
+  sessionStorage.removeItem('dircbot-admin-api-pass');
+}
+
 function initKbManager() {
   const dropZone = document.getElementById('kbUploadZone');
   const fileInput = document.getElementById('kbFileInput');
@@ -876,8 +899,8 @@ function fileToBase64(file) {
 }
 
 async function uploadKbFile(fileName, base64Data, fileType) {
-  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
-  if (!apiPass) return { error: 'Admin-Pass fehlt. Erst Submissions laden.' };
+  const apiPass = getAdminApiPass();
+  if (!apiPass) return { error: 'Admin-Pass nicht eingegeben — abgebrochen.' };
   const res = await fetch('/.netlify/functions/kb-manage?action=upload', {
     method: 'POST',
     headers: {
@@ -886,16 +909,26 @@ async function uploadKbFile(fileName, base64Data, fileType) {
     },
     body: JSON.stringify({ fileName, fileType, fileData: base64Data })
   });
+  if (res.status === 401) {
+    clearAdminApiPass();
+    return { error: 'Falsches API-Passwort. Refresh + neu versuchen.' };
+  }
   return await res.json();
 }
 
 async function deleteKbFile(id, fileName) {
   if (!confirm(`Wirklich löschen: "${fileName}"?`)) return;
-  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const apiPass = getAdminApiPass();
+  if (!apiPass) return;
   const res = await fetch(`/.netlify/functions/kb-manage?action=delete&id=${encodeURIComponent(id)}`, {
     method: 'DELETE',
     headers: { 'x-admin-pass': apiPass }
   });
+  if (res.status === 401) {
+    clearAdminApiPass();
+    alert('Falsches API-Passwort. Bitte neu eingeben.');
+    return;
+  }
   const data = await res.json();
   if (data.error) {
     alert('Fehler: ' + data.error);
@@ -905,11 +938,17 @@ async function deleteKbFile(id, fileName) {
 }
 
 async function toggleKbFile(id) {
-  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const apiPass = getAdminApiPass();
+  if (!apiPass) return;
   const res = await fetch(`/.netlify/functions/kb-manage?action=toggle&id=${encodeURIComponent(id)}`, {
     method: 'POST',
     headers: { 'x-admin-pass': apiPass }
   });
+  if (res.status === 401) {
+    clearAdminApiPass();
+    alert('Falsches API-Passwort. Bitte neu eingeben.');
+    return;
+  }
   const data = await res.json();
   if (data.error) {
     alert('Fehler: ' + data.error);
@@ -919,10 +958,16 @@ async function toggleKbFile(id) {
 }
 
 async function previewKbFile(id, title) {
-  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  const apiPass = getAdminApiPass();
+  if (!apiPass) return;
   const res = await fetch(`/.netlify/functions/kb-manage?action=preview&id=${encodeURIComponent(id)}`, {
     headers: { 'x-admin-pass': apiPass }
   });
+  if (res.status === 401) {
+    clearAdminApiPass();
+    alert('Falsches API-Passwort. Bitte neu eingeben.');
+    return;
+  }
   const data = await res.json();
   if (data.error) {
     alert('Fehler: ' + data.error);
