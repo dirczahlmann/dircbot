@@ -10,7 +10,45 @@ const path = require('path');
 
 // Lazy require of @netlify/blobs (may not exist in local dev without netlify dev)
 let getStoreFn = null;
-try { getStoreFn = require('@netlify/blobs').getStore; } catch (e) { /* netlify-blobs unavailable */ }
+let connectLambdaFn = null;
+try {
+  const blobs = require('@netlify/blobs');
+  getStoreFn = blobs.getStore;
+  connectLambdaFn = blobs.connectLambda;
+} catch (e) { /* netlify-blobs unavailable */ }
+
+// Track whether we've initialised Blobs context for this Lambda execution
+let blobsInitialised = false;
+function ensureBlobsContext(event) {
+  if (blobsInitialised) return true;
+  if (!getStoreFn) return false;
+  if (connectLambdaFn) {
+    try {
+      connectLambdaFn(event);
+      blobsInitialised = true;
+      return true;
+    } catch (e) {
+      // fall through to manual config
+    }
+  }
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
+  if (siteID && token) {
+    blobsInitialised = true;
+    return true; // we'll pass siteID/token at getStore call time
+  }
+  return false;
+}
+
+function getBlobStore() {
+  if (!getStoreFn) return null;
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
+  if (siteID && token) {
+    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+  }
+  return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+}
 
 // Cache KB across warm invocations
 let cachedKB = null;
@@ -101,9 +139,9 @@ async function loadKnowledgeBase() {
     }
 
     // === 3. Files from Netlify Blobs (uploaded via admin UI, the canonical store) ===
-    if (getStoreFn) {
+    if (getStoreFn && blobsInitialised) {
       try {
-        const store = getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+        const store = getBlobStore();
         const indexRaw = await store.get('__index', { type: 'json' });
         const index = Array.isArray(indexRaw) ? indexRaw : [];
         let usedTokens = estimateTokens(combined);
@@ -417,6 +455,10 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured' })
       };
     }
+
+    // Initialize Netlify Blobs context for this Lambda execution (must happen
+    // before any KB load that touches Blobs). Safe no-op if Blobs unavailable.
+    ensureBlobsContext(event);
 
     const body = JSON.parse(event.body || '{}');
     const message = (body.message || '').toString().slice(0, 4000);

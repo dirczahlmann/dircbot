@@ -8,7 +8,7 @@
 //
 // All require x-admin-pass header matching ADMIN_API_PASS env var.
 
-const { getStore } = require('@netlify/blobs');
+const { getStore, connectLambda } = require('@netlify/blobs');
 
 const KB_TOKEN_BUDGET = 80000;
 const KB_MAX_FILE_SIZE_MB = 10; // single file limit
@@ -16,6 +16,30 @@ const KB_MAX_FILES = 20;        // max files in active KB
 
 function estimateTokens(text) {
   return Math.ceil((text || '').length / 4);
+}
+
+// Initialize Blobs for the Lambda-compatibility mode (exports.handler style).
+// Netlify auto-injects context for ESM functions but NOT for Lambda-style ones,
+// so we must call connectLambda(event) or pass siteID/token manually.
+function initBlobs(event) {
+  // Strategy 1: connectLambda — works on production when Netlify injects event.blobs
+  if (typeof connectLambda === 'function') {
+    try {
+      connectLambda(event);
+      return getStore({ name: 'dircbot-kb', consistency: 'strong' });
+    } catch (e) {
+      // Fall through to strategy 2
+      console.warn('connectLambda failed, falling back to manual config:', e.message);
+    }
+  }
+  // Strategy 2: manual siteID + token from env vars (user must set these)
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
+  if (siteID && token) {
+    return getStore({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+  }
+  // Strategy 3: try default (works if context was auto-injected somehow)
+  return getStore({ name: 'dircbot-kb', consistency: 'strong' });
 }
 
 function corsHeaders() {
@@ -230,7 +254,7 @@ exports.handler = async (event) => {
   const action = (event.queryStringParameters || {}).action;
 
   try {
-    const store = getStore({ name: 'dircbot-kb', consistency: 'strong' });
+    const store = initBlobs(event);
 
     if (action === 'list' || !action) {
       const data = await listFiles(store);

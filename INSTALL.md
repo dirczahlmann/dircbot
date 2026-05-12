@@ -1,26 +1,58 @@
-# DircBot v8.16 — Bugfix: KB-Manager prompted Admin-Pass jetzt selbst
+# DircBot v8.17 — Netlify Blobs Lambda-Compat Fix
 
-## 🐛 Was gefixt wurde
+## 🐛 Was kaputt war
 
-In v8.15 musstest du **erst auf "Bewerbungen laden" klicken** damit der Admin-Pass gesetzt wurde — sonst zeigte der KB-Upload "Admin-Pass fehlt. Erst Submissions laden."
+`MissingBlobsEnvironmentError: The environment has not been configured to use Netlify Blobs`
 
-Außerdem inkonsistent: Submissions speicherten den Pass in `sessionStorage`, KB las aus `localStorage` → klappte auch dann nicht zuverlässig.
+**Root cause:** Unsere Functions nutzen den **Lambda-Compatibility-Mode** (`exports.handler = async (event) => {...}`). In diesem Mode injiziert Netlify den Blobs-Context **NICHT automatisch** — wie es bei ESM-Functions (`export default`) der Fall wäre.
+
+Bekanntes Netlify-Behavior: https://github.com/netlify/blobs/issues/175
 
 ## ✅ Was jetzt funktioniert
 
-- **Zentrale `getAdminApiPass()` Helper-Funktion**: Promptet bei Bedarf, speichert in sessionStorage (vereinheitlicht mit Submissions)
-- **Auto-Prompt beim ersten Bedarf**: Sobald du eine Datei droppst oder die Seite öffnest, kommt der Pass-Dialog (falls noch nicht eingegeben)
-- **401-Handling**: Wenn falsches Passwort → Auto-Clear + verständliche Fehlermeldung mit "Nochmal versuchen"-Link
-- **Konsistenz**: Submissions, KB-Stats, KB-Upload, KB-Delete, KB-Toggle, KB-Preview — alle nutzen jetzt denselben Helper
+Drei-fache Fallback-Strategie in allen drei Blob-Funktionen (chat.js, kb-stats.js, kb-manage.js):
+
+**Strategy 1: `connectLambda(event)`**
+Offizielle Netlify-Methode für Lambda-Mode. Wird beim Handler-Start mit dem event aufgerufen und initialisiert den Blobs-Context.
+
+**Strategy 2: Manuelle Config über Env-Vars**
+Falls Strategy 1 fehlschlägt, nutzen wir explizite `siteID + token` aus Env-Vars:
+- `NETLIFY_SITE_ID` (oder `SITE_ID`)
+- `NETLIFY_BLOBS_TOKEN` (oder `NETLIFY_AUTH_TOKEN`)
+
+**Strategy 3: Default Auto-Discovery**
+Fallback auf default `getStore()` falls Context-Injection nach Deploy doch funktioniert.
 
 ## 🚀 Upload + Test
 
-1. ZIP nach GitHub hoch
-2. Hard-Refresh im Admin
-3. Admin öffnen → KB-Manager sollte **direkt** den API-Pass-Prompt zeigen
-4. Eingeben → Stats laden + Dateien können hochgeladen werden
+1. ZIP nach GitHub (42 Files, keine neuen)
+2. **Wichtig**: in Netlify Dashboard sicherstellen dass die Function neu deployed wird:
+   - **Deploys → Trigger deploy → Clear cache and deploy site**
+3. Hard-Refresh im Admin
+4. KB-Manager öffnen → PDF in Drop-Zone
 
-## 📁 Files v8.16 (42 total — keine neuen)
+### Falls Strategy 1 (connectLambda) klappt → fertig.
+
+### Falls weiter Fehler (Strategy 2 brauchen):
+
+In Netlify Dashboard → **Site configuration → Environment variables → Add a variable**:
+
+1. **NETLIFY_SITE_ID**
+   - Wert: Dein Site-ID, zu finden unter **Site configuration → General → Project information → Project ID**
+
+2. **NETLIFY_BLOBS_TOKEN** (Personal Access Token)
+   - Generieren unter: https://app.netlify.com/user/applications#personal-access-tokens
+   - Klick **"New access token"** → Description: `DircBot Blobs Access` → Generate
+   - Den Token kopieren (wird nur EINMAL gezeigt!) und als Env-Var setzen
+
+3. **Trigger Deploy → Clear cache and deploy**
+
+Nach Deploy sollte Upload funktionieren.
+
+## 📁 Files v8.17 (42 total)
 
 Modified:
-- `assets/admin.js` — `getAdminApiPass()` + `clearAdminApiPass()` Helper, alle KB-Functions auf sessionStorage umgestellt, 401-Handling in loadKbStats/upload/delete/toggle/preview
+- `netlify/functions/chat.js` — `ensureBlobsContext(event)` + `getBlobStore()` helpers
+- `netlify/functions/kb-stats.js` — `initBlobs(event)` helper
+- `netlify/functions/kb-manage.js` — `initBlobs(event)` helper
+

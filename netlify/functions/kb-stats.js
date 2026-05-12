@@ -6,10 +6,34 @@ const fs = require('fs');
 const path = require('path');
 
 let getStoreFn = null;
-try { getStoreFn = require('@netlify/blobs').getStore; } catch (e) { /* not available */ }
+let connectLambdaFn = null;
+try {
+  const blobs = require('@netlify/blobs');
+  getStoreFn = blobs.getStore;
+  connectLambdaFn = blobs.connectLambda;
+} catch (e) { /* not available */ }
 
 function estimateTokens(text) {
   return Math.ceil((text || '').length / 4);
+}
+
+// Initialize Blobs with Lambda-compat or manual fallback
+function initBlobs(event) {
+  if (!getStoreFn) return null;
+  if (connectLambdaFn) {
+    try {
+      connectLambdaFn(event);
+      return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+    } catch (e) { /* fall through */ }
+  }
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
+  if (siteID && token) {
+    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+  }
+  try {
+    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+  } catch (e) { return null; }
 }
 
 exports.handler = async (event) => {
@@ -78,7 +102,8 @@ exports.handler = async (event) => {
   // === Blob KB Files (managed via admin UI) ===
   if (getStoreFn) {
     try {
-      const store = getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+      const store = initBlobs(event);
+      if (!store) throw new Error('Blobs store could not be initialised');
       const indexRaw = await store.get('__index', { type: 'json' });
       const index = Array.isArray(indexRaw) ? indexRaw : [];
       for (const entry of index) {
