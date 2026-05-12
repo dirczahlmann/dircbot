@@ -16,6 +16,7 @@ const TOPICS = [
       de: 'Vertrieb & Closing',
       es: 'Ventas & Cierre'
     },
+    short: { en: 'Sales', de: 'Vertrieb', es: 'Ventas' },
     intro: {
       en: 'Sales is decision architecture. Pick a question — let\'s go.',
       de: 'Vertrieb ist Entscheidungs-Architektur. Wähl eine Frage — los geht\'s.',
@@ -53,6 +54,7 @@ const TOPICS = [
       de: 'Crypto & Blockchain',
       es: 'Crypto & Blockchain'
     },
+    short: { en: 'Crypto', de: 'Crypto', es: 'Crypto' },
     intro: {
       en: 'Crypto without the noise. Frameworks I actually use.',
       de: 'Crypto ohne den Lärm. Frameworks die ich wirklich nutze.',
@@ -90,6 +92,7 @@ const TOPICS = [
       de: 'Wealth & Family Office',
       es: 'Patrimonio & Family Office'
     },
+    short: { en: 'Wealth', de: 'Wealth', es: 'Wealth' },
     intro: {
       en: 'Wealth that lasts generations. Real strategies, not slogans.',
       de: 'Wealth der über Generationen hält. Echte Strategien, keine Slogans.',
@@ -127,6 +130,7 @@ const TOPICS = [
       de: 'Network Marketing',
       es: 'Network Marketing'
     },
+    short: { en: 'Network', de: 'Network', es: 'Network' },
     intro: {
       en: 'Network marketing done right. Sustainable, not pyramid-shaped.',
       de: 'Network Marketing richtig gemacht. Nachhaltig, kein Schneeballsystem.',
@@ -164,6 +168,7 @@ const TOPICS = [
       de: 'Tokenisierung',
       es: 'Tokenización'
     },
+    short: { en: 'Tokens', de: 'Tokens', es: 'Tokens' },
     intro: {
       en: 'Tokenization is eating finance. Here\'s where to position yourself.',
       de: 'Tokenisierung frisst Finance. Hier ist wie du dich positionierst.',
@@ -201,6 +206,7 @@ const TOPICS = [
       de: 'Mindset & Leadership',
       es: 'Mentalidad & Liderazgo'
     },
+    short: { en: 'Mindset', de: 'Mindset', es: 'Mindset' },
     intro: {
       en: 'Your mindset is the operating system. Let\'s upgrade it.',
       de: 'Dein Mindset ist das Betriebssystem. Lass uns upgraden.',
@@ -238,6 +244,7 @@ const TOPICS = [
       de: 'Business Build & Scale',
       es: 'Construir & Escalar'
     },
+    short: { en: 'Scale', de: 'Scaling', es: 'Escala' },
     intro: {
       en: 'How I built 8 unicorns. The exact stages and triggers.',
       de: 'Wie ich 8 Unicorns gebaut habe. Die exakten Stufen und Trigger.',
@@ -275,6 +282,7 @@ const TOPICS = [
       de: 'Persönliches Coaching',
       es: 'Coaching Personal'
     },
+    short: { en: 'Coaching', de: 'Coaching', es: 'Coaching' },
     intro: {
       en: 'Where are you stuck? Let\'s find the exact next move.',
       de: 'Wo hängst du fest? Lass uns den genauen nächsten Move finden.',
@@ -312,6 +320,7 @@ const TOPICS = [
       de: 'KI fürs Business',
       es: 'IA para Negocios'
     },
+    short: { en: 'AI', de: 'KI', es: 'IA' },
     intro: {
       en: 'AI is a layer you build on, not a tool you use. Let\'s talk leverage.',
       de: 'KI ist eine Schicht auf der du baust, kein Tool das du nutzt. Lass uns über Hebel reden.',
@@ -349,6 +358,7 @@ const TOPICS = [
       de: 'Agentic AI',
       es: 'IA Agéntica'
     },
+    short: { en: 'Agents', de: 'Agents', es: 'Agentes' },
     intro: {
       en: 'ChatGPT answers. Agents act. The biggest opportunity since the internet.',
       de: 'ChatGPT antwortet. Agents handeln. Die größte Chance seit dem Internet.',

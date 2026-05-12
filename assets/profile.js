@@ -343,6 +343,7 @@ function createNewChat(firstMessage, topicId) {
     id: 'chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
     title: firstMessage ? truncateTitle(firstMessage) : (currentLang === 'de' ? 'Neuer Chat' : currentLang === 'es' ? 'Chat Nuevo' : 'New Chat'),
     topic: topicId || null,
+    projectId: currentProjectId || null,  // auto-assign to current project
     messages: [],
     created: Date.now(),
     updated: Date.now()
@@ -426,8 +427,16 @@ function renderChatHistory() {
   if (!container) return;
   container.innerHTML = '';
 
-  if (allChats.length === 0) {
-    container.innerHTML = `<div class="chat-history-empty">${{en:'No chats yet',de:'Noch keine Chats',es:'Sin chats aún'}[currentLang]}</div>`;
+  // Filter by current project if active
+  const filtered = currentProjectId
+    ? allChats.filter(c => c.projectId === currentProjectId)
+    : allChats;
+
+  if (filtered.length === 0) {
+    const msg = currentProjectId
+      ? { en: 'No chats in this project yet', de: 'Noch keine Chats in diesem Projekt', es: 'Sin chats en este proyecto aún' }[currentLang]
+      : { en: 'No chats yet', de: 'Noch keine Chats', es: 'Sin chats aún' }[currentLang];
+    container.innerHTML = `<div class="chat-history-empty">${msg}</div>`;
     return;
   }
 
@@ -436,7 +445,7 @@ function renderChatHistory() {
   const oneDay = 24 * 60 * 60 * 1000;
   const sevenDays = 7 * oneDay;
   const groups = { today: [], week: [], older: [] };
-  allChats.forEach(c => {
+  filtered.forEach(c => {
     const age = now - (c.updated || c.created);
     if (age < oneDay) groups.today.push(c);
     else if (age < sevenDays) groups.week.push(c);
@@ -675,4 +684,292 @@ function clearAllMemories() {
     saveProfile(userProfile);
     renderMemoriesList();
   }
+}
+
+
+// ============== PROJECTS (v8.10) ==============
+// Projects group chats by context. Each chat optionally belongs to a project.
+// When a project is active, new chats are auto-assigned to it.
+// System prompt includes project context so bot answers in-context.
+
+let allProjects = [];
+let currentProjectId = null;
+
+const PROJECT_COLORS = [
+  '#e8420a', // orange
+  '#c9a84c', // gold
+  '#8b5cf6', // purple
+  '#3a78b8', // blue
+  '#10b981', // green
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+  '#f59e0b'  // amber
+];
+
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem('dircbot-projects');
+    if (raw) {
+      allProjects = JSON.parse(raw);
+    }
+    const cur = localStorage.getItem('dircbot-current-project');
+    if (cur) {
+      // verify it still exists
+      if (allProjects.find(p => p.id === cur)) {
+        currentProjectId = cur;
+      }
+    }
+  } catch (e) { console.warn('Projects load:', e); allProjects = []; }
+  return allProjects;
+}
+
+function saveProjects() {
+  try {
+    localStorage.setItem('dircbot-projects', JSON.stringify(allProjects));
+    if (currentProjectId) {
+      localStorage.setItem('dircbot-current-project', currentProjectId);
+    } else {
+      localStorage.removeItem('dircbot-current-project');
+    }
+  } catch (e) { console.warn('Projects save:', e); }
+}
+
+function setCurrentProject(projectId) {
+  currentProjectId = projectId;
+  saveProjects();
+  renderProjects();
+  renderProjectContext();
+  renderChatHistory(); // refresh chat list (filtered by project)
+}
+
+function createProject(title, goal, color) {
+  const project = {
+    id: 'proj-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    title: title.trim().slice(0, 80),
+    goal: (goal || '').trim().slice(0, 400),
+    color: color || PROJECT_COLORS[allProjects.length % PROJECT_COLORS.length],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  allProjects.push(project);
+  saveProjects();
+  return project;
+}
+
+function updateProject(projectId, updates) {
+  const p = allProjects.find(x => x.id === projectId);
+  if (!p) return;
+  if (updates.title !== undefined) p.title = updates.title.trim().slice(0, 80);
+  if (updates.goal !== undefined) p.goal = updates.goal.trim().slice(0, 400);
+  if (updates.color !== undefined) p.color = updates.color;
+  p.updatedAt = Date.now();
+  saveProjects();
+}
+
+function deleteProject(projectId) {
+  // Remove project; orphan chats stay (just lose projectId reference)
+  allProjects = allProjects.filter(p => p.id !== projectId);
+  if (allChats && Array.isArray(allChats)) {
+    allChats.forEach(c => { if (c.projectId === projectId) delete c.projectId; });
+    if (typeof saveChats === 'function') saveChats();
+  }
+  if (currentProjectId === projectId) currentProjectId = null;
+  saveProjects();
+}
+
+function getCurrentProject() {
+  if (!currentProjectId) return null;
+  return allProjects.find(p => p.id === currentProjectId);
+}
+
+function renderProjects() {
+  const container = document.getElementById('sidebarProjects');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Render "All Chats" pseudo-project at top
+  const allBtn = document.createElement('button');
+  allBtn.className = 'sidebar-project' + (currentProjectId === null ? ' active' : '');
+  allBtn.style.setProperty('--proj-color', 'rgba(240,237,232,0.5)');
+  allBtn.innerHTML = `
+    <span class="sidebar-project-dot" style="background:rgba(240,237,232,0.5);box-shadow:none;"></span>
+    <span class="sidebar-project-name">${{en:'All Chats',de:'Alle Chats',es:'Todos los Chats'}[currentLang]}</span>
+  `;
+  allBtn.onclick = () => setCurrentProject(null);
+  container.appendChild(allBtn);
+
+  if (allProjects.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'sidebar-project-empty';
+    empty.textContent = {
+      en: 'No projects yet. Click + to create one.',
+      de: 'Noch keine Projekte. Klick + um eines zu erstellen.',
+      es: 'Sin proyectos aún. Click + para crear uno.'
+    }[currentLang];
+    container.appendChild(empty);
+    return;
+  }
+
+  allProjects.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-project' + (p.id === currentProjectId ? ' active' : '');
+    btn.style.setProperty('--proj-color', p.color);
+    btn.innerHTML = `
+      <span class="sidebar-project-dot"></span>
+      <span class="sidebar-project-name">${escapeHtml(p.title)}</span>
+      <button class="sidebar-project-edit" onclick="openProjectModal('${p.id}', event)" title="Edit">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    `;
+    btn.onclick = (e) => {
+      if (e.target.closest('.sidebar-project-edit')) return;
+      setCurrentProject(p.id);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function renderProjectContext() {
+  // Show/hide the project context bar in chat header area
+  let bar = document.getElementById('projectContextBar');
+  const proj = getCurrentProject();
+  if (!proj) {
+    if (bar) bar.classList.remove('visible');
+    return;
+  }
+  if (!bar) {
+    // inject the bar after chat-header
+    const chatHeader = document.querySelector('.chat-header');
+    if (!chatHeader) return;
+    bar = document.createElement('div');
+    bar.className = 'project-context-bar';
+    bar.id = 'projectContextBar';
+    chatHeader.insertAdjacentElement('afterend', bar);
+  }
+  bar.style.setProperty('--ctx-color', proj.color);
+  bar.innerHTML = `
+    <span class="project-context-icon"></span>
+    <span class="project-context-label">${{en:'In project',de:'Im Projekt',es:'En proyecto'}[currentLang]}</span>
+    <span class="project-context-name">${escapeHtml(proj.title)}</span>
+    <button class="project-context-clear" onclick="setCurrentProject(null)">
+      ${{en:'Exit',de:'Verlassen',es:'Salir'}[currentLang]}
+    </button>
+  `;
+  bar.classList.add('visible');
+}
+
+// Get project system prompt addendum (called from chat fn)
+function getProjectPrompt() {
+  const proj = getCurrentProject();
+  if (!proj) return '';
+  let p = '\n\nCURRENT PROJECT CONTEXT:';
+  p += `\n- Project: ${proj.title}`;
+  if (proj.goal) p += `\n- Project goal: ${proj.goal}`;
+  p += '\n\nThe user is working on this specific project. Tie your advice to advancing THIS project. Don\'t give generic answers when project context exists.';
+  return p;
+}
+
+// ============== PROJECT MODAL ==============
+function openProjectModal(projectId, event) {
+  if (event) event.stopPropagation();
+  const isEdit = !!projectId;
+  const proj = isEdit ? allProjects.find(p => p.id === projectId) : null;
+
+  let modal = document.getElementById('projectModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'projectModal';
+    modal.className = 'project-modal';
+    document.body.appendChild(modal);
+  }
+
+  const labels = {
+    en: { title: isEdit ? 'Edit Project' : 'New Project', sub: 'Group chats by what you\'re working on. Bot will keep your project context in mind.', name: 'Project Name', goal: 'Project Goal (optional)', goalHint: 'What are you trying to achieve in this project?', color: 'Color', cancel: 'Cancel', save: 'Save', delete: 'Delete', namePlaceholder: 'e.g. Side-Hustle Crypto Consulting' },
+    de: { title: isEdit ? 'Projekt bearbeiten' : 'Neues Projekt', sub: 'Gruppiere Chats nach Vorhaben. Der Bot behält den Projekt-Kontext im Kopf.', name: 'Projekt-Name', goal: 'Projekt-Ziel (optional)', goalHint: 'Was willst du in diesem Projekt erreichen?', color: 'Farbe', cancel: 'Abbrechen', save: 'Speichern', delete: 'Löschen', namePlaceholder: 'z.B. Side-Hustle Crypto-Beratung' },
+    es: { title: isEdit ? 'Editar Proyecto' : 'Nuevo Proyecto', sub: 'Agrupa chats por lo que estás trabajando. El bot recordará el contexto.', name: 'Nombre del Proyecto', goal: 'Meta del Proyecto (opcional)', goalHint: '¿Qué quieres lograr en este proyecto?', color: 'Color', cancel: 'Cancelar', save: 'Guardar', delete: 'Eliminar', namePlaceholder: 'ej. Consultoría Crypto' }
+  }[currentLang];
+
+  const swatches = PROJECT_COLORS.map(c => {
+    const initialColor = proj ? proj.color : PROJECT_COLORS[0];
+    const sel = c === initialColor ? ' selected' : '';
+    return `<button class="project-color-swatch${sel}" data-color="${c}" style="background:${c};" onclick="selectProjectColor('${c}')"></button>`;
+  }).join('');
+
+  modal.innerHTML = `
+    <div class="project-modal-content">
+      <button class="project-modal-close" onclick="closeProjectModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h3>${labels.title}</h3>
+      <p class="project-modal-sub">${labels.sub}</p>
+      <div class="project-form-group">
+        <label>${labels.name}</label>
+        <input type="text" id="projectModalName" maxlength="80" placeholder="${labels.namePlaceholder}" value="${proj ? escapeHtml(proj.title).replace(/"/g,'&quot;') : ''}">
+      </div>
+      <div class="project-form-group">
+        <label>${labels.goal}</label>
+        <textarea id="projectModalGoal" rows="2" maxlength="400" placeholder="${labels.goalHint}">${proj ? escapeHtml(proj.goal || '') : ''}</textarea>
+      </div>
+      <div class="project-form-group">
+        <label>${labels.color}</label>
+        <div class="project-color-picker" id="projectColorPicker">${swatches}</div>
+      </div>
+      <div class="project-modal-footer">
+        ${isEdit ? `<button class="project-modal-btn project-modal-btn-delete" onclick="confirmDeleteProject('${projectId}')">${labels.delete}</button>` : ''}
+        <button class="project-modal-btn project-modal-btn-cancel" onclick="closeProjectModal()">${labels.cancel}</button>
+        <button class="project-modal-btn project-modal-btn-save" onclick="saveProjectModal('${projectId || ''}')">${labels.save}</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('visible');
+  setTimeout(() => document.getElementById('projectModalName')?.focus(), 50);
+}
+
+function closeProjectModal() {
+  const modal = document.getElementById('projectModal');
+  if (modal) modal.classList.remove('visible');
+}
+
+function selectProjectColor(color) {
+  document.querySelectorAll('.project-color-swatch').forEach(el => {
+    el.classList.toggle('selected', el.dataset.color === color);
+  });
+}
+
+function saveProjectModal(projectId) {
+  const name = document.getElementById('projectModalName')?.value.trim();
+  const goal = document.getElementById('projectModalGoal')?.value.trim();
+  const colorEl = document.querySelector('.project-color-swatch.selected');
+  const color = colorEl ? colorEl.dataset.color : PROJECT_COLORS[0];
+  if (!name) {
+    document.getElementById('projectModalName')?.focus();
+    return;
+  }
+  if (projectId) {
+    updateProject(projectId, { title: name, goal: goal, color: color });
+  } else {
+    const newProj = createProject(name, goal, color);
+    currentProjectId = newProj.id;
+    saveProjects();
+  }
+  closeProjectModal();
+  renderProjects();
+  renderProjectContext();
+  renderChatHistory();
+}
+
+function confirmDeleteProject(projectId) {
+  const proj = allProjects.find(p => p.id === projectId);
+  if (!proj) return;
+  const msg = {
+    en: `Delete project "${proj.title}"? Chats inside stay but lose project link.`,
+    de: `Projekt "${proj.title}" löschen? Chats darin bleiben, verlieren aber die Projekt-Zuordnung.`,
+    es: `¿Eliminar proyecto "${proj.title}"? Los chats permanecerán pero perderán el enlace.`
+  }[currentLang];
+  if (!confirm(msg)) return;
+  deleteProject(projectId);
+  closeProjectModal();
+  renderProjects();
+  renderProjectContext();
+  renderChatHistory();
 }

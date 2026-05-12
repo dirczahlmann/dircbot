@@ -23,12 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
   applyMode();
   setupVoiceRecognition();
   updateCounters();
+  // Load projects (independent of tester mode for now)
+  if (typeof loadProjects === 'function') loadProjects();
 
   // If already in tester mode on load, render sidebar components
   if (testerMode) {
     setTimeout(() => {
       if (typeof renderProfileCard === 'function') renderProfileCard();
       if (typeof renderDailyFocus === 'function') renderDailyFocus();
+      if (typeof renderProjects === 'function') renderProjects();
+      if (typeof renderProjectContext === 'function') renderProjectContext();
       if (typeof renderChatHistory === 'function') renderChatHistory();
     }, 100);
   }
@@ -92,9 +96,11 @@ function enterTesterMode(code) {
   renderTopics();
   closeTesterWall();
 
-  // After entering tester mode, render profile + history + daily focus
+  // After entering tester mode, render profile + history + daily focus + projects
   if (typeof renderProfileCard === 'function') renderProfileCard();
   if (typeof renderDailyFocus === 'function') renderDailyFocus();
+  if (typeof renderProjects === 'function') renderProjects();
+  if (typeof renderProjectContext === 'function') renderProjectContext();
   if (typeof renderChatHistory === 'function') renderChatHistory();
 
   // If no profile yet, prompt to create one
@@ -154,27 +160,29 @@ function openTesterLimitWall() {
 }
 
 function renderTopics() {
-  const container = document.getElementById('sidebarTopics');
-  if (container) {
-    container.innerHTML = '';
-    TOPICS.forEach(topic => {
-      const btn = document.createElement('button');
-      btn.className = 'topic-item';
-      btn.dataset.topicId = topic.id;
-      if (currentTopic && currentTopic.id === topic.id) btn.classList.add('active');
-      btn.style.setProperty('--topic-color', topic.color);
-      btn.innerHTML = '<span class="topic-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg></span><span class="topic-name">' + topic.name[currentLang] + '</span>';
-      btn.onclick = () => selectTopic(topic.id);
-      container.appendChild(btn);
-    });
-  }
+  // Topics now render in the top topic-bar (no longer in sidebar)
+  const bar = document.getElementById('topicBar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  TOPICS.forEach(topic => {
+    const chip = document.createElement('button');
+    chip.className = 'topic-pill';
+    chip.dataset.topicId = topic.id;
+    if (currentTopic && currentTopic.id === topic.id) chip.classList.add('active');
+    chip.style.setProperty('--pill-color', topic.color);
+    const label = (topic.short && topic.short[currentLang]) || topic.name[currentLang];
+    chip.title = topic.name[currentLang]; // full name on hover
+    chip.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg><span>' + label + '</span>';
+    chip.onclick = () => selectTopic(topic.id);
+    bar.appendChild(chip);
+  });
 }
 
 function selectTopic(topicId) {
   const topic = TOPICS.find(t => t.id === topicId);
   if (!topic) return;
   currentTopic = topic;
-  document.querySelectorAll('.topic-item').forEach(el => {
+  document.querySelectorAll('.topic-pill').forEach(el => {
     el.classList.toggle('active', el.dataset.topicId === topicId);
   });
   const header = document.getElementById('topicHeader');
@@ -198,7 +206,7 @@ function selectTopic(topicId) {
 
 function clearTopic() {
   currentTopic = null;
-  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.topic-pill').forEach(el => el.classList.remove('active'));
   const header = document.getElementById('topicHeader');
   if (header) header.classList.remove('visible');
   const sug = document.getElementById('topicSuggestions');
@@ -240,7 +248,7 @@ function newChat() {
         </h2>
         <p class="welcome-sub">
           <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic above or ask me anything.</span>
-          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema oben oder frag mich alles.</span>
+          <span data-lang="de">30 Jahre Vertriebs-Expertise. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema oben oder frag mich alles.</span>
           <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema arriba o pregúntame lo que sea.</span>
         </p>
         <div class="welcome-suggestions">
@@ -362,6 +370,11 @@ async function callBot(text, fileData) {
     if (typeof getMemoriesPrompt === 'function') {
       const memPrompt = getMemoriesPrompt();
       if (memPrompt) payload.userMemories = memPrompt;
+    }
+    // Inject current project context (if user is working in a project)
+    if (typeof getProjectPrompt === 'function') {
+      const projPrompt = getProjectPrompt();
+      if (projPrompt) payload.projectContext = projPrompt;
     }
     if (fileData) {
       payload.fileData = fileData.data;

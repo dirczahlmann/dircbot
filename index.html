@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DircBot — Your AI Coach</title>
-<meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebsmeisterschaft + 8 Unicorns.">
+<meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebs-Expertise + 8 Unicorns.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=8">
 <link rel="stylesheet" href="/assets/legal.css?v=8">
@@ -38,7 +38,7 @@
     </button>
   </div>
 
-  <!-- FIXED TOP: Daily + Profile + Topics (never scroll out of view) -->
+  <!-- FIXED TOP: Daily + Profile + Projects (never scroll out of view) -->
   <div class="sidebar-fixed-top">
     <!-- Daily Focus Widget -->
     <div class="sidebar-daily-focus" id="dailyFocusWidget" style="display:none;"></div>
@@ -46,12 +46,17 @@
     <!-- Profile Card -->
     <div class="sidebar-profile" id="sidebarProfileCard"></div>
 
-    <div class="sidebar-section-divider">
-      <span data-lang="en">Topics</span>
-      <span data-lang="de">Themen</span>
-      <span data-lang="es">Temas</span>
+    <div class="sidebar-section-divider sidebar-section-divider-row">
+      <span>
+        <span data-lang="en">Projects</span>
+        <span data-lang="de">Projekte</span>
+        <span data-lang="es">Proyectos</span>
+      </span>
+      <button class="sidebar-section-add" onclick="openProjectModal()" title="New Project">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
     </div>
-    <nav class="sidebar-topics" id="sidebarTopics"></nav>
+    <div class="sidebar-projects" id="sidebarProjects"></div>
   </div>
 
   <!-- SCROLLABLE BOTTOM: Chat history (grows over time, scrolls within) -->
@@ -83,7 +88,7 @@
         </h1>
         <p class="hero-sub">
           <span data-lang="en">3 free messages. Real DircBot answers. Powered by Dirc's 30 years of mastery in sales, crypto & wealth building.</span>
-          <span data-lang="de">3 Nachrichten gratis. Echte DircBot-Antworten. Powered by Dircs 30 Jahren Meisterschaft in Vertrieb, Crypto & Wealth.</span>
+          <span data-lang="de">3 Nachrichten gratis. Echte DircBot-Antworten. Powered by Dircs 30 Jahren Praxis in Vertrieb, Crypto & Wealth.</span>
           <span data-lang="es">3 mensajes gratis. Respuestas reales de DircBot. Impulsado por los 30 años de maestría de Dirc en ventas, crypto y construcción de riqueza.</span>
         </p>
       </div>
@@ -107,7 +112,7 @@
 
   <div class="chat-wrapper">
     <div class="chat-header">
-      <div class="chat-avatar">D</div>
+      <div class="chat-avatar"><img src="/assets/dircbot_icon.png?v=12" alt="DircBot" /></div>
       <div style="flex:1;">
         <div class="chat-title">DircBot</div>
         <div class="chat-status">
@@ -127,6 +132,9 @@
       <div class="msg-progress-fill" id="msgProgressFill"></div>
     </div>
 
+    <!-- Top Topic Bar: color-coded, wraps to fit screen -->
+    <div class="topic-bar" id="topicBar"></div>
+
     <div class="chat-body has-welcome" id="chatBody">
       <div class="welcome-state welcome-state-v2" id="welcomeState">
         <img src="/assets/dircbot_logo.png?v=11" alt="DircBot — Your AI. Your Edge." class="welcome-logo">
@@ -137,7 +145,7 @@
         </h2>
         <p class="welcome-sub">
           <span data-lang="en">30 years of sales mastery. 15 years in crypto. 8 unicorns built. Pick a topic above or ask me anything.</span>
-          <span data-lang="de">30 Jahre Vertriebsmeisterschaft. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema oben oder frag mich alles.</span>
+          <span data-lang="de">30 Jahre Vertriebs-Expertise. 15 Jahre Crypto. 8 Unicorns aufgebaut. Wähl ein Thema oben oder frag mich alles.</span>
           <span data-lang="es">30 años de maestría en ventas. 15 años en crypto. 8 unicornios construidos. Elige un tema arriba o pregúntame lo que sea.</span>
         </p>
         <div class="welcome-suggestions">

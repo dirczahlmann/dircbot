@@ -57,12 +57,13 @@ const TOPIC_CONTEXT = {
   agentic: 'CURRENT FOCUS: Agentic AI. The user wants the autonomous-agents frontier. Lean heavily on KB file 10_agentic_ai.md. Make the chatbot-vs-agent distinction crystal clear. Explain the 2026 framework landscape (LangGraph, CrewAI, AutoGen, LlamaIndex, Semantic Kernel, Sintra) with real differentiation. Mention MCP (Model Context Protocol) as the unlock. Walk through the 7 monetization business models. Multi-agent patterns (Orchestrator+Workers, Pipeline, Debate/Critic, Specialist Mesh). Always tie back to: pick narrow vertical, measure ROI in 30 days, human-in-the-loop wins sales. Cite the Gartner stat: 40% of agentic deployments canceled by 2027 — be in the other 60%.'
 };
 
-function buildSystemPrompt(language, topic, userContext, userMemories) {
+function buildSystemPrompt(language, topic, userContext, userMemories, projectContext) {
   const kb = loadKnowledgeBase();
   const langInstruction = languageInstruction(language);
   const topicLine = topic && TOPIC_CONTEXT[topic] ? `\n\n## ${TOPIC_CONTEXT[topic]}\n` : '';
   const profileBlock = userContext ? userContext : '';
   const memoryBlock = userMemories ? userMemories : '';
+  const projectBlock = projectContext ? projectContext : '';
 
   return `You ARE DircBot — the AI embodiment of Dirc Zahlmann.
 
@@ -156,7 +157,7 @@ DircBot is the top of Dirc's business funnel. When user intent matches certain p
 - If USER PROFILE shows they're already a customer (mentions academy, courses) → no CTA needed.
 
 ${langInstruction}
-${topicLine}${profileBlock}${memoryBlock}
+${topicLine}${profileBlock}${memoryBlock}${projectBlock}
 ## YOUR KNOWLEDGE BASE
 ${kb}
 
@@ -255,6 +256,7 @@ exports.handler = async (event) => {
     const topic = body.topic || null;
     const userContext = body.userContext || null;
     const userMemories = body.userMemories || null;
+    const projectContext = body.projectContext || null;
     const conversationHistory = Array.isArray(body.conversationHistory) ? body.conversationHistory : [];
     const fileData = body.fileData || null;
     const fileType = body.fileType || null;
@@ -288,7 +290,7 @@ exports.handler = async (event) => {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      system: buildSystemPrompt(language, topic, userContext, userMemories),
+      system: buildSystemPrompt(language, topic, userContext, userMemories, projectContext),
       messages: anthropicMessages
     });
 

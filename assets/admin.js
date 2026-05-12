@@ -155,7 +155,7 @@ Antworte einfach auf diese Email oder schreib direkt auf Telegram.
 Let's build the future of AI coaching together.
 
 🔥 Dirc Zahlmann
-DircBot · 8 KI-Modelle · 30 Jahre Meisterschaft
+DircBot · 8 KI-Modelle · 30 Jahre Praxis-Wissen
 
 —
 Dirc Zahlmann · Zahlmann Consulting International GmbH
