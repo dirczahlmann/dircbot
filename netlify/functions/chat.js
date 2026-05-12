@@ -45,9 +45,9 @@ function getBlobStore() {
   const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
   const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
   if (siteID && token) {
-    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+    return getStoreFn({ name: 'dircbot-kb', siteID, token });
   }
-  return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+  return getStoreFn({ name: 'dircbot-kb' });
 }
 
 // Cache KB across warm invocations

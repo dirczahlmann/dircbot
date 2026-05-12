@@ -23,16 +23,16 @@ function initBlobs(event) {
   if (connectLambdaFn) {
     try {
       connectLambdaFn(event);
-      return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+      return getStoreFn({ name: 'dircbot-kb' });
     } catch (e) { /* fall through */ }
   }
   const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
   const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
   if (siteID && token) {
-    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+    return getStoreFn({ name: 'dircbot-kb', siteID, token });
   }
   try {
-    return getStoreFn({ name: 'dircbot-kb', consistency: 'strong' });
+    return getStoreFn({ name: 'dircbot-kb' });
   } catch (e) { return null; }
 }
 

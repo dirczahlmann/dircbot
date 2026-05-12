@@ -26,7 +26,7 @@ function initBlobs(event) {
   if (typeof connectLambda === 'function') {
     try {
       connectLambda(event);
-      return getStore({ name: 'dircbot-kb', consistency: 'strong' });
+      return getStore({ name: 'dircbot-kb' });
     } catch (e) {
       // Fall through to strategy 2
       console.warn('connectLambda failed, falling back to manual config:', e.message);
@@ -36,10 +36,10 @@ function initBlobs(event) {
   const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
   const token = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
   if (siteID && token) {
-    return getStore({ name: 'dircbot-kb', consistency: 'strong', siteID, token });
+    return getStore({ name: 'dircbot-kb', siteID, token });
   }
   // Strategy 3: try default (works if context was auto-injected somehow)
-  return getStore({ name: 'dircbot-kb', consistency: 'strong' });
+  return getStore({ name: 'dircbot-kb' });
 }
 
 function corsHeaders() {
