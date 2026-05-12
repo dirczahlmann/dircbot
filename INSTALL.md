@@ -1,70 +1,47 @@
-# DircBot v8.8 — CI-Integration + Topic-Chips-Bar
+# DircBot v8.9 — Cleanup: keine doppelten Topics + cleaneres Signup-Hero
 
-## 🎯 Was neu ist in v8.8
+## 🎯 Was neu ist in v8.9
 
-### 1. 🎨 DIRCBOT-CI komplett integriert
-Beide CI-Assets sind jetzt eingebaut:
-- **DIRCBOT-Logo** (metallisches D + Schriftzug + "YOUR AI. YOUR EDGE." Tagline) ersetzt den simplen "D"-Kreis im Welcome-State
-- **Cyber-Suit-Dirc** wird als Hero-Image auf der Tester-Signup-Seite (`tester-signup.html`) verwendet — neues 2-Spalten-Layout mit Content links, Image rechts
+### 1. ❌ Horizontale Topic-Chips-Bar oben ENTFERNT
+Vorher (v8.8): Topics doppelt — sidebar UND horizontale Chips oben. Auf großen Screens überfluteten die Chips den Header.
 
-Files:
-- `assets/dircbot_logo.png` (139KB)
-- `assets/dirc_avatar_suit.jpg` (139KB)
+Jetzt: Topics nur noch in der **Sidebar links** (die ist seit v8.7 sowieso fixed-top, verschwindet also nicht mehr beim Scrollen). Saubere, einheitliche UX.
 
-### 2. ⚡ Horizontal Topic-Chips-Bar oben (Equinat-Style)
-Topics sind jetzt IMMER sichtbar — auch wenn du tief in einem Chat bist und in der Sidebar gescrollt hast:
+### 2. ❌ DIRCBOT-Logo aus Signup-Hero ENTFERNT
+Vorher (v8.8): DIRCBOT-Logo als Header-Brand + Cyber-Suit-Dirc mit Logo auf der Brust = doppelt.
 
-```
-[Topic Chips: Vertrieb · Crypto · Wealth · Network · Tokenization · Mindset · ...]  ← horizontal scroll
-─────────────────────────────────────────────────────────────────────────
-[Chat-Inhalt]
-```
+Jetzt: Nur noch **Cyber-Suit-Dirc** im Hero (Logo ist eh auf der Brust). Cleaner, fokussierter, kein "zu viel".
 
-- Zwischen Progress-Bar und Chat-Body
-- Klick auf Chip → wählt Topic + scrollt zu Suggestions
-- Active-State synchronisiert mit Sidebar-Topics (beides hervorgehoben gleichzeitig)
-- Horizontal scrollbar auf kleineren Screens
-- Nur in Tester-Mode sichtbar (Free-Mode bleibt clean)
+### 3. ✨ Cyber-Suit-Dirc prominenter gemacht
+Da der Cyber-Suit jetzt das einzige Markenelement im Hero ist:
+- max-height: 560px → **640px** (größer)
+- Drop-Shadow intensiver (von 25/0.25 → 30/0.3)
+- Glow-Effekt im Hintergrund ausgeweitet (75% → 85% area, blur 40 → 50px)
+- Mehr visuelle Präsenz
 
-Sidebar-Topics bleiben zusätzlich erhalten — Topics sind jetzt von ZWEI Stellen aus erreichbar.
-
-### 3. ✨ Welcome-State Redesign
-- DIRCBOT-Logo (320px max-width) prominent zentriert mit Drop-Shadow-Glow
-- Subtext aktualisiert: "Wähl ein Thema **oben** oder frag mich alles" (verweist auf neue Chips-Bar statt Sidebar)
-- 4 Suggestion-Cards bleiben unverändert
-
-### 4. 🖼️ Tester-Signup Hero Redesign
-2-Spalten-Layout:
-- **Links:** DIRCBOT-Logo oben + alle bisherigen Inhalte (Label, h1, Subtext, Stats, CTA)
-- **Rechts:** Cyber-Suit-Dirc Image mit Drop-Shadow + radialem Orange-Glow im Hintergrund
-- Mobile: Image stackt nach oben, Content nach unten
+DIRCBOT-Logo bleibt im Chat-Welcome-State erhalten (dort funktioniert es als Brand-Statement gut, da kein Cyber-Suit konkurriert).
 
 ---
 
 ## 🚀 Upload + Test
 
-1. GitHub: 38 Files hochladen (2 neue Image-Assets dazugekommen)
-2. Commit: `v8.8: CI integration + topic chips bar + cyber-suit hero`
-3. Hard-Refresh (`Cmd+Shift+R`)
+1. GitHub: 38 Files
+2. Auto-Deploy + Hard-Refresh
 
 ### Test-Flow
-1. `dircbotDebug.reset()` → DIRC500 → erstes Bild: **DIRCBOT-Logo** im Welcome statt "D"-Kreis ✓
-2. Direkt über dem Chat-Body: **horizontale Topic-Chips** sichtbar ✓
-3. Klick auf einen Chip → wird active (farbiger Outline), Sidebar sync, Suggestions erscheinen
-4. Lange chatten → Chips bleiben **immer** sichtbar oben
-5. `tester-signup.html` öffnen → **Cyber-Suit-Dirc** rechts im Hero, Content links
+1. Chat-Page: **keine Chip-Leiste** mehr oben — Topics nur in Sidebar links ✓
+2. Sidebar bleibt fixed-top → Topics immer sichtbar ✓
+3. `tester-signup.html`: nur Cyber-Suit-Dirc rechts, KEIN Extra-Logo ✓
+4. Cyber-Suit-Dirc größer/prominenter, mit stärkerem Glow ✓
 
 ---
 
-## 📁 Files v8.8 (38 total)
-
-Neu:
-- `assets/dircbot_logo.png` 🆕 (CI Logo)
-- `assets/dirc_avatar_suit.jpg` 🆕 (Cyber-Suit Dirc)
+## 📁 Files v8.9 (38 total — unverändert)
 
 Modified:
-- `index.html` — Welcome-State mit Logo, topic-chips-bar div, content-classes
-- `assets/app.js` — renderTopicChips(), selectTopic+clearTopic sync chips, newChat() rebuilt mit Logo
-- `assets/style.css` — Topic-chips-bar CSS, welcome-logo CSS
-- `tester-signup.html` — 2-col hero layout
-- `assets/tester-signup.css` — Grid-Layout + image styling
+- `index.html` — topic-chips-bar div entfernt
+- `assets/app.js` — renderTopicChips() entfernt, selectTopic/clearTopic sync nur noch sidebar
+- `assets/style.css` — Komplette V8.8 Chip-CSS-Section entfernt (~1960 chars)
+- `tester-signup.html` — signup-hero-brand div entfernt
+- `assets/tester-signup.css` — brand CSS-rules entfernt, Cyber-Suit Image prominenter
+

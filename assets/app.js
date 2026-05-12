@@ -168,25 +168,6 @@ function renderTopics() {
       container.appendChild(btn);
     });
   }
-  // Also render the horizontal chip bar at top of chat
-  renderTopicChips();
-}
-
-// Horizontal chip bar at top of chat area (Equinat-style)
-function renderTopicChips() {
-  const bar = document.getElementById('topicChipsBar');
-  if (!bar) return;
-  bar.innerHTML = '';
-  TOPICS.forEach(topic => {
-    const chip = document.createElement('button');
-    chip.className = 'topic-chip';
-    chip.dataset.topicId = topic.id;
-    if (currentTopic && currentTopic.id === topic.id) chip.classList.add('active');
-    chip.style.setProperty('--chip-color', topic.color);
-    chip.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + topic.icon + '"/></svg><span>' + topic.name[currentLang] + '</span>';
-    chip.onclick = () => selectTopic(topic.id);
-    bar.appendChild(chip);
-  });
 }
 
 function selectTopic(topicId) {
@@ -194,9 +175,6 @@ function selectTopic(topicId) {
   if (!topic) return;
   currentTopic = topic;
   document.querySelectorAll('.topic-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.topicId === topicId);
-  });
-  document.querySelectorAll('.topic-chip').forEach(el => {
     el.classList.toggle('active', el.dataset.topicId === topicId);
   });
   const header = document.getElementById('topicHeader');
@@ -221,7 +199,6 @@ function selectTopic(topicId) {
 function clearTopic() {
   currentTopic = null;
   document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.topic-chip').forEach(el => el.classList.remove('active'));
   const header = document.getElementById('topicHeader');
   if (header) header.classList.remove('visible');
   const sug = document.getElementById('topicSuggestions');

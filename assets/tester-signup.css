@@ -33,35 +33,23 @@ body.signup-page {
   text-align: left;
 }
 
-.signup-hero-brand {
-  margin-bottom: 24px;
-}
-
-.signup-hero-brand-logo {
-  max-width: 260px;
-  width: 100%;
-  height: auto;
-  display: block;
-  filter: drop-shadow(0 6px 18px rgba(232,66,10,0.2));
-}
-
 .signup-hero-visual {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 480px;
+  min-height: 580px;
 }
 
 .signup-hero-image {
   position: relative;
   z-index: 2;
-  max-height: 560px;
+  max-height: 640px;
   width: auto;
   height: 100%;
   max-width: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 25px 60px rgba(232,66,10,0.25)) drop-shadow(0 0 30px rgba(232,66,10,0.15));
+  filter: drop-shadow(0 30px 70px rgba(232,66,10,0.3)) drop-shadow(0 0 40px rgba(232,66,10,0.18));
 }
 
 .signup-hero-image-glow {
@@ -69,10 +57,10 @@ body.signup-page {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 75%;
-  height: 75%;
-  background: radial-gradient(ellipse at center, rgba(232,66,10,0.18) 0%, transparent 65%);
-  filter: blur(40px);
+  width: 85%;
+  height: 85%;
+  background: radial-gradient(ellipse at center, rgba(232,66,10,0.22) 0%, transparent 65%);
+  filter: blur(50px);
   z-index: 1;
   pointer-events: none;
 }
@@ -85,15 +73,12 @@ body.signup-page {
   .signup-hero-content {
     text-align: center;
   }
-  .signup-hero-brand-logo {
-    margin: 0 auto;
-  }
   .signup-hero-visual {
     order: -1;
-    min-height: 320px;
+    min-height: 380px;
   }
   .signup-hero-image {
-    max-height: 360px;
+    max-height: 420px;
   }
 }
 
