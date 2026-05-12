@@ -10,26 +10,117 @@ const path = require('path');
 
 // Cache KB across warm invocations
 let cachedKB = null;
+let kbStats = null; // metadata: per-file token estimates, useful for admin
 
-function loadKnowledgeBase() {
-  if (cachedKB) return cachedKB;
-  const kbDir = path.join(__dirname, '..', '..', 'knowledge-base');
-  let combined = '';
-  try {
-    const files = fs.readdirSync(kbDir)
-      .filter(f => f.endsWith('.md'))
-      .sort();
-    for (const file of files) {
-      const content = fs.readFileSync(path.join(kbDir, file), 'utf-8');
-      combined += `\n\n## File: ${file}\n${content}`;
-    }
-  } catch (err) {
-    console.error('KB load error:', err);
-    combined = 'KB unavailable. Use core identity only.';
-  }
-  cachedKB = combined;
-  return cachedKB;
+// Rough token estimate: ~4 chars per token for english/german text (Anthropic's tokenizer ratio)
+function estimateTokens(text) {
+  return Math.ceil(text.length / 4);
 }
+
+// PDF parsing is async — we load PDFs once and cache the result
+// Hard budget: don't let total KB exceed 80k tokens (leaves 120k+ for chat history, output, system base)
+const KB_TOKEN_BUDGET = 80000;
+
+let pdfParsePromise = null;
+async function loadKnowledgeBase() {
+  if (cachedKB) return cachedKB;
+  if (pdfParsePromise) return pdfParsePromise; // in-flight load, dedupe parallel callers
+
+  pdfParsePromise = (async () => {
+    const kbDir = path.join(__dirname, '..', '..', 'knowledge-base');
+    const pdfDir = path.join(kbDir, 'pdfs');
+    let combined = '';
+    let perFile = [];
+
+    // === 1. Markdown files (existing flow) ===
+    try {
+      const files = fs.readdirSync(kbDir)
+        .filter(f => f.endsWith('.md'))
+        .sort();
+      for (const file of files) {
+        const content = fs.readFileSync(path.join(kbDir, file), 'utf-8');
+        const tokens = estimateTokens(content);
+        combined += `\n\n## File: ${file}\n${content}`;
+        perFile.push({ file: file, type: 'md', tokens: tokens, chars: content.length });
+      }
+    } catch (err) {
+      console.error('KB markdown load error:', err);
+    }
+
+    // === 2. PDF files (NEW v8.13) ===
+    let pdfParse = null;
+    try { pdfParse = require('pdf-parse'); } catch (e) {
+      // pdf-parse not installed in this environment — skip silently
+      console.warn('pdf-parse not available, PDFs will be skipped:', e.message);
+    }
+
+    if (pdfParse && fs.existsSync(pdfDir)) {
+      try {
+        const pdfFiles = fs.readdirSync(pdfDir)
+          .filter(f => f.toLowerCase().endsWith('.pdf'))
+          .sort();
+        let usedTokens = estimateTokens(combined);
+        for (const file of pdfFiles) {
+          if (usedTokens >= KB_TOKEN_BUDGET) {
+            console.warn(`KB budget reached (${KB_TOKEN_BUDGET} tokens) — skipping ${file} and remaining PDFs.`);
+            perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'budget' });
+            continue;
+          }
+          try {
+            const buf = fs.readFileSync(path.join(pdfDir, file));
+            const data = await pdfParse(buf);
+            const text = (data.text || '').trim();
+            if (!text) {
+              perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'empty (likely scanned/OCR needed)' });
+              continue;
+            }
+            const fileTokens = estimateTokens(text);
+            // If adding this single file would massively overflow budget, truncate it
+            const remainingBudget = KB_TOKEN_BUDGET - usedTokens;
+            let textToAdd = text;
+            let truncated = false;
+            if (fileTokens > remainingBudget) {
+              // Truncate to remaining budget (rough: tokens * 4 = chars)
+              textToAdd = text.slice(0, remainingBudget * 4) + '\n\n[...truncated due to KB budget...]';
+              truncated = true;
+            }
+            const niceTitle = file.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ');
+            combined += `\n\n## PDF: ${niceTitle} (source file: ${file}, ${data.numpages || '?'} pages)\n${textToAdd}`;
+            usedTokens = estimateTokens(combined);
+            perFile.push({
+              file: file,
+              type: 'pdf',
+              tokens: estimateTokens(textToAdd),
+              chars: textToAdd.length,
+              pages: data.numpages,
+              truncated: truncated
+            });
+          } catch (pdfErr) {
+            console.error(`PDF parse error for ${file}:`, pdfErr.message);
+            perFile.push({ file: file, type: 'pdf', skipped: true, reason: 'parse error: ' + pdfErr.message });
+          }
+        }
+      } catch (err) {
+        console.error('KB PDF load error:', err);
+      }
+    }
+
+    if (!combined) combined = 'KB unavailable. Use core identity only.';
+
+    cachedKB = combined;
+    kbStats = {
+      totalTokens: estimateTokens(combined),
+      totalChars: combined.length,
+      files: perFile,
+      loadedAt: Date.now()
+    };
+    return cachedKB;
+  })();
+
+  return pdfParsePromise;
+}
+
+function getKbStats() { return kbStats; }
 
 function languageInstruction(language) {
   switch (language) {
@@ -57,15 +148,22 @@ const TOPIC_CONTEXT = {
   agentic: 'CURRENT FOCUS: Agentic AI. The user wants the autonomous-agents frontier. Lean heavily on KB file 10_agentic_ai.md. Make the chatbot-vs-agent distinction crystal clear. Explain the 2026 framework landscape (LangGraph, CrewAI, AutoGen, LlamaIndex, Semantic Kernel, Sintra) with real differentiation. Mention MCP (Model Context Protocol) as the unlock. Walk through the 7 monetization business models. Multi-agent patterns (Orchestrator+Workers, Pipeline, Debate/Critic, Specialist Mesh). Always tie back to: pick narrow vertical, measure ROI in 30 days, human-in-the-loop wins sales. Cite the Gartner stat: 40% of agentic deployments canceled by 2027 — be in the other 60%.'
 };
 
-function buildSystemPrompt(language, topic, userContext, userMemories, projectContext) {
-  const kb = loadKnowledgeBase();
+// Returns Anthropic-format system array with cache_control on the static block.
+// The static block (identity + voice + rules + KB + memory protocol) is cached for 5 min;
+// the dynamic block (language, topic, user-specific profile/memories/project) is fresh each call.
+// This drops cost on every cached read by ~90% on the static portion.
+async function buildSystemPrompt(language, topic, userContext, userMemories, projectContext) {
+  const kb = await loadKnowledgeBase();
   const langInstruction = languageInstruction(language);
   const topicLine = topic && TOPIC_CONTEXT[topic] ? `\n\n## ${TOPIC_CONTEXT[topic]}\n` : '';
   const profileBlock = userContext ? userContext : '';
   const memoryBlock = userMemories ? userMemories : '';
   const projectBlock = projectContext ? projectContext : '';
 
-  return `You ARE DircBot — the AI embodiment of Dirc Zahlmann.
+  // === STATIC BLOCK (cacheable) — identical for every user, every message ===
+  // Cache TTL is 5 min, refreshed on each hit. ~5500 tokens here = ~€0.0017 per cached read
+  // vs €0.0165 uncached. Cache write (first call in 5 min) is 1.25× normal = €0.020 once.
+  const staticBlock = `You ARE DircBot — the AI embodiment of Dirc Zahlmann.
 
 You are not an assistant explaining what Dirc would do. You ARE Dirc, speaking in first person, with his voice, his certainty, his frameworks. You answer like a sales operator with 30 years in the trenches — not like a chatbot reading from a manual.
 
@@ -156,8 +254,6 @@ DircBot is the top of Dirc's business funnel. When user intent matches certain p
 - If user says "let's just talk here" → respect it, drop the CTA, keep helping in chat.
 - If USER PROFILE shows they're already a customer (mentions academy, courses) → no CTA needed.
 
-${langInstruction}
-${topicLine}${profileBlock}${memoryBlock}${projectBlock}
 ## YOUR KNOWLEDGE BASE
 ${kb}
 
@@ -190,6 +286,31 @@ After your normal response, if the user revealed a NEW, MEANINGFUL, LASTING fact
 Memory entries are max 100 characters each. Write them like database rows — terse, factual, no fluff.
 
 Stay sharp. Stay direct. BE Dirc.`;
+
+  // === DYNAMIC BLOCK (per-user, not cached) ===
+  // Built fresh every call — language preference, current topic, user profile/memories/project context.
+  // Kept SMALL so caching savings are maximized.
+  const dynamicParts = [];
+  dynamicParts.push(`## SESSION CONTEXT\n${langInstruction}`);
+  if (topicLine) dynamicParts.push(topicLine.trim());
+  if (profileBlock) dynamicParts.push(profileBlock.trim());
+  if (memoryBlock) dynamicParts.push(memoryBlock.trim());
+  if (projectBlock) dynamicParts.push(projectBlock.trim());
+  const dynamicBlock = dynamicParts.join('\n\n');
+
+  // Return Anthropic system-array format with cache_control marker on the static block.
+  // Static block gets cached for 5 minutes; dynamic block is always fresh.
+  return [
+    {
+      type: 'text',
+      text: staticBlock,
+      cache_control: { type: 'ephemeral' }
+    },
+    {
+      type: 'text',
+      text: dynamicBlock
+    }
+  ];
 }
 
 // Build content blocks for current user turn — supports file attachments
@@ -287,10 +408,12 @@ exports.handler = async (event) => {
 
     const client = new Anthropic({ apiKey });
 
+    const systemPrompt = await buildSystemPrompt(language, topic, userContext, userMemories, projectContext);
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
-      system: buildSystemPrompt(language, topic, userContext, userMemories, projectContext),
+      system: systemPrompt,
       messages: anthropicMessages
     });
 
@@ -299,13 +422,31 @@ exports.handler = async (event) => {
       .map(block => block.text)
       .join('\n');
 
+    // Cache stats: usage object includes cache_creation_input_tokens and cache_read_input_tokens
+    // when prompt caching is active. Log them so we can monitor savings in Netlify logs.
+    const usage = response.usage || {};
+    const cacheCreate = usage.cache_creation_input_tokens || 0;
+    const cacheRead = usage.cache_read_input_tokens || 0;
+    const regularInput = usage.input_tokens || 0;
+    const output = usage.output_tokens || 0;
+
+    if (cacheCreate > 0 || cacheRead > 0) {
+      console.log(`[cache] read=${cacheRead} create=${cacheCreate} input=${regularInput} output=${output}`);
+    }
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         response: replyText,
         reply: replyText,
-        model: response.model
+        model: response.model,
+        usage: {
+          cacheReadTokens: cacheRead,
+          cacheCreateTokens: cacheCreate,
+          inputTokens: regularInput,
+          outputTokens: output
+        }
       })
     };
   } catch (err) {

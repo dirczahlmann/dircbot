@@ -46,6 +46,75 @@
     <h1 class="admin-title">DircBot Control Center</h1>
     <p class="admin-subtitle">Tester-Verwaltung · Email-Templates · Stats</p>
 
+    <!-- KNOWLEDGE BASE (v8.13) -->
+    <section class="admin-section">
+      <h2>📚 Wissensbasis (MD + PDF)</h2>
+      <p class="admin-section-sub">Dateien aus <code>knowledge-base/</code> die der Bot in jeden Chat einspeist. PDFs gehen in den Unterordner <code>pdfs/</code>.</p>
+
+      <div class="kb-budget-bar">
+        <div class="kb-budget-label">
+          <span><strong id="kbTokens">—</strong> / 80.000 Tokens</span>
+          <span class="kb-budget-pct" id="kbBudgetPct">—</span>
+        </div>
+        <div class="kb-budget-track">
+          <div class="kb-budget-fill" id="kbBudgetFill"></div>
+        </div>
+        <p class="kb-budget-hint" id="kbBudgetHint">Lädt...</p>
+      </div>
+
+      <div class="kb-files-grid">
+        <div class="kb-files-col">
+          <h3>📄 Markdown</h3>
+          <div id="kbMdList" class="kb-list">—</div>
+        </div>
+        <div class="kb-files-col">
+          <h3>📕 PDF</h3>
+          <div id="kbPdfList" class="kb-list">—</div>
+        </div>
+      </div>
+
+      <div class="kb-howto">
+        <strong>💡 So fügst du PDFs hinzu:</strong>
+        <ol>
+          <li>Drop PDFs in <code>knowledge-base/pdfs/</code> auf GitHub (drag-and-drop im Browser)</li>
+          <li>Commit → Netlify deployt automatisch</li>
+          <li>Refresh diese Seite → neue PDFs erscheinen unten + im Token-Counter</li>
+        </ol>
+        <p>⚠️ <strong>Limit 80k Tokens</strong> total. Bei Überschreitung werden spätere PDFs abgeschnitten. Bei 50+ PDFs solltest du auf RAG umsteigen (frag Claude).</p>
+      </div>
+    </section>
+
+    <!-- CACHE STATS (v8.14) -->
+    <section class="admin-section">
+      <h2>⚡ Prompt-Cache Performance</h2>
+      <p class="admin-section-sub">Anthropic Prompt-Caching aktiv. KB + System-Prompt werden 5min gecached → Folge-Nachrichten ~90% billiger im Input. Daten der letzten 100 Chat-Antworten dieses Browsers.</p>
+
+      <div class="cache-stats-grid">
+        <div class="cache-stat-card">
+          <div class="cache-stat-num" id="cacheHitRate">—</div>
+          <div class="cache-stat-label">Cache Hit-Rate</div>
+          <div class="cache-stat-sub" id="cacheHitDetail">Lädt...</div>
+        </div>
+        <div class="cache-stat-card">
+          <div class="cache-stat-num" id="cacheSavings">—</div>
+          <div class="cache-stat-label">Geschätzte Ersparnis</div>
+          <div class="cache-stat-sub" id="cacheSavingsDetail">vs. ohne Caching</div>
+        </div>
+        <div class="cache-stat-card">
+          <div class="cache-stat-num" id="cacheAvgCost">—</div>
+          <div class="cache-stat-label">Ø Cost pro Nachricht</div>
+          <div class="cache-stat-sub" id="cacheAvgDetail">aktuell</div>
+        </div>
+        <div class="cache-stat-card">
+          <div class="cache-stat-num" id="cacheTotalMsgs">—</div>
+          <div class="cache-stat-label">Tracked Messages</div>
+          <div class="cache-stat-sub">letzte 100 max.</div>
+        </div>
+      </div>
+
+      <p class="cache-stats-hint" id="cacheStatsHint">Sende ein paar Chat-Nachrichten als Tester um Stats zu sammeln.</p>
+    </section>
+
     <!-- STATS GRID -->
     <section class="admin-section">
       <h2>📊 Übersicht</h2>
@@ -185,9 +254,9 @@
           <div class="pricing-breakdown">
             <div class="pricing-breakdown-row"><span>Affiliate (25%)</span><span class="pricing-debit">−€12.50</span></div>
             <div class="pricing-breakdown-row"><span>Stripe (3% + €0.30)</span><span class="pricing-debit">−€1.80</span></div>
-            <div class="pricing-breakdown-row"><span>API @ avg 200 msgs</span><span class="pricing-debit">−€7.00</span></div>
-            <div class="pricing-breakdown-row pricing-profit"><span><strong>Profit (avg)</strong></span><span class="pricing-credit"><strong>€28.70</strong> (57%)</span></div>
-            <div class="pricing-breakdown-row pricing-worst"><span>Worst case @ 500 msgs</span><span>€18.20 (36%)</span></div>
+            <div class="pricing-breakdown-row"><span>API @ avg 200 msgs <span style="color:#34d399;">(mit Cache)</span></span><span class="pricing-debit">−€4.00</span></div>
+            <div class="pricing-breakdown-row pricing-profit"><span><strong>Profit (avg)</strong></span><span class="pricing-credit"><strong>€31.70</strong> (63%)</span></div>
+            <div class="pricing-breakdown-row pricing-worst"><span>Worst case @ 500 msgs (mit Cache)</span><span>€25.70 (51%)</span></div>
           </div>
         </div>
 

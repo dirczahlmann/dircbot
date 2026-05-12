@@ -427,6 +427,11 @@ async function callBot(text, fileData) {
     const data = await response.json();
     const botText = data.response || data.message || 'Hmm — something went wrong. Try again?';
 
+    // Track cache stats (used by admin to monitor caching savings)
+    if (data.usage && typeof trackCacheStats === 'function') {
+      trackCacheStats(data.usage);
+    }
+
     // Auto-memory: strip <<MEMORY>> blocks from displayed text, save silently
     let displayText = botText;
     let newlyAddedMemories = [];
@@ -805,4 +810,26 @@ function renderMemoryChips(memories) {
   });
 
   lastBot.appendChild(chipsContainer);
+}
+
+
+// ============== CACHE STATS TRACKING (v8.14) ==============
+// Records per-message API usage to localStorage so admin can see cache hit rate + savings.
+// Rolling buffer of last 100 messages.
+function trackCacheStats(usage) {
+  if (!usage) return;
+  try {
+    const raw = localStorage.getItem('dircbot-cache-stats') || '[]';
+    const stats = JSON.parse(raw);
+    stats.push({
+      t: Date.now(),
+      cr: usage.cacheReadTokens || 0,   // cache read (90% cheaper)
+      cw: usage.cacheCreateTokens || 0, // cache write (1.25× more expensive than normal input, once per 5min)
+      i:  usage.inputTokens || 0,       // non-cached input
+      o:  usage.outputTokens || 0       // output tokens
+    });
+    // Keep last 100 entries
+    if (stats.length > 100) stats.splice(0, stats.length - 100);
+    localStorage.setItem('dircbot-cache-stats', JSON.stringify(stats));
+  } catch (e) { /* ignore - local storage quota / parse error */ }
 }

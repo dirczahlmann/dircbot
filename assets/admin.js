@@ -33,6 +33,8 @@ function showAdmin() {
   renderCodesGrid();
   populateCodeSelect();
   updateStats();
+  if (typeof loadKbStats === 'function') loadKbStats();
+  if (typeof loadCacheStats === 'function') loadCacheStats();
 }
 
 function attemptLogin(e) {
@@ -561,4 +563,196 @@ if (document.readyState !== 'loading') {
   setTimeout(bootstrapAdminAddons, 100);
 } else {
   document.addEventListener('DOMContentLoaded', () => setTimeout(bootstrapAdminAddons, 100));
+}
+
+
+// ============== KB STATS (v8.13) ==============
+async function loadKbStats() {
+  const apiPass = localStorage.getItem('dircbot-admin-api-pass');
+  if (!apiPass) return;
+  try {
+    const res = await fetch('/.netlify/functions/kb-stats', {
+      headers: { 'x-admin-pass': apiPass }
+    });
+    if (!res.ok) {
+      console.warn('KB stats fetch failed:', res.status);
+      document.getElementById('kbBudgetHint').textContent = 'Stats konnten nicht geladen werden.';
+      return;
+    }
+    const stats = await res.json();
+    renderKbStats(stats);
+  } catch (e) {
+    console.error('KB stats error:', e);
+  }
+}
+
+function renderKbStats(stats) {
+  const tokensEl = document.getElementById('kbTokens');
+  const pctEl = document.getElementById('kbBudgetPct');
+  const fillEl = document.getElementById('kbBudgetFill');
+  const hintEl = document.getElementById('kbBudgetHint');
+
+  if (tokensEl) tokensEl.textContent = stats.totalTokens.toLocaleString('de-DE');
+  if (pctEl) pctEl.textContent = stats.budgetUsedPct + '%';
+  if (fillEl) {
+    fillEl.style.width = Math.min(stats.budgetUsedPct, 100) + '%';
+    if (stats.budgetUsedPct < 50) {
+      fillEl.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+    } else if (stats.budgetUsedPct < 80) {
+      fillEl.style.background = 'linear-gradient(90deg, #c9a84c, #f59e0b)';
+    } else {
+      fillEl.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+    }
+  }
+  if (hintEl) {
+    if (!stats.pdfParseAvailable) {
+      hintEl.innerHTML = '⚠️ <strong>pdf-parse Modul nicht verfügbar.</strong> Nach Deploy automatisch installiert. Falls Problem bleibt: <code>npm install pdf-parse</code> in package.json prüfen.';
+    } else if (stats.budgetUsedPct >= 95) {
+      hintEl.innerHTML = '🔴 <strong>Budget fast voll!</strong> Spätere PDFs werden abgeschnitten. Reduziere oder steige auf RAG um.';
+    } else if (stats.budgetUsedPct >= 80) {
+      hintEl.innerHTML = '⚠️ Budget bei ' + stats.budgetUsedPct + '%. Bei weiteren PDFs auf RAG umsteigen erwägen.';
+    } else if (stats.totalTokens === 0) {
+      hintEl.innerHTML = 'Noch keine KB-Files. MD-Files sind in <code>knowledge-base/</code>, PDFs in <code>knowledge-base/pdfs/</code>.';
+    } else {
+      hintEl.innerHTML = '✅ Im sicheren Bereich. API-Cost pro Nachricht: ca. €' + (0.035 + (stats.totalTokens * 3 / 1000000) * 0.5).toFixed(3);
+    }
+  }
+
+  // MD list
+  const mdList = document.getElementById('kbMdList');
+  if (mdList) {
+    if (stats.md.length === 0) {
+      mdList.innerHTML = '<div class="kb-empty">Keine MD-Files gefunden.</div>';
+    } else {
+      mdList.innerHTML = stats.md.map(f => `
+        <div class="kb-file-row">
+          <span class="kb-file-name">${escapeHtmlAdmin(f.file)}</span>
+          <span class="kb-file-tokens">${f.tokens.toLocaleString('de-DE')} tok</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  // PDF list
+  const pdfList = document.getElementById('kbPdfList');
+  if (pdfList) {
+    if (stats.pdf.length === 0) {
+      pdfList.innerHTML = '<div class="kb-empty">Noch keine PDFs.<br>Drop in <code>knowledge-base/pdfs/</code></div>';
+    } else {
+      pdfList.innerHTML = stats.pdf.map(f => {
+        let detail;
+        if (f.error) detail = '<span class="kb-file-err">Fehler: ' + escapeHtmlAdmin(f.error) + '</span>';
+        else if (f.empty) detail = '<span class="kb-file-err">Leer (gescannt? OCR nötig)</span>';
+        else if (f.tokens) detail = `${f.tokens.toLocaleString('de-DE')} tok · ${f.pages || '?'} S.`;
+        else detail = `${f.sizeKB} KB`;
+        return `
+          <div class="kb-file-row">
+            <span class="kb-file-name">${escapeHtmlAdmin(f.file)}</span>
+            <span class="kb-file-tokens">${detail}</span>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function escapeHtmlAdmin(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+
+// ============== CACHE STATS DISPLAY (v8.14) ==============
+function loadCacheStats() {
+  try {
+    const raw = localStorage.getItem('dircbot-cache-stats') || '[]';
+    const stats = JSON.parse(raw);
+    renderCacheStats(stats);
+  } catch (e) {
+    console.error('Cache stats load error:', e);
+  }
+}
+
+function renderCacheStats(stats) {
+  const hitRateEl = document.getElementById('cacheHitRate');
+  const hitDetailEl = document.getElementById('cacheHitDetail');
+  const savingsEl = document.getElementById('cacheSavings');
+  const savingsDetailEl = document.getElementById('cacheSavingsDetail');
+  const avgCostEl = document.getElementById('cacheAvgCost');
+  const avgDetailEl = document.getElementById('cacheAvgDetail');
+  const totalMsgsEl = document.getElementById('cacheTotalMsgs');
+  const hintEl = document.getElementById('cacheStatsHint');
+
+  if (totalMsgsEl) totalMsgsEl.textContent = stats.length;
+
+  if (stats.length === 0) {
+    if (hitRateEl) hitRateEl.textContent = '—';
+    if (savingsEl) savingsEl.textContent = '—';
+    if (avgCostEl) avgCostEl.textContent = '—';
+    if (hintEl) hintEl.innerHTML = '🟡 <strong>Noch keine Daten.</strong> Sende mind. 3-5 Nachrichten als Tester (im Chat) damit die ersten Stats erscheinen. Cache braucht ~5sec zum aufzubauen, dann greift er auf Folge-Nachrichten.';
+    return;
+  }
+
+  // Compute aggregates
+  let totalCacheRead = 0, totalCacheWrite = 0, totalInput = 0, totalOutput = 0;
+  let hits = 0; // messages where cacheRead > 0
+  let writes = 0;
+  stats.forEach(s => {
+    totalCacheRead += s.cr || 0;
+    totalCacheWrite += s.cw || 0;
+    totalInput += s.i || 0;
+    totalOutput += s.o || 0;
+    if ((s.cr || 0) > 0) hits++;
+    if ((s.cw || 0) > 0) writes++;
+  });
+
+  const hitRate = stats.length > 0 ? (hits / stats.length) * 100 : 0;
+  if (hitRateEl) hitRateEl.textContent = hitRate.toFixed(0) + '%';
+  if (hitDetailEl) hitDetailEl.textContent = `${hits} hits / ${writes} writes`;
+
+  // Cost calc (Sonnet 4.6 pricing per 1M tokens):
+  // - Cache read: $0.30 ($3 * 0.1)
+  // - Cache write: $3.75 ($3 * 1.25)
+  // - Regular input: $3
+  // - Output: $15
+  // Currency conversion ~1:1 USD/EUR for simplicity (close enough for estimates)
+  const PRICE_CACHE_READ = 0.30 / 1_000_000;
+  const PRICE_CACHE_WRITE = 3.75 / 1_000_000;
+  const PRICE_INPUT = 3 / 1_000_000;
+  const PRICE_OUTPUT = 15 / 1_000_000;
+
+  const totalCost = totalCacheRead * PRICE_CACHE_READ
+                  + totalCacheWrite * PRICE_CACHE_WRITE
+                  + totalInput * PRICE_INPUT
+                  + totalOutput * PRICE_OUTPUT;
+
+  // Hypothetical cost without caching = (cacheRead + cacheWrite tokens would all be regular input)
+  const cacheTokens = totalCacheRead + totalCacheWrite;
+  const costWithoutCaching = (cacheTokens + totalInput) * PRICE_INPUT
+                           + totalOutput * PRICE_OUTPUT;
+
+  const savings = costWithoutCaching - totalCost;
+  const savingsPct = costWithoutCaching > 0 ? (savings / costWithoutCaching) * 100 : 0;
+
+  if (savingsEl) savingsEl.textContent = savingsPct.toFixed(0) + '%';
+  if (savingsDetailEl) savingsDetailEl.textContent = '$' + savings.toFixed(4) + ' gespart';
+
+  const avgCost = stats.length > 0 ? totalCost / stats.length : 0;
+  if (avgCostEl) avgCostEl.textContent = '$' + avgCost.toFixed(4);
+  if (avgDetailEl) {
+    const avgWithoutCache = stats.length > 0 ? costWithoutCaching / stats.length : 0;
+    avgDetailEl.textContent = `ohne Cache: $${avgWithoutCache.toFixed(4)}`;
+  }
+
+  if (hintEl) {
+    if (hitRate >= 70) {
+      hintEl.innerHTML = '✅ <strong>Caching läuft optimal.</strong> Hohe Hit-Rate = User chatten oft in Folge → Anthropic refresht den 5-Min-Cache automatisch.';
+    } else if (hitRate >= 40) {
+      hintEl.innerHTML = '🟡 <strong>OK.</strong> Cache greift, aber nicht maximal. Typisch wenn User längere Pausen machen oder Cache-Refresh aufs nächste Gespräch warten muss.';
+    } else if (stats.length < 5) {
+      hintEl.innerHTML = '🟡 <strong>Zu wenig Daten.</strong> Sende mind. 5 Nachrichten in einer Session damit der Cache greifen kann.';
+    } else {
+      hintEl.innerHTML = '🔴 <strong>Niedrige Hit-Rate.</strong> Möglich: zu lange Pausen zwischen Nachrichten (>5min läuft Cache ab) oder System-Prompt-Block ändert sich.';
+    }
+  }
 }
