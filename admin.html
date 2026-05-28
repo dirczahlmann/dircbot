@@ -37,6 +37,7 @@
     <div class="admin-header-right">
       <a href="/" class="admin-nav-link" target="_blank">→ Live Bot</a>
       <a href="/tester-signup" class="admin-nav-link" target="_blank">→ Signup Page</a>
+      <a href="#tgInvite" class="admin-nav-link">→ Telegram Invite</a>
       <button onclick="logout()" class="admin-logout">Logout</button>
     </div>
   </header>
@@ -248,6 +249,182 @@
           <textarea id="emailOutput" readonly placeholder="Klick 'Email generieren' um die Welcome-Email zu erstellen..."></textarea>
         </div>
       </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TELEGRAM INVITE SENDER (selbst-enthalten, hängt an keiner    -->
+    <!-- externen JS/CSS-Datei; isoliert per #tgInvite + IIFE)        -->
+    <!-- ============================================================ -->
+    <section class="admin-section" id="tgInvite">
+      <h2>✈️ Telegram-Einladungen</h2>
+      <p class="admin-section-sub">Fertige Einladung pro Sprache erzeugen und direkt per Telegram, E-Mail oder Copy verschicken. Für neue Tester und zum erneuten Anschreiben alter Tester.</p>
+
+      <style>
+        /* Alles hier ist auf #tgInvite gescoped, damit es nichts anderes im Admin beeinflusst */
+        #tgInvite .tgi-grid{display:flex;flex-direction:column;gap:18px}
+        #tgInvite .tgi-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+          letter-spacing:1.5px;text-transform:uppercase;color:#8c8c93;display:block;margin-bottom:8px}
+        #tgInvite .tgi-input{width:100%;background:#1c1c1f;border:1px solid #2a2a2e;color:#ededef;
+          font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:12px 14px;border-radius:10px;
+          outline:none;transition:border-color .15s,box-shadow .15s}
+        #tgInvite .tgi-input::placeholder{color:#5d5d63;font-weight:500}
+        #tgInvite .tgi-input:focus{border-color:rgba(245,82,46,.45);box-shadow:0 0 0 3px rgba(245,82,46,.12)}
+        #tgInvite .tgi-seg{display:flex;gap:8px;flex-wrap:wrap}
+        #tgInvite .tgi-seg button{flex:1;min-width:92px;background:#1c1c1f;border:1px solid #2a2a2e;color:#8c8c93;
+          font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:11px 10px;border-radius:10px;
+          cursor:pointer;transition:all .15s}
+        #tgInvite .tgi-seg button:hover{border-color:#3a3a40;color:#ededef}
+        #tgInvite .tgi-seg button.on{background:rgba(245,82,46,.12);border-color:rgba(245,82,46,.45);color:#f5522e}
+        #tgInvite .tgi-prevhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        #tgInvite .tgi-cc{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.5px;color:#5d5d63}
+        #tgInvite .tgi-preview{background:#0e0e10;border:1px dashed #2a2a2e;border-radius:11px;padding:15px 16px;
+          white-space:pre-wrap;word-wrap:break-word;font-family:'Inter',sans-serif;font-size:15px;line-height:1.55;
+          color:#dcdce0;min-height:120px}
+        #tgInvite .tgi-preview .tgi-lnk{color:#f5522e;font-weight:600}
+        #tgInvite .tgi-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+        #tgInvite .tgi-btn{flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:8px;
+          border:none;border-radius:11px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;
+          padding:13px 12px;cursor:pointer;transition:transform .12s,filter .15s}
+        #tgInvite .tgi-btn:active{transform:translateY(1px)}
+        #tgInvite .tgi-btn-tg{background:linear-gradient(135deg,#2aabee,#229ed9);color:#fff}
+        #tgInvite .tgi-btn-tg:hover{filter:brightness(1.07)}
+        #tgInvite .tgi-btn-mail{background:#1c1c1f;border:1px solid #2a2a2e;color:#ededef}
+        #tgInvite .tgi-btn-mail:hover{border-color:#3a3a40}
+        #tgInvite .tgi-btn-copy{background:#f5522e;color:#fff}
+        #tgInvite .tgi-btn-copy:hover{filter:brightness(1.06)}
+        #tgInvite .tgi-hint{font-size:13px;color:#8c8c93;margin-top:14px;line-height:1.5}
+        #tgInvite .tgi-hint b{color:#bcbcc2;font-weight:600}
+      </style>
+
+      <div class="tgi-grid">
+        <div>
+          <span class="tgi-label">Vorname Tester</span>
+          <input type="text" id="tgiName" class="tgi-input" placeholder="z. B. Volker" autocomplete="off">
+        </div>
+
+        <div>
+          <span class="tgi-label">Sprache</span>
+          <div class="tgi-seg" id="tgiLang">
+            <button data-v="de" class="on">🇩🇪 Deutsch</button>
+            <button data-v="en">🇬🇧 English</button>
+            <button data-v="es">🇪🇸 Español</button>
+          </div>
+        </div>
+
+        <div>
+          <span class="tgi-label">Empfänger-Typ</span>
+          <div class="tgi-seg" id="tgiType">
+            <button data-v="new" class="on">Neuer Tester</button>
+            <button data-v="old">Alter Tester · Re-Invite</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="tgi-prevhead">
+            <span class="tgi-label" style="margin:0">Vorschau</span>
+            <span class="tgi-cc" id="tgiCc">0 Zeichen</span>
+          </div>
+          <div class="tgi-preview" id="tgiPreview"></div>
+
+          <div class="tgi-actions">
+            <button class="tgi-btn tgi-btn-tg" id="tgiBtnTg">✈️ In Telegram öffnen</button>
+            <button class="tgi-btn tgi-btn-mail" id="tgiBtnMail">✉️ Als E-Mail</button>
+            <button class="tgi-btn tgi-btn-copy" id="tgiBtnCopy">📋 Kopieren</button>
+          </div>
+
+          <p class="tgi-hint">
+            <b>So funktioniert der Telegram-Knopf:</b> Telegram öffnet sich mit dem fertigen Text. Du wählst den Kontakt aus und drückst nur noch auf Senden — der Gruppenlink wird automatisch angehängt.
+          </p>
+        </div>
+      </div>
+
+      <script>
+      (function(){
+        var LINKS={
+          de:'https://t.me/+WEGN9cw0WME5M2Ey',
+          en:'https://t.me/+yhLmVcFe4MFiZTQ6',
+          es:'https://t.me/+iqjk3apcamBmMzgy'
+        };
+        // body = alles bis inkl. CTA (ohne Link). Link wird ans Ende gesetzt.
+        var T={
+          de:{
+            new:{subject:'🔥 Willkommen, {name} — deine DircBot Tester-Community',
+              body:'Hey {name}, 🔥\n\nwillkommen als DircBot-Tester! Wir haben eine eigene Tester-Community auf Telegram — dort gibst du dein Feedback, teilst Screenshots und bekommst Updates aus erster Hand. Oben in der Gruppe ist angepinnt, wie alles läuft.\n\nKomm rein 👉'},
+            old:{subject:'🔥 {name}, die offizielle DircBot-Beta ist da',
+              body:'Hey {name}, 🔥\n\ndu hast DircBot schon in einer früheren Version getestet — danke dafür! 🙏\n\nJetzt startet die offizielle Beta, und wir haben dazu eine eigene Tester-Community auf Telegram. Dort sammeln wir Feedback, Ideen und Bugs und entwickeln den Bot gemeinsam weiter — oben in der Gruppe ist angepinnt, wie du Feedback und Screenshots teilst. Dein Input zählt ab jetzt direkt fürs finale Produkt.\n\nKomm dazu 👉'}
+          },
+          en:{
+            new:{subject:'🔥 Welcome, {name} — your DircBot tester community',
+              body:'Hey {name}, 🔥\n\nwelcome as a DircBot tester! We\u2019ve set up a dedicated tester community on Telegram — that\u2019s where you share feedback, post screenshots and get first-hand updates. There\u2019s a pinned message inside showing how it all works.\n\nJump in 👉'},
+            old:{subject:'🔥 {name}, the official DircBot beta is here',
+              body:'Hey {name}, 🔥\n\nyou already tested DircBot in an earlier version — thank you for that! 🙏\n\nNow the official beta is launching, and we\u2019ve built a dedicated tester community on Telegram. That\u2019s where we collect feedback, ideas and bugs and improve the bot together — there\u2019s a pinned message inside on how to share feedback and screenshots. From now on your input goes straight into the final product.\n\nJoin us 👉'}
+          },
+          es:{
+            new:{subject:'🔥 Bienvenido, {name} — tu comunidad de testers DircBot',
+              body:'Hey {name}, 🔥\n\n¡bienvenido como tester de DircBot! Creamos una comunidad de testers en Telegram — ahí compartes feedback, mandas screenshots y recibes novedades de primera mano. Dentro hay un mensaje fijado que explica cómo funciona todo.\n\nEntra 👉'},
+            old:{subject:'🔥 {name}, la beta oficial de DircBot ya está aquí',
+              body:'Hey {name}, 🔥\n\nya probaste DircBot en una versión anterior — ¡gracias por eso! 🙏\n\nAhora arranca la beta oficial y creamos una comunidad de testers dedicada en Telegram. Ahí reunimos feedback, ideas y bugs y mejoramos el bot juntos — dentro hay un mensaje fijado sobre cómo compartir feedback y screenshots. A partir de ahora tu aporte va directo al producto final.\n\nÚnete 👉'}
+          }
+        };
+
+        var root=document.getElementById('tgInvite');
+        var lang='de', type='new';
+        var q=function(sel){return root.querySelector(sel);};
+
+        function nameVal(){return q('#tgiName').value.trim();}
+        function fillName(str){
+          var n=nameVal();
+          if(n) return str.replace(/\{name\}/g,n);
+          return str.replace(/\{name\}, /g,'').replace(/\{name\}/g,'');
+        }
+        function parts(){
+          var tpl=T[lang][type], link=LINKS[lang];
+          var body=fillName(tpl.body), subject=fillName(tpl.subject);
+          return {body:body,subject:subject,link:link,full:body+' '+link};
+        }
+        function render(){
+          var p=parts();
+          var safe=p.full.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});
+          q('#tgiPreview').innerHTML=safe.replace(p.link,'<span class="tgi-lnk">'+p.link+'</span>');
+          q('#tgiCc').textContent=p.full.length+' Zeichen';
+        }
+        function bindSeg(id,setter){
+          var box=q('#'+id);
+          box.querySelectorAll('button').forEach(function(b){
+            b.addEventListener('click',function(){
+              box.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+              b.classList.add('on'); setter(b.dataset.v); render();
+            });
+          });
+        }
+        bindSeg('tgiLang',function(v){lang=v;});
+        bindSeg('tgiType',function(v){type=v;});
+        q('#tgiName').addEventListener('input',render);
+
+        q('#tgiBtnTg').addEventListener('click',function(){
+          var p=parts();
+          var url='https://t.me/share/url?url='+encodeURIComponent(p.link)+'&text='+encodeURIComponent(p.body);
+          window.open(url,'_blank');
+        });
+        q('#tgiBtnMail').addEventListener('click',function(){
+          var p=parts();
+          window.location.href='mailto:?subject='+encodeURIComponent(p.subject)+'&body='+encodeURIComponent(p.full);
+        });
+        q('#tgiBtnCopy').addEventListener('click',function(){
+          var p=parts(), btn=q('#tgiBtnCopy'), orig=btn.textContent;
+          var done=function(){btn.textContent='Kopiert ✓';setTimeout(function(){btn.textContent=orig;},1600);};
+          if(navigator.clipboard&&navigator.clipboard.writeText){
+            navigator.clipboard.writeText(p.full).then(done,function(){fallback(p.full);done();});
+          }else{fallback(p.full);done();}
+        });
+        function fallback(txt){
+          var t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);
+          t.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(t);
+        }
+
+        render();
+      })();
+      </script>
     </section>
 
     <!-- QUICK ACTIONS -->
