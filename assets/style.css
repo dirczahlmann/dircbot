@@ -52,7 +52,7 @@ body.lang-es [data-lang="es"] { display:inline; }
 /* ============== HERO — SPLIT LAYOUT ============== */
 .hero {
   position:relative;
-  margin:0 -6vw;        /* break out of container padding */
+  margin:0 -6vw;
   padding:0;
   overflow:hidden;
   background:#0a0a0a;
@@ -70,7 +70,6 @@ body.lang-es [data-lang="es"] { display:inline; }
   position:relative;
 }
 
-/* Text column */
 .hero-text {
   padding:90px 6vw 70px 6vw;
   position:relative;
@@ -105,7 +104,6 @@ body.lang-es [data-lang="es"] { display:inline; }
   text-align:left;
 }
 
-/* Image column */
 .hero-image {
   position:relative;
   height:100%;
@@ -122,7 +120,6 @@ body.lang-es [data-lang="es"] { display:inline; }
   display:block;
 }
 
-/* Soft gradient fade on left edge of image to merge into dark background */
 .hero-image-fade {
   position:absolute;
   top:0;
@@ -134,7 +131,6 @@ body.lang-es [data-lang="es"] { display:inline; }
   pointer-events:none;
 }
 
-/* Subtle vertical vignette on image for atmosphere */
 .hero-image::after {
   content:'';
   position:absolute;
@@ -144,53 +140,23 @@ body.lang-es [data-lang="es"] { display:inline; }
   pointer-events:none;
 }
 
-/* ============== MOBILE: stack vertical ============== */
 @media (max-width:820px) {
-  .hero {
-    min-height:auto;
-  }
-  .hero-inner {
-    grid-template-columns:1fr;
-    min-height:auto;
-  }
-  .hero-text {
-    padding:70px 6vw 50px;
-    text-align:center;
-    order:2;
-  }
-  .hero h1, .hero-sub {
-    text-align:center;
-  }
-  .hero-sub {
-    margin:0 auto;
-  }
-  .hero-image {
-    order:1;
-    min-height:380px;
-    max-height:60vh;
-  }
-  .hero-image img {
-    object-position:center 20%;
-  }
-  /* Different fade direction on mobile — bottom-to-top */
+  .hero { min-height:auto; }
+  .hero-inner { grid-template-columns:1fr; min-height:auto; }
+  .hero-text { padding:70px 6vw 50px; text-align:center; order:2; }
+  .hero h1, .hero-sub { text-align:center; }
+  .hero-sub { margin:0 auto; }
+  .hero-image { order:1; min-height:380px; max-height:60vh; }
+  .hero-image img { object-position:center 20%; }
   .hero-image-fade {
-    top:auto;
-    bottom:0;
-    left:0;
-    right:0;
-    width:100%;
-    height:50%;
+    top:auto; bottom:0; left:0; right:0; width:100%; height:50%;
     background:linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.7) 60%, #0a0a0a 100%);
   }
 }
 
 @media (max-width:600px) {
-  .hero-image {
-    min-height:320px;
-  }
-  .hero-text {
-    padding:60px 6vw 40px;
-  }
+  .hero-image { min-height:320px; }
+  .hero-text { padding:60px 6vw 40px; }
 }
 
 /* ============== CHAT WRAPPER ============== */
@@ -358,11 +324,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   border-color:#e8420a;
   transform:translateX(4px);
 }
-.chip:disabled {
-  opacity:0.3;
-  cursor:not-allowed;
-  transform:none;
-}
+.chip:disabled { opacity:0.3; cursor:not-allowed; transform:none; }
 
 /* ============== INPUT BAR ============== */
 .input-area {
@@ -370,11 +332,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   background:#0a0a0a;
   border-top:1px solid rgba(255,255,255,0.06);
 }
-.input-area form {
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
+.input-area form { display:flex; gap:8px; align-items:center; }
 .input-area input[type="text"] {
   flex:1;
   background:#1a1a1a;
@@ -385,14 +343,8 @@ body.lang-es [data-lang="es"] { display:inline; }
   font-family:'Inter',sans-serif;
   font-size:15px;
 }
-.input-area input[type="text"]:focus {
-  outline:none;
-  border-color:#e8420a;
-}
-.input-area input[type="text"]:disabled {
-  opacity:0.4;
-  cursor:not-allowed;
-}
+.input-area input[type="text"]:focus { outline:none; border-color:#e8420a; }
+.input-area input[type="text"]:disabled { opacity:0.4; cursor:not-allowed; }
 .input-area button {
   background:#e8420a;
   border:none;
@@ -407,13 +359,8 @@ body.lang-es [data-lang="es"] { display:inline; }
   justify-content:center;
   flex-shrink:0;
 }
-.input-area button:hover {
-  background:#ff5520;
-}
-.input-area button:disabled {
-  opacity:0.4;
-  cursor:not-allowed;
-}
+.input-area button:hover { background:#ff5520; }
+.input-area button:disabled { opacity:0.4; cursor:not-allowed; }
 .input-area #attachBtn {
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.08);
@@ -431,10 +378,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   background:#0a0a0a;
   border-top:1px solid rgba(255,255,255,0.06);
 }
-.file-preview.visible {
-  display:block;
-  animation:fadeIn 0.3s ease-out;
-}
+.file-preview.visible { display:block; animation:fadeIn 0.3s ease-out; }
 .file-preview-content {
   display:flex;
   align-items:center;
@@ -456,15 +400,8 @@ body.lang-es [data-lang="es"] { display:inline; }
   flex-shrink:0;
   overflow:hidden;
 }
-.file-preview-icon img {
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.file-preview-info {
-  flex:1;
-  min-width:0;
-}
+.file-preview-icon img { width:100%; height:100%; object-fit:cover; }
+.file-preview-info { flex:1; min-width:0; }
 .file-preview-name {
   font-size:13px;
   font-weight:500;
@@ -508,11 +445,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   overflow:hidden;
   max-width:280px;
 }
-.msg-attachment img {
-  width:100%;
-  display:block;
-  border-radius:10px;
-}
+.msg-attachment img { width:100%; display:block; border-radius:10px; }
 .msg-attachment.file {
   display:flex;
   align-items:center;
@@ -521,9 +454,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   padding:10px 14px;
   border:1px solid rgba(255,255,255,0.08);
 }
-.msg-attachment.file .file-icon {
-  font-size:20px;
-}
+.msg-attachment.file .file-icon { font-size:20px; }
 .msg-attachment.file .file-name {
   font-size:13px;
   color:#f0ede8;
@@ -600,10 +531,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   font-family:'Inter',sans-serif;
   font-size:15px;
 }
-.email-form input:focus {
-  outline:none;
-  border-color:#e8420a;
-}
+.email-form input:focus { outline:none; border-color:#e8420a; }
 .btn-primary {
   background:#e8420a;
   color:#fff;
@@ -692,10 +620,7 @@ body.lang-es [data-lang="es"] { display:inline; }
   font-family:'Barlow Condensed',sans-serif;
   color:#6b6660;
 }
-.footer-links a {
-  color:#c9a84c;
-  text-decoration:none;
-}
+.footer-links a { color:#c9a84c; text-decoration:none; }
 
 @media (max-width:600px) {
   .hero { padding:60px 0 30px; }
@@ -720,13 +645,8 @@ body.lang-es [data-lang="es"] { display:inline; }
   transition:transform 0.3s ease;
   padding-top:72px;
 }
-body.mode-tester .topic-sidebar {
-  transform:translateX(0);
-}
-body.mode-tester .main-content {
-  margin-left:260px;
-  transition:margin-left 0.3s ease;
-}
+body.mode-tester .topic-sidebar { transform:translateX(0); }
+body.mode-tester .main-content { margin-left:260px; transition:margin-left 0.3s ease; }
 
 .sidebar-header {
   padding:18px 22px 14px;
@@ -767,10 +687,7 @@ body.mode-tester .main-content {
   transition:all 0.15s;
   --topic-color:#e8420a;
 }
-.topic-item:hover {
-  background:rgba(255,255,255,0.04);
-  color:#f0ede8;
-}
+.topic-item:hover { background:rgba(255,255,255,0.04); color:#f0ede8; }
 .topic-item.active {
   background:rgba(232,66,10,0.1);
   color:#f0ede8;
@@ -787,14 +704,8 @@ body.mode-tester .main-content {
   color:var(--topic-color);
   flex-shrink:0;
 }
-.topic-item.active .topic-icon {
-  background:var(--topic-color);
-  color:#fff;
-}
-.topic-name {
-  font-size:13px;
-  letter-spacing:0.01em;
-}
+.topic-item.active .topic-icon { background:var(--topic-color); color:#fff; }
+.topic-name { font-size:13px; letter-spacing:0.01em; }
 
 .sidebar-footer {
   padding:14px 14px 18px;
@@ -844,9 +755,7 @@ body.mode-tester .main-content {
   text-transform:uppercase;
   color:#34d399;
 }
-body.mode-tester .tester-badge {
-  display:inline-flex;
-}
+body.mode-tester .tester-badge { display:inline-flex; }
 .tester-badge-dot {
   width:6px;
   height:6px;
@@ -855,27 +764,18 @@ body.mode-tester .tester-badge {
   box-shadow:0 0 8px rgba(52,211,153,0.6);
   animation:pulse-dot 2s infinite;
 }
-@keyframes pulse-dot {
-  0%,100% { opacity:1; }
-  50% { opacity:0.4; }
-}
+@keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 
-/* In tester mode, hide things that don't make sense */
 body.mode-tester .hero,
 body.mode-tester .cta-section,
 body.mode-tester .trust-bar,
-body.mode-tester .question-area {
-  display:none;
-}
+body.mode-tester .question-area { display:none; }
 
-/* In free mode, hide tester UI */
 body.mode-free .tester-badge,
 body.mode-free .msg-counter-pill,
 body.mode-free .msg-progress,
 body.mode-free .topic-header,
-body.mode-free .topic-suggestions {
-  display:none;
-}
+body.mode-free .topic-suggestions { display:none; }
 
 /* ============== TOPIC HEADER ============== */
 .topic-header {
@@ -889,9 +789,7 @@ body.mode-free .topic-suggestions {
   border-radius:14px;
   position:relative;
 }
-.topic-header.visible {
-  display:flex;
-}
+.topic-header.visible { display:flex; }
 .topic-header-icon {
   width:48px;
   height:48px;
@@ -935,9 +833,7 @@ body.mode-free .topic-suggestions {
   gap:10px;
   padding:0 24px 16px;
 }
-.topic-suggestions.visible {
-  display:grid;
-}
+.topic-suggestions.visible { display:grid; }
 .topic-suggestion-card {
   position: relative;
   background: linear-gradient(135deg,
@@ -976,9 +872,7 @@ body.mode-free .topic-suggestions {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px color-mix(in srgb, var(--topic-color) 12%, transparent);
 }
-.topic-suggestion-card:hover::before {
-  opacity: 1;
-}
+.topic-suggestion-card:hover::before { opacity: 1; }
 @media (max-width:600px) {
   .topic-suggestions { grid-template-columns:1fr; }
 }
@@ -994,19 +888,9 @@ body.mode-free .topic-suggestions {
   border-radius:18px;
   font-family:'Inter',sans-serif;
 }
-.msg-counter-value {
-  font-weight:700;
-  font-size:14px;
-  color:#f0ede8;
-}
-.msg-counter-divider {
-  color:#6b6660;
-  font-size:12px;
-}
-.msg-counter-max {
-  color:#6b6660;
-  font-size:12px;
-}
+.msg-counter-value { font-weight:700; font-size:14px; color:#f0ede8; }
+.msg-counter-divider { color:#6b6660; font-size:12px; }
+.msg-counter-max { color:#6b6660; font-size:12px; }
 
 .msg-progress {
   height:3px;
@@ -1034,10 +918,7 @@ body.mode-free .topic-suggestions {
   justify-content:center;
   transition:all 0.15s;
 }
-#micBtn:hover {
-  background:rgba(255,255,255,0.05);
-  color:#f0ede8;
-}
+#micBtn:hover { background:rgba(255,255,255,0.05); color:#f0ede8; }
 #micBtn.listening {
   background:rgba(232,66,10,0.18);
   color:#e8420a;
@@ -1062,9 +943,7 @@ body.mode-free .topic-suggestions {
   text-transform:uppercase;
   color:#e8420a;
 }
-.voice-indicator.visible {
-  display:flex;
-}
+.voice-indicator.visible { display:flex; }
 .voice-pulse {
   width:8px;
   height:8px;
@@ -1073,7 +952,7 @@ body.mode-free .topic-suggestions {
   animation:pulse-dot 1s infinite;
 }
 
-/* ============== MESSAGE ACTIONS (Copy / Share / Try Another) ============== */
+/* ============== MESSAGE ACTIONS ============== */
 .msg-actions {
   display:flex;
   gap:6px;
@@ -1109,7 +988,6 @@ body.mode-free .topic-suggestions {
   color:#34d399;
 }
 
-/* On mobile, always show actions */
 @media (max-width:600px) {
   .msg-actions { opacity:1; }
 }
@@ -1125,10 +1003,7 @@ body.mode-free .topic-suggestions {
   padding:20px;
 }
 .tester-wall.visible { display:flex; animation:fade-in 0.25s ease; }
-@keyframes fade-in {
-  from { opacity:0; }
-  to { opacity:1; }
-}
+@keyframes fade-in { from { opacity:0; } to { opacity:1; } }
 .tester-wall-backdrop {
   position:absolute;
   inset:0;
@@ -1194,11 +1069,7 @@ body.mode-free .topic-suggestions {
 }
 .tester-wall-sub strong { color:#c9a84c; font-weight:600; }
 
-#testerCodeForm {
-  display:flex;
-  gap:10px;
-  margin-bottom:14px;
-}
+#testerCodeForm { display:flex; gap:10px; margin-bottom:14px; }
 #testerCodeInput {
   flex:1;
   background:rgba(255,255,255,0.04);
@@ -1233,12 +1104,7 @@ body.mode-free .topic-suggestions {
   transition:all 0.15s;
 }
 #testerCodeForm .btn-primary:hover { background:#ff5520; }
-.tester-wall-error {
-  color:#ef4444;
-  font-size:13px;
-  min-height:18px;
-  margin-bottom:12px;
-}
+.tester-wall-error { color:#ef4444; font-size:13px; min-height:18px; margin-bottom:12px; }
 .tester-wall-howto {
   font-size:12px;
   color:rgba(240,237,232,0.5);
@@ -1252,7 +1118,7 @@ body.mode-free .topic-suggestions {
   border-bottom:1px solid rgba(201,168,76,0.3);
 }
 
-/* ============== TESTER CTA LINK IN CTA SECTION ============== */
+/* ============== TESTER CTA LINK ============== */
 .tester-cta-link {
   background:transparent;
   border:1px solid rgba(232,66,10,0.4);
@@ -1290,12 +1156,8 @@ body.mode-free .topic-suggestions {
   pointer-events:none;
   transition:all 0.25s;
 }
-.toast.visible {
-  transform:translateX(-50%) translateY(0);
-  opacity:1;
-}
+.toast.visible { transform:translateX(-50%) translateY(0); opacity:1; }
 
-/* ============== MESSAGE ATTACHMENT INDICATOR ============== */
 .msg-attachment {
   display:inline-flex;
   align-items:center;
@@ -1310,15 +1172,9 @@ body.mode-free .topic-suggestions {
 
 /* ============== MOBILE TESTER LAYOUT ============== */
 @media (max-width:900px) {
-  body.mode-tester .topic-sidebar {
-    transform:translateX(-100%);
-  }
-  body.mode-tester .main-content {
-    margin-left:0;
-  }
-  body.mode-tester.sidebar-open .topic-sidebar {
-    transform:translateX(0);
-  }
+  body.mode-tester .topic-sidebar { transform:translateX(-100%); }
+  body.mode-tester .main-content { margin-left:0; }
+  body.mode-tester.sidebar-open .topic-sidebar { transform:translateX(0); }
   .tester-badge {
     left:auto;
     right:140px;
@@ -1334,37 +1190,21 @@ body.mode-free .topic-suggestions {
 }
 
 /* ============== V8 SAFETY OVERRIDES ============== */
-/* These !important rules prevent v7-cached-CSS conflicts on first deploy */
+.tester-wall { display: none !important; }
+.tester-wall.visible { display: flex !important; }
 
-/* Modals MUST be hidden by default */
-.tester-wall {
-  display: none !important;
-}
-.tester-wall.visible {
-  display: flex !important;
-}
-
-/* In tester mode, hero & free-mode UI MUST be hidden */
 body.mode-tester .hero,
 body.mode-tester .cta-section,
 body.mode-tester .trust-bar,
-body.mode-tester .question-area {
-  display: none !important;
-}
+body.mode-tester .question-area { display: none !important; }
 
-/* In free mode, tester UI MUST be hidden */
 body.mode-free .tester-badge,
 body.mode-free .msg-counter-pill,
 body.mode-free .msg-progress,
 body.mode-free .topic-header,
-body.mode-free .topic-suggestions {
-  display: none !important;
-}
-body.mode-free .topic-sidebar {
-  transform: translateX(-100%) !important;
-}
+body.mode-free .topic-suggestions { display: none !important; }
+body.mode-free .topic-sidebar { transform: translateX(-100%) !important; }
 
-/* Sidebar MUST be fixed when in tester mode */
 body.mode-tester .topic-sidebar {
   position: fixed !important;
   top: 0 !important;
@@ -1375,7 +1215,6 @@ body.mode-tester .topic-sidebar {
   z-index: 50 !important;
 }
 
-/* Tester badge must be properly styled */
 .tester-badge {
   position: fixed !important;
   top: 22px !important;
@@ -1383,14 +1222,9 @@ body.mode-tester .topic-sidebar {
   left: auto !important;
   z-index: 55 !important;
 }
-body.mode-free .tester-badge {
-  display: none !important;
-}
-body.mode-tester .tester-badge {
-  display: inline-flex !important;
-}
+body.mode-free .tester-badge { display: none !important; }
+body.mode-tester .tester-badge { display: inline-flex !important; }
 
-/* Modal backdrop MUST be visible when modal is open */
 .tester-wall.visible .tester-wall-backdrop {
   position: absolute !important;
   inset: 0 !important;
@@ -1408,24 +1242,11 @@ body.mode-tester .tester-badge {
 }
 
 /* ============== V8.1 ACTION BUTTON FIX ============== */
-/* Force .msg to stack bubble + actions vertically */
-.msg {
-  display: flex !important;
-  flex-direction: column !important;
-}
-.msg.user {
-  align-items: flex-end !important;
-}
-.msg.bot {
-  align-items: flex-start !important;
-}
-.msg-bubble {
-  display: block !important;
-  width: auto !important;
-  max-width: 90% !important;
-}
+.msg { display: flex !important; flex-direction: column !important; }
+.msg.user { align-items: flex-end !important; }
+.msg.bot { align-items: flex-start !important; }
+.msg-bubble { display: block !important; width: auto !important; max-width: 90% !important; }
 
-/* Action buttons: small boxes under the answer, always visible */
 .msg-actions {
   display: flex !important;
   flex-direction: row !important;
@@ -1433,7 +1254,7 @@ body.mode-tester .tester-badge {
   gap: 6px !important;
   margin-top: 8px !important;
   padding-left: 4px !important;
-  opacity: 1 !important;  /* Always visible, no hover trick */
+  opacity: 1 !important;
   width: auto !important;
 }
 .msg-action-btn {
@@ -1466,30 +1287,18 @@ body.mode-tester .tester-badge {
   border-color: rgba(16,185,129,0.35) !important;
   color: #34d399 !important;
 }
-.msg-action-btn svg {
-  flex-shrink: 0;
-}
-.msg-action-btn span {
-  display: inline-block !important;
-  white-space: nowrap !important;
-}
+.msg-action-btn svg { flex-shrink: 0; }
+.msg-action-btn span { display: inline-block !important; white-space: nowrap !important; }
 
 /* ============== V8.2: PROFILE + HISTORY + DAILY ============== */
-
-/* Sidebar enhancement: wider, scrollable */
 body.mode-tester .topic-sidebar {
   width: 290px !important;
   overflow-y: auto;
   overflow-x: hidden;
 }
-body.mode-tester .main-content {
-  margin-left: 290px;
-}
+body.mode-tester .main-content { margin-left: 290px; }
 
-.sidebar-header {
-  padding: 14px 14px 10px;
-  border-bottom: none;
-}
+.sidebar-header { padding: 14px 14px 10px; border-bottom: none; }
 .sidebar-newchat-btn {
   width: 100%;
   display: flex;
@@ -1524,7 +1333,6 @@ body.mode-tester .main-content {
   color: #6b6660;
 }
 
-/* DAILY FOCUS WIDGET */
 .sidebar-daily-focus {
   margin: 10px 12px;
   padding: 14px 14px 12px;
@@ -1532,12 +1340,7 @@ body.mode-tester .main-content {
   border: 1px solid rgba(232,66,10,0.18);
   border-radius: 10px;
 }
-.daily-focus-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
+.daily-focus-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .daily-focus-label {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 9.5px;
@@ -1546,29 +1349,10 @@ body.mode-tester .main-content {
   text-transform: uppercase;
   color: #c9a84c;
 }
-.daily-focus-topic {
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-}
-.daily-focus-tip {
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: #f0ede8;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-.daily-focus-action {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: rgba(240,237,232,0.6);
-  margin-bottom: 10px;
-}
-.daily-focus-action-label {
-  color: #c9a84c;
-  font-weight: 600;
-  margin-right: 4px;
-}
+.daily-focus-topic { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; }
+.daily-focus-tip { font-size: 12.5px; line-height: 1.4; color: #f0ede8; margin-bottom: 8px; font-weight: 500; }
+.daily-focus-action { font-size: 11.5px; line-height: 1.4; color: rgba(240,237,232,0.6); margin-bottom: 10px; }
+.daily-focus-action-label { color: #c9a84c; font-weight: 600; margin-right: 4px; }
 .daily-focus-go {
   display: flex;
   align-items: center;
@@ -1586,16 +1370,9 @@ body.mode-tester .main-content {
   cursor: pointer;
   transition: all 0.15s;
 }
-.daily-focus-go:hover {
-  background: #e8420a;
-  border-color: #e8420a;
-  color: #fff;
-}
+.daily-focus-go:hover { background: #e8420a; border-color: #e8420a; color: #fff; }
 
-/* PROFILE CARD */
-.sidebar-profile {
-  margin: 8px 12px;
-}
+.sidebar-profile { margin: 8px 12px; }
 .profile-card-inner {
   display: flex;
   align-items: center;
@@ -1624,29 +1401,10 @@ body.mode-tester .main-content {
   font-size: 18px;
   flex-shrink: 0;
 }
-.profile-info {
-  flex: 1;
-  overflow: hidden;
-}
-.profile-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #f0ede8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.profile-meta {
-  font-size: 11px;
-  color: rgba(240,237,232,0.5);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.profile-edit-icon {
-  color: rgba(240,237,232,0.35);
-  flex-shrink: 0;
-}
+.profile-info { flex: 1; overflow: hidden; }
+.profile-name { font-size: 13px; font-weight: 600; color: #f0ede8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-meta { font-size: 11px; color: rgba(240,237,232,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-edit-icon { color: rgba(240,237,232,0.35); flex-shrink: 0; }
 .profile-create-btn {
   width: 100%;
   display: flex;
@@ -1664,24 +1422,11 @@ body.mode-tester .main-content {
   cursor: pointer;
   transition: all 0.15s;
 }
-.profile-create-btn:hover {
-  background: rgba(201,168,76,0.14);
-  border-color: #c9a84c;
-}
+.profile-create-btn:hover { background: rgba(201,168,76,0.14); border-color: #c9a84c; }
 
-/* CHAT HISTORY */
-.sidebar-chat-history {
-  padding: 4px 8px 30px;
-}
-.chat-history-empty {
-  padding: 12px 14px;
-  font-size: 12px;
-  color: rgba(240,237,232,0.35);
-  font-style: italic;
-}
-.chat-history-group {
-  margin-bottom: 12px;
-}
+.sidebar-chat-history { padding: 4px 8px 30px; }
+.chat-history-empty { padding: 12px 14px; font-size: 12px; color: rgba(240,237,232,0.35); font-style: italic; }
+.chat-history-group { margin-bottom: 12px; }
 .chat-history-group-label {
   padding: 6px 10px 4px;
   font-family: 'Inter', sans-serif;
@@ -1700,25 +1445,13 @@ body.mode-tester .main-content {
   transition: all 0.12s;
   position: relative;
 }
-.chat-history-item:hover {
-  background: rgba(255,255,255,0.04);
-}
+.chat-history-item:hover { background: rgba(255,255,255,0.04); }
 .chat-history-item.active {
   background: rgba(232,66,10,0.08);
   box-shadow: inset 2px 0 0 #e8420a;
 }
-.chat-history-item-icon {
-  flex-shrink: 0;
-  opacity: 0.6;
-}
-.chat-history-item-title {
-  flex: 1;
-  font-size: 12.5px;
-  color: rgba(240,237,232,0.78);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.chat-history-item-icon { flex-shrink: 0; opacity: 0.6; }
+.chat-history-item-title { flex: 1; font-size: 12.5px; color: rgba(240,237,232,0.78); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chat-history-item-delete {
   flex-shrink: 0;
   background: transparent;
@@ -1730,13 +1463,8 @@ body.mode-tester .main-content {
   opacity: 0;
   transition: all 0.15s;
 }
-.chat-history-item:hover .chat-history-item-delete {
-  opacity: 1;
-}
-.chat-history-item-delete:hover {
-  color: #ef4444;
-  background: rgba(239,68,68,0.1);
-}
+.chat-history-item:hover .chat-history-item-delete { opacity: 1; }
+.chat-history-item-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
 
 /* ============== PROFILE MODAL ============== */
 .profile-modal {
@@ -1748,10 +1476,7 @@ body.mode-tester .main-content {
   justify-content: center;
   padding: 20px;
 }
-.profile-modal.visible {
-  display: flex !important;
-  animation: fade-in 0.25s ease;
-}
+.profile-modal.visible { display: flex !important; animation: fade-in 0.25s ease; }
 .profile-modal-backdrop {
   position: absolute;
   inset: 0;
@@ -1782,10 +1507,7 @@ body.mode-tester .main-content {
   padding: 6px;
   border-radius: 6px;
 }
-.profile-modal-close:hover {
-  background: rgba(255,255,255,0.06);
-  color: #f0ede8;
-}
+.profile-modal-close:hover { background: rgba(255,255,255,0.06); color: #f0ede8; }
 .profile-modal-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 30px;
@@ -1794,16 +1516,9 @@ body.mode-tester .main-content {
   margin-bottom: 8px;
   line-height: 1.1;
 }
-.profile-modal-sub {
-  font-size: 14px;
-  color: rgba(240,237,232,0.65);
-  margin-bottom: 26px;
-  line-height: 1.5;
-}
+.profile-modal-sub { font-size: 14px; color: rgba(240,237,232,0.65); margin-bottom: 26px; line-height: 1.5; }
 
-.profile-form-group {
-  margin-bottom: 16px;
-}
+.profile-form-group { margin-bottom: 16px; }
 .profile-form-group label {
   display: block;
   font-family: 'Barlow Condensed', sans-serif;
@@ -1837,35 +1552,13 @@ body.mode-tester .main-content {
 }
 .profile-form-group input:focus,
 .profile-form-group select:focus,
-.profile-form-group textarea:focus {
-  border-color: #e8420a;
-}
-.profile-form-group textarea {
-  resize: vertical;
-  font-family: 'Inter', sans-serif;
-  line-height: 1.5;
-}
-.profile-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-@media (max-width: 560px) {
-  .profile-form-row { grid-template-columns: 1fr; }
-}
+.profile-form-group textarea:focus { border-color: #e8420a; }
+.profile-form-group textarea { resize: vertical; font-family: 'Inter', sans-serif; line-height: 1.5; }
+.profile-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { .profile-form-row { grid-template-columns: 1fr; } }
 
-.profile-modal-error {
-  color: #ef4444;
-  font-size: 13px;
-  min-height: 16px;
-  margin-bottom: 12px;
-}
-.profile-modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 14px;
-}
+.profile-modal-error { color: #ef4444; font-size: 13px; min-height: 16px; margin-bottom: 12px; }
+.profile-modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 14px; }
 .profile-modal-skip {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.15);
@@ -1878,10 +1571,7 @@ body.mode-tester .main-content {
   cursor: pointer;
   transition: all 0.15s;
 }
-.profile-modal-skip:hover {
-  background: rgba(255,255,255,0.05);
-  color: #f0ede8;
-}
+.profile-modal-skip:hover { background: rgba(255,255,255,0.05); color: #f0ede8; }
 .profile-modal-card .btn-primary {
   background: linear-gradient(135deg, #e8420a, #ff5520);
   color: #fff;
@@ -1896,12 +1586,8 @@ body.mode-tester .main-content {
   cursor: pointer;
   transition: all 0.15s;
 }
-.profile-modal-card .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(232,66,10,0.35);
-}
+.profile-modal-card .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(232,66,10,0.35); }
 
-/* ============== TESTER WALL REDESIGN ============== */
 .tester-wall-primary-cta {
   display: block;
   width: 100%;
@@ -1920,10 +1606,7 @@ body.mode-tester .main-content {
   transition: all 0.15s;
   box-shadow: 0 10px 28px rgba(232,66,10,0.3);
 }
-.tester-wall-primary-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 36px rgba(232,66,10,0.4);
-}
+.tester-wall-primary-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(232,66,10,0.4); }
 
 .tester-wall-divider {
   text-align: center;
@@ -1948,41 +1631,23 @@ body.mode-tester .main-content {
 .tester-wall-divider::before { left: 0; }
 .tester-wall-divider::after { right: 0; }
 
-/* Mobile sidebar */
 @media (max-width: 900px) {
-  body.mode-tester .topic-sidebar {
-    width: 280px !important;
-  }
-  body.mode-tester .main-content {
-    margin-left: 0 !important;
-  }
+  body.mode-tester .topic-sidebar { width: 280px !important; }
+  body.mode-tester .main-content { margin-left: 0 !important; }
 }
 
 /* ============================================
    V8.4: EQUINAT-STYLE LAYOUT (TESTER MODE)
-   ============================================
-   In tester mode, body becomes app-like:
-   - Full viewport height, no page scroll
-   - Sidebar fixed left
-   - Main content: sticky header + scrollable middle + sticky input
-   - Centered welcome state when no chat yet
    ============================================ */
+body.mode-tester { height: 100vh; overflow: hidden; }
 
-body.mode-tester {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Hide site-wide elements not needed in tester app mode */
 body.mode-tester .site-header,
 body.mode-tester .site-footer,
 body.mode-tester .hero,
 body.mode-tester .cta-section,
 body.mode-tester .trust-bar,
 body.mode-tester .topic-header,
-body.mode-tester .question-area {
-  display: none !important;
-}
+body.mode-tester .question-area { display: none !important; }
 
 body.mode-tester .main-content {
   height: 100vh;
@@ -2002,7 +1667,6 @@ body.mode-tester .container {
   margin: 0;
 }
 
-/* Chat wrapper becomes a flat app shell, NOT a rounded card */
 body.mode-tester .chat-wrapper {
   flex: 1;
   display: flex;
@@ -2019,7 +1683,6 @@ body.mode-tester .chat-wrapper {
   box-shadow: none !important;
 }
 
-/* === STICKY TOP HEADER === */
 body.mode-tester .chat-header {
   position: sticky;
   top: 0;
@@ -2036,26 +1699,11 @@ body.mode-tester .chat-header {
   gap: 14px;
 }
 
-body.mode-tester .chat-avatar {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-}
+body.mode-tester .chat-avatar { width: 44px; height: 44px; flex-shrink: 0; }
+body.mode-tester .chat-title { font-size: 19px; font-weight: 700; }
+body.mode-tester .chat-status { font-size: 12px; }
+body.mode-tester .msg-counter-pill { margin-left: auto; }
 
-body.mode-tester .chat-title {
-  font-size: 19px;
-  font-weight: 700;
-}
-
-body.mode-tester .chat-status {
-  font-size: 12px;
-}
-
-body.mode-tester .msg-counter-pill {
-  margin-left: auto;
-}
-
-/* === STICKY PROGRESS BAR (just below header) === */
 body.mode-tester .msg-progress {
   position: sticky;
   top: 76px;
@@ -2067,12 +1715,8 @@ body.mode-tester .msg-progress {
   border: none;
 }
 
-body.mode-tester .msg-progress-fill {
-  height: 100%;
-  border-radius: 0;
-}
+body.mode-tester .msg-progress-fill { height: 100%; border-radius: 0; }
 
-/* === SCROLLABLE CHAT BODY === */
 body.mode-tester .chat-body {
   flex: 1;
   overflow-y: auto;
@@ -2085,14 +1729,12 @@ body.mode-tester .chat-body {
   scroll-behavior: smooth;
 }
 
-/* When welcome state is visible, center it vertically + horizontally */
 body.mode-tester .chat-body.has-welcome {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* === WELCOME STATE (Equinat-style centered hero) === */
 .welcome-state {
   max-width: 760px;
   width: 100%;
@@ -2121,9 +1763,7 @@ body.mode-tester .chat-body.has-welcome {
   font-size: 48px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  box-shadow:
-    0 0 0 4px rgba(232,66,10,0.15),
-    0 20px 50px rgba(232,66,10,0.25);
+  box-shadow: 0 0 0 4px rgba(232,66,10,0.15), 0 20px 50px rgba(232,66,10,0.25);
 }
 
 .welcome-heading {
@@ -2170,19 +1810,8 @@ body.mode-tester .chat-body.has-welcome {
   transform: translateY(-1px);
 }
 
-.welcome-card-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #c9a84c;
-  margin-bottom: 6px;
-  letter-spacing: 0.01em;
-}
-
-.welcome-card-desc {
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: rgba(240,237,232,0.78);
-}
+.welcome-card-title { font-size: 13px; font-weight: 700; color: #c9a84c; margin-bottom: 6px; letter-spacing: 0.01em; }
+.welcome-card-desc { font-size: 13.5px; line-height: 1.45; color: rgba(240,237,232,0.78); }
 
 @media (max-width: 600px) {
   .welcome-suggestions { grid-template-columns: 1fr; }
@@ -2190,12 +1819,8 @@ body.mode-tester .chat-body.has-welcome {
   .welcome-avatar { width: 72px; height: 72px; font-size: 38px; }
 }
 
-/* === TOPIC SUGGESTIONS in chat-body (when topic clicked) === */
-body.mode-tester .topic-suggestions {
-  margin: 0 40px 16px;
-}
+body.mode-tester .topic-suggestions { margin: 0 40px 16px; }
 
-/* === STICKY BOTTOM INPUT BAR === */
 body.mode-tester .input-area {
   position: sticky;
   bottom: 0;
@@ -2209,11 +1834,8 @@ body.mode-tester .input-area {
   border-radius: 0 !important;
 }
 
-body.mode-tester .file-preview {
-  margin: 0 36px 8px !important;
-}
+body.mode-tester .file-preview { margin: 0 36px 8px !important; }
 
-/* === COUNTER (bottom bar) === */
 body.mode-tester .counter {
   padding: 8px 36px 12px;
   border-top: 1px solid rgba(255,255,255,0.04);
@@ -2224,29 +1846,15 @@ body.mode-tester .counter {
   border-radius: 0 !important;
 }
 
-/* === MOBILE: collapse sidebar, full width === */
 @media (max-width: 900px) {
-  body.mode-tester .main-content {
-    margin-left: 0 !important;
-  }
-  body.mode-tester .chat-header {
-    padding: 14px 20px;
-  }
-  body.mode-tester .msg-progress {
-    top: 70px;
-  }
-  body.mode-tester .chat-body {
-    padding: 24px 20px;
-  }
-  body.mode-tester .input-area {
-    padding: 12px 20px !important;
-  }
-  body.mode-tester .counter {
-    padding: 8px 20px 12px;
-  }
+  body.mode-tester .main-content { margin-left: 0 !important; }
+  body.mode-tester .chat-header { padding: 14px 20px; }
+  body.mode-tester .msg-progress { top: 70px; }
+  body.mode-tester .chat-body { padding: 24px 20px; }
+  body.mode-tester .input-area { padding: 12px 20px !important; }
+  body.mode-tester .counter { padding: 8px 20px 12px; }
 }
 
-/* === Top-right floating elements (lang toggle, tester badge) — keep visible === */
 body.mode-tester .lang-toggle,
 body.mode-tester .tester-badge {
   position: fixed;
@@ -2260,12 +1868,7 @@ body.mode-tester .tester-badge {
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-.profile-memories-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
+.profile-memories-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 
 .profile-memories-header label {
   font-family: 'Barlow Condensed', sans-serif;
@@ -2288,17 +1891,9 @@ body.mode-tester .tester-badge {
   font-family: inherit;
 }
 
-.profile-memories-clear:hover {
-  background: rgba(239,68,68,0.08);
-  color: #ef4444;
-  border-color: rgba(239,68,68,0.4);
-}
+.profile-memories-clear:hover { background: rgba(239,68,68,0.08); color: #ef4444; border-color: rgba(239,68,68,0.4); }
 
-.profile-memories-hint {
-  font-size: 12px;
-  color: rgba(240,237,232,0.4);
-  margin: 0 0 12px;
-}
+.profile-memories-hint { font-size: 12px; color: rgba(240,237,232,0.4); margin: 0 0 12px; }
 
 .profile-memories-list {
   max-height: 240px;
@@ -2309,13 +1904,7 @@ body.mode-tester .tester-badge {
   padding: 8px;
 }
 
-.memories-empty {
-  padding: 18px;
-  font-size: 13px;
-  color: rgba(240,237,232,0.4);
-  text-align: center;
-  font-style: italic;
-}
+.memories-empty { padding: 18px; font-size: 13px; color: rgba(240,237,232,0.4); text-align: center; font-style: italic; }
 
 .memory-item {
   display: flex;
@@ -2327,16 +1916,8 @@ body.mode-tester .tester-badge {
   margin-bottom: 2px;
 }
 
-.memory-item:hover {
-  background: rgba(255,255,255,0.03);
-}
-
-.memory-icon {
-  flex-shrink: 0;
-  margin-top: 1px;
-  font-size: 13px;
-  opacity: 0.7;
-}
+.memory-item:hover { background: rgba(255,255,255,0.03); }
+.memory-icon { flex-shrink: 0; margin-top: 1px; font-size: 13px; opacity: 0.7; }
 
 .memory-text {
   flex: 1;
@@ -2349,10 +1930,7 @@ body.mode-tester .tester-badge {
   word-break: break-word;
 }
 
-.memory-text:focus {
-  background: rgba(201,168,76,0.08);
-  box-shadow: inset 0 0 0 1px rgba(201,168,76,0.3);
-}
+.memory-text:focus { background: rgba(201,168,76,0.08); box-shadow: inset 0 0 0 1px rgba(201,168,76,0.3); }
 
 .memory-delete {
   flex-shrink: 0;
@@ -2366,78 +1944,49 @@ body.mode-tester .tester-badge {
   transition: all 0.15s;
 }
 
-.memory-item:hover .memory-delete {
-  opacity: 1;
-}
-
-.memory-delete:hover {
-  background: rgba(239,68,68,0.12);
-  color: #ef4444;
-}
+.memory-item:hover .memory-delete { opacity: 1; }
+.memory-delete:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
 
 /* ============================================
    V8.5: BUG FIX — hide bottom counter in tester mode
-   (top-right counter pill already shows tester progress)
    ============================================ */
-body.mode-tester .counter {
-  display: none !important;
-}
+body.mode-tester .counter { display: none !important; }
 
-/* Ensure top counter pill is visible above other floating elements */
 body.mode-tester .msg-counter-pill {
   display: flex !important;
   margin-left: auto;
-  margin-right: 320px;  /* clear TESTER-MODUS badge (right:220px) + lang-toggle (right:24px) */
+  margin-right: 320px;
   position: relative;
   z-index: 31;
 }
 
 @media (max-width: 1100px) {
-  body.mode-tester .msg-counter-pill {
-    margin-right: 12px;
-  }
-  /* On smaller screens, hide tester badge to make room */
-  body.mode-tester .tester-badge {
-    display: none !important;
-  }
+  body.mode-tester .msg-counter-pill { margin-right: 12px; }
+  body.mode-tester .tester-badge { display: none !important; }
 }
 
 /* ============================================
-   V8.6: FIXES — layout/scroll/memory chips
+   V8.6: FIXES
    ============================================ */
-
-/* Ensure chat-body really scrolls in tester mode (not just at viewport) */
 body.mode-tester .chat-body {
-  display: block;  /* explicit, but messages stack naturally as block-flex msgs */
-  min-height: 0;   /* required for flex children to shrink */
+  display: block;
+  min-height: 0;
   max-height: none;
 }
 
-/* When chat-body has welcome state, override to flex-center */
 body.mode-tester .chat-body.has-welcome {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-/* Add padding bottom to ensure last message clears sticky input */
-body.mode-tester .chat-body:not(.has-welcome) {
-  padding-bottom: 80px !important;
-}
+body.mode-tester .chat-body:not(.has-welcome) { padding-bottom: 80px !important; }
 
-/* Better scrollbar visibility */
-body.mode-tester .chat-body::-webkit-scrollbar {
-  width: 8px;
-}
-body.mode-tester .chat-body::-webkit-scrollbar-thumb {
-  background: rgba(232,66,10,0.25);
-  border-radius: 4px;
-}
-body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(232,66,10,0.4);
-}
+body.mode-tester .chat-body::-webkit-scrollbar { width: 8px; }
+body.mode-tester .chat-body::-webkit-scrollbar-thumb { background: rgba(232,66,10,0.25); border-radius: 4px; }
+body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover { background: rgba(232,66,10,0.4); }
 
-/* ============== MEMORY CHIPS (inline under bot message) ============== */
+/* ============== MEMORY CHIPS ============== */
 .memory-chips {
   display: flex;
   flex-wrap: wrap;
@@ -2466,17 +2015,8 @@ body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.memory-chip.dismissed {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.2s;
-}
-
-.memory-chip-icon {
-  font-size: 12px;
-  line-height: 1;
-}
-
+.memory-chip.dismissed { opacity: 0; transform: scale(0.9); transition: all 0.2s; }
+.memory-chip-icon { font-size: 12px; line-height: 1; }
 .memory-chip-label {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -2485,7 +2025,6 @@ body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
   color: #c084fc;
   text-transform: uppercase;
 }
-
 .memory-chip-text {
   font-weight: 500;
   color: rgba(240,237,232,0.92);
@@ -2511,60 +2050,39 @@ body.mode-tester .chat-body::-webkit-scrollbar-thumb:hover {
   transition: all 0.15s;
 }
 
-.memory-chip-dismiss:hover {
-  background: rgba(239,68,68,0.18);
-  color: #ef4444;
-}
+.memory-chip-dismiss:hover { background: rgba(239,68,68,0.18); color: #ef4444; }
 
-@media (max-width: 600px) {
-  .memory-chip-text {
-    max-width: 200px;
-  }
-}
+@media (max-width: 600px) { .memory-chip-text { max-width: 200px; } }
 
 /* ============================================
    V8.7: SIDEBAR FIXED-TOP + SCROLLABLE-BOTTOM
-   Topics stay visible at top, chats scroll within their section
    ============================================ */
-
-/* Sidebar becomes flex column with fixed top + scrollable bottom */
 body.mode-tester .topic-sidebar {
   display: flex !important;
   flex-direction: column !important;
   height: 100vh;
-  overflow: hidden;  /* outer container doesn't scroll */
+  overflow: hidden;
 }
 
-/* Top header (newer chat button) — fixed */
-body.mode-tester .topic-sidebar .sidebar-header {
-  flex-shrink: 0;
-}
+body.mode-tester .topic-sidebar .sidebar-header { flex-shrink: 0; }
 
-/* Fixed top: Daily + Profile + Topics — never scrolls */
 .sidebar-fixed-top {
   flex-shrink: 0;
   max-height: 65vh;
-  overflow-y: auto;  /* if user has too many things, this section can scroll independently */
+  overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 6px;
 }
 
-/* Sleeker scrollbar for fixed-top */
-.sidebar-fixed-top::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar-fixed-top::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.08);
-  border-radius: 2px;
-}
+.sidebar-fixed-top::-webkit-scrollbar { width: 4px; }
+.sidebar-fixed-top::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
-/* Scrollable bottom: Chat history — takes remaining space, scrolls */
 .sidebar-scrollable-bottom {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 100px;  /* always at least this tall */
+  min-height: 100px;
   border-top: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -2576,7 +2094,6 @@ body.mode-tester .topic-sidebar .sidebar-header {
   min-height: 0;
 }
 
-/* Sticky chat-history label */
 .sidebar-section-divider-sticky {
   position: sticky;
   top: 0;
@@ -2587,7 +2104,7 @@ body.mode-tester .topic-sidebar .sidebar-header {
 }
 
 /* ============================================
-   V8.7: DAILY FOCUS — Personalized View
+   V8.7: DAILY FOCUS
    ============================================ */
 .daily-focus-goal-block {
   margin: 4px 0 10px;
@@ -2605,13 +2122,7 @@ body.mode-tester .topic-sidebar .sidebar-header {
   color: rgba(240,237,232,0.45);
   margin-bottom: 4px;
 }
-.daily-focus-goal-text {
-  font-size: 13px;
-  line-height: 1.4;
-  color: #f0ede8;
-  font-weight: 600;
-  word-break: break-word;
-}
+.daily-focus-goal-text { font-size: 13px; line-height: 1.4; color: #f0ede8; font-weight: 600; word-break: break-word; }
 .daily-focus-stage {
   display: inline-block;
   margin-top: 6px;
@@ -2623,13 +2134,7 @@ body.mode-tester .topic-sidebar .sidebar-header {
   border-radius: 4px;
   letter-spacing: 0.04em;
 }
-.daily-focus-ctxline {
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: rgba(240,237,232,0.6);
-  margin-bottom: 10px;
-  font-style: italic;
-}
+.daily-focus-ctxline { font-size: 11.5px; line-height: 1.45; color: rgba(240,237,232,0.6); margin-bottom: 10px; font-style: italic; }
 
 /* ============================================
    V8.8: DIRCBOT LOGO IN WELCOME STATE
@@ -2643,24 +2148,16 @@ body.mode-tester .topic-sidebar .sidebar-header {
   filter: drop-shadow(0 8px 24px rgba(232,66,10,0.22));
 }
 
-/* Hide old welcome heading when logo is present (logo says it all) */
-.welcome-state-v2 .welcome-heading {
-  display: none;
-}
+.welcome-state-v2 .welcome-heading { display: none; }
 
 @media (max-width: 600px) {
-  .welcome-logo {
-    max-width: 240px;
-  }
+  .welcome-logo { max-width: 240px; }
 }
 
 /* ============================================
-   V8.10: TOP TOPIC-BAR — color-coded, flex-wraps
+   V8.10: TOP TOPIC-BAR
    ============================================ */
-
-.topic-bar {
-  display: none;
-}
+.topic-bar { display: none; }
 
 body.mode-tester .topic-bar {
   display: flex;
@@ -2686,17 +2183,12 @@ body.mode-tester .topic-bar {
   white-space: nowrap;
   font-family: inherit;
   letter-spacing: 0.01em;
-  /* color-coded subtle background using each topic's color */
   background: color-mix(in srgb, var(--pill-color) 9%, rgba(255,255,255,0.02));
   border: 1px solid color-mix(in srgb, var(--pill-color) 22%, rgba(255,255,255,0.06));
   color: color-mix(in srgb, var(--pill-color) 35%, #f0ede8 65%);
 }
 
-.topic-pill svg {
-  flex-shrink: 0;
-  color: var(--pill-color);
-  opacity: 0.95;
-}
+.topic-pill svg { flex-shrink: 0; color: var(--pill-color); opacity: 0.95; }
 
 .topic-pill:hover {
   background: color-mix(in srgb, var(--pill-color) 18%, transparent);
@@ -2713,29 +2205,17 @@ body.mode-tester .topic-bar {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--pill-color) 35%, transparent), 0 2px 12px color-mix(in srgb, var(--pill-color) 22%, transparent);
 }
 
-.topic-pill.active svg {
-  opacity: 1;
-}
+.topic-pill.active svg { opacity: 1; }
 
 @media (max-width: 700px) {
-  body.mode-tester .topic-bar {
-    padding: 9px 14px 10px;
-    gap: 5px;
-  }
-  .topic-pill {
-    font-size: 11.5px;
-    padding: 4px 10px 4px 8px;
-  }
-  .topic-pill svg {
-    width: 12px;
-    height: 12px;
-  }
+  body.mode-tester .topic-bar { padding: 9px 14px 10px; gap: 5px; }
+  .topic-pill { font-size: 11.5px; padding: 4px 10px 4px 8px; }
+  .topic-pill svg { width: 12px; height: 12px; }
 }
 
 /* ============================================
    V8.10: PROJECTS SIDEBAR
    ============================================ */
-
 .sidebar-section-divider-row {
   display: flex !important;
   align-items: center;
@@ -2798,10 +2278,7 @@ body.mode-tester .topic-bar {
   position: relative;
 }
 
-.sidebar-project:hover {
-  background: rgba(255,255,255,0.04);
-  color: #f0ede8;
-}
+.sidebar-project:hover { background: rgba(255,255,255,0.04); color: #f0ede8; }
 
 .sidebar-project.active {
   background: color-mix(in srgb, var(--proj-color, #e8420a) 12%, rgba(255,255,255,0.03));
@@ -2836,16 +2313,9 @@ body.mode-tester .topic-bar {
   transition: opacity 0.15s;
 }
 
-.sidebar-project:hover .sidebar-project-edit {
-  opacity: 1;
-}
+.sidebar-project:hover .sidebar-project-edit { opacity: 1; }
+.sidebar-project-edit:hover { background: rgba(255,255,255,0.08); color: #e8420a; }
 
-.sidebar-project-edit:hover {
-  background: rgba(255,255,255,0.08);
-  color: #e8420a;
-}
-
-/* Project context bar (above chat header, shows current project) */
 .project-context-bar {
   display: none;
   align-items: center;
@@ -2856,9 +2326,7 @@ body.mode-tester .topic-bar {
   font-size: 12.5px;
 }
 
-body.mode-tester .project-context-bar.visible {
-  display: flex;
-}
+body.mode-tester .project-context-bar.visible { display: flex; }
 
 .project-context-icon {
   width: 8px;
@@ -2878,10 +2346,7 @@ body.mode-tester .project-context-bar.visible {
   color: rgba(240,237,232,0.45);
 }
 
-.project-context-name {
-  color: #f0ede8;
-  font-weight: 600;
-}
+.project-context-name { color: #f0ede8; font-weight: 600; }
 
 .project-context-clear {
   margin-left: auto;
@@ -2895,13 +2360,8 @@ body.mode-tester .project-context-bar.visible {
   transition: all 0.15s;
 }
 
-.project-context-clear:hover {
-  background: rgba(255,255,255,0.05);
-  color: #e8420a;
-  border-color: rgba(232,66,10,0.3);
-}
+.project-context-clear:hover { background: rgba(255,255,255,0.05); color: #e8420a; border-color: rgba(232,66,10,0.3); }
 
-/* Project modal */
 .project-modal {
   display: none;
   position: fixed;
@@ -2913,9 +2373,7 @@ body.mode-tester .project-context-bar.visible {
   backdrop-filter: blur(8px);
 }
 
-.project-modal.visible {
-  display: flex;
-}
+.project-modal.visible { display: flex; }
 
 .project-modal-content {
   background: #161616;
@@ -2936,11 +2394,7 @@ body.mode-tester .project-context-bar.visible {
   margin-bottom: 6px;
 }
 
-.project-modal-sub {
-  font-size: 13px;
-  color: rgba(240,237,232,0.55);
-  margin-bottom: 20px;
-}
+.project-modal-sub { font-size: 13px; color: rgba(240,237,232,0.55); margin-bottom: 20px; }
 
 .project-modal-close {
   position: absolute;
@@ -2953,9 +2407,7 @@ body.mode-tester .project-context-bar.visible {
   padding: 4px;
 }
 
-.project-form-group {
-  margin-bottom: 14px;
-}
+.project-form-group { margin-bottom: 14px; }
 
 .project-form-group label {
   display: block;
@@ -2984,15 +2436,9 @@ body.mode-tester .project-context-bar.visible {
 }
 
 .project-form-group input:focus,
-.project-form-group textarea:focus {
-  border-color: rgba(232,66,10,0.5);
-}
+.project-form-group textarea:focus { border-color: rgba(232,66,10,0.5); }
 
-.project-color-picker {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.project-color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .project-color-swatch {
   width: 28px;
@@ -3004,21 +2450,10 @@ body.mode-tester .project-context-bar.visible {
   position: relative;
 }
 
-.project-color-swatch:hover {
-  transform: scale(1.1);
-}
+.project-color-swatch:hover { transform: scale(1.1); }
+.project-color-swatch.selected { border-color: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.5); }
 
-.project-color-swatch.selected {
-  border-color: #fff;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-}
-
-.project-modal-footer {
-  display: flex;
-  gap: 8px;
-  margin-top: 20px;
-  justify-content: flex-end;
-}
+.project-modal-footer { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
 
 .project-modal-btn {
   padding: 9px 16px;
@@ -3037,10 +2472,7 @@ body.mode-tester .project-context-bar.visible {
   color: rgba(240,237,232,0.7);
 }
 
-.project-modal-btn-cancel:hover {
-  border-color: rgba(255,255,255,0.25);
-  color: #f0ede8;
-}
+.project-modal-btn-cancel:hover { border-color: rgba(255,255,255,0.25); color: #f0ede8; }
 
 .project-modal-btn-delete {
   background: transparent;
@@ -3049,27 +2481,18 @@ body.mode-tester .project-context-bar.visible {
   margin-right: auto;
 }
 
-.project-modal-btn-delete:hover {
-  background: rgba(239,68,68,0.1);
-  border-color: rgba(239,68,68,0.6);
-}
+.project-modal-btn-delete:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.6); }
 
-.project-modal-btn-save {
-  background: linear-gradient(135deg, #e8420a, #c9a84c);
-  color: #fff;
-}
-
-.project-modal-btn-save:hover {
-  filter: brightness(1.1);
-}
+.project-modal-btn-save { background: linear-gradient(135deg, #e8420a, #c9a84c); color: #fff; }
+.project-modal-btn-save:hover { filter: brightness(1.1); }
 
 /* ============================================
-   V8.11: TOPIC HIGHLIGHT CARD (Today's tip per category)
+   V8.11: TOPIC HIGHLIGHT CARD
    ============================================ */
 .topic-highlight-card {
-  grid-column: 1 / -1;  /* spans full grid width above the 2x2 suggestion cards */
-  background: linear-gradient(135deg, 
-    color-mix(in srgb, var(--topic-color) 12%, rgba(15,15,15,0.6)) 0%, 
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--topic-color) 12%, rgba(15,15,15,0.6)) 0%,
     color-mix(in srgb, var(--topic-color) 4%, rgba(15,15,15,0.4)) 100%);
   border: 1px solid color-mix(in srgb, var(--topic-color) 35%, rgba(255,255,255,0.05));
   border-radius: 12px;
@@ -3100,13 +2523,7 @@ body.mode-tester .project-context-bar.visible {
   margin-bottom: 8px;
 }
 
-.topic-highlight-tip {
-  font-size: 14.5px;
-  line-height: 1.45;
-  color: #f0ede8;
-  font-weight: 500;
-  margin-bottom: 12px;
-}
+.topic-highlight-tip { font-size: 14.5px; line-height: 1.45; color: #f0ede8; font-weight: 500; margin-bottom: 12px; }
 
 .topic-highlight-action {
   display: flex;
@@ -3143,9 +2560,7 @@ body.mode-tester .project-context-bar.visible {
   padding-top: 2px;
 }
 
-.topic-highlight-action-text {
-  flex: 1;
-}
+.topic-highlight-action-text { flex: 1; }
 
 .topic-highlight-action svg {
   flex-shrink: 0;
@@ -3154,10 +2569,7 @@ body.mode-tester .project-context-bar.visible {
   opacity: 0.8;
 }
 
-.topic-highlight-action:hover svg {
-  opacity: 1;
-  transform: translateX(2px);
-}
+.topic-highlight-action:hover svg { opacity: 1; transform: translateX(2px); }
 
 /* ============================================
    V8.11: CHAT → PROJECT MOVE
@@ -3185,14 +2597,8 @@ body.mode-tester .project-context-bar.visible {
   transition: all 0.15s;
 }
 
-.chat-history-item:hover .chat-history-item-move {
-  opacity: 1;
-}
-
-.chat-history-item-move:hover {
-  background: rgba(232,66,10,0.15);
-  color: #e8420a;
-}
+.chat-history-item:hover .chat-history-item-move { opacity: 1; }
+.chat-history-item-move:hover { background: rgba(232,66,10,0.15); color: #e8420a; }
 
 .move-to-project-menu {
   position: fixed;
@@ -3241,30 +2647,12 @@ body.mode-tester .project-context-bar.visible {
   transition: background 0.12s;
 }
 
-.move-menu-item:hover {
-  background: rgba(255,255,255,0.05);
-  color: #f0ede8;
-}
+.move-menu-item:hover { background: rgba(255,255,255,0.05); color: #f0ede8; }
+.move-menu-item.active { background: rgba(232,66,10,0.1); color: #f0ede8; }
 
-.move-menu-item.active {
-  background: rgba(232,66,10,0.1);
-  color: #f0ede8;
-}
+.move-menu-dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; }
 
-.move-menu-dot {
-  flex-shrink: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
-.move-menu-empty {
-  padding: 10px 12px;
-  font-size: 12px;
-  color: rgba(240,237,232,0.45);
-  font-style: italic;
-  line-height: 1.4;
-}
+.move-menu-empty { padding: 10px 12px; font-size: 12px; color: rgba(240,237,232,0.45); font-style: italic; line-height: 1.4; }
 
 /* ============================================
    V8.11: DAILY PLAN HISTORY + STREAK BADGE
@@ -3299,24 +2687,11 @@ body.mode-tester .project-context-bar.visible {
   transition: color 0.15s;
 }
 
-.daily-focus-history-btn:hover {
-  color: #e8420a;
-}
+.daily-focus-history-btn:hover { color: #e8420a; }
 
-/* Daily plan history modal */
-.dph-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 2px;
-  margin: 8px 0;
-  max-height: 50vh;
-}
-
+.dph-list { flex: 1; overflow-y: auto; padding: 4px 2px; margin: 8px 0; max-height: 50vh; }
 .dph-list::-webkit-scrollbar { width: 5px; }
-.dph-list::-webkit-scrollbar-thumb {
-  background: rgba(232,66,10,0.2);
-  border-radius: 3px;
-}
+.dph-list::-webkit-scrollbar-thumb { background: rgba(232,66,10,0.2); border-radius: 3px; }
 
 .dph-entry {
   padding: 11px 13px;
@@ -3327,13 +2702,7 @@ body.mode-tester .project-context-bar.visible {
   border-radius: 7px;
 }
 
-.dph-entry-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
+.dph-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .dph-entry-date {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 11px;
@@ -3341,14 +2710,40 @@ body.mode-tester .project-context-bar.visible {
   letter-spacing: 0.14em;
   color: rgba(240,237,232,0.55);
 }
+.dph-entry-topic { font-size: 11.5px; font-weight: 600; }
+.dph-entry-summary { font-size: 13px; line-height: 1.5; color: rgba(240,237,232,0.88); }
 
-.dph-entry-topic {
-  font-size: 11.5px;
-  font-weight: 600;
+/* ============================================
+   V8.16: MOBILE INPUT-BAR FIX (Tester-Modus)
+   ============================================
+   Problem: Auf dem Handy verdeckt das Eingabefeld die letzte Antwort.
+   Ursache: 100vh ignoriert die mobile Browser-Leiste → die App-Shell
+   ist höher als der sichtbare Bereich, das sticky Eingabefeld landet
+   unter der Browser-UI / über der letzten Nachricht.
+   Fix: dynamische Viewport-Höhe (dvh) + mehr Platz unten + Safe-Area.
+   Desktop bleibt unverändert (dvh == vh am Desktop).
+   ============================================ */
+
+/* 1. Echte sichtbare Höhe statt 100vh (adressleisten-bewusst) */
+body.mode-tester { height: 100dvh; }
+body.mode-tester .main-content { height: 100dvh; }
+body.mode-tester .topic-sidebar { height: 100dvh; }
+
+/* 2. Letzte Nachricht klar über dem Eingabefeld halten
+      (Eingabefeld ~48px + Paddings + iPhone-Home-Indikator) */
+body.mode-tester .chat-body:not(.has-welcome) {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+  scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
-.dph-entry-summary {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(240,237,232,0.88);
+/* 3. Eingabefeld über den iPhone-Home-Indikator heben */
+body.mode-tester .input-area {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+}
+
+/* 4. Auf kleinen Phones etwas mehr Luft */
+@media (max-width: 700px) {
+  body.mode-tester .chat-body:not(.has-welcome) {
+    padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important;
+  }
 }
