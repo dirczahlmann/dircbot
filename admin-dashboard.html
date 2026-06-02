@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DircBot Admin · Tracking Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --orange: #e8420a;
+    --orange-bright: #ff5520;
+    --gold: #c9a84c;
+    --bg: #0a0a0a;
+    --bg-card: #111;
+    --bg-elevated: #1a1a1a;
+    --text: #f0ede8;
+    --text-dim: rgba(240,237,232,0.65);
+    --text-muted: rgba(240,237,232,0.4);
+    --border: rgba(255,255,255,0.08);
+    --green: #34d399;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .header h1 .orange { color: var(--orange); }
+  .header-actions { display: flex; gap: 10px; }
+  .btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn.primary {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .btn.primary:hover {
+    background: var(--orange-bright);
+    border-color: var(--orange-bright);
+    color: #fff;
+  }
+  .btn.small { padding: 6px 11px; font-size: 12px; }
+
+  /* AUTH GATE */
+  .auth-gate {
+    max-width: 420px;
+    margin: 100px auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 32px;
+    text-align: center;
+  }
+  .auth-gate h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .auth-gate p { color: var(--text-dim); font-size: 14px; margin-bottom: 22px; }
+  .auth-gate input {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 13px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 14px;
+    outline: none;
+  }
+  .auth-gate input:focus { border-color: var(--gold); }
+  .auth-error {
+    color: var(--red);
+    background: rgba(239,68,68,0.1);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .auth-error.visible { display: block; }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--accent-color, var(--orange));
+  }
+  .stat-card[data-color="green"] { --accent-color: var(--green); }
+  .stat-card[data-color="blue"] { --accent-color: var(--blue); }
+  .stat-card[data-color="gold"] { --accent-color: var(--gold); }
+  .stat-card[data-color="purple"] { --accent-color: var(--purple); }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+
+  /* COST PANEL */
+  .cost-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 28px;
+  }
+  .cost-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .cost-panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .cost-panel-total {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--text);
+  }
+  .cost-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .cost-row {
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+  }
+  .cost-row-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cost-row-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  /* TESTERS TABLE */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+  .panel-actions { display: flex; gap: 8px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: rgba(255,255,255,0.02);
+    text-align: left;
+    padding: 12px 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  tr:hover td { background: rgba(232,66,10,0.03); }
+  tr:last-child td { border-bottom: none; }
+  .code-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .badge.active { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge.paused { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.shared { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge.personal { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .progress-bar {
+    width: 80px;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--gold));
+  }
+  .progress-fill.high { background: linear-gradient(90deg, var(--gold), var(--orange)); }
+  .progress-fill.critical { background: linear-gradient(90deg, var(--orange), var(--red)); }
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  /* INVITE FORM */
+  .invite-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    padding: 20px;
+    background: rgba(232,66,10,0.05);
+    border: 1px dashed rgba(232,66,10,0.25);
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .invite-form input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+  }
+  .invite-form input:focus { border-color: var(--gold); }
+  @media (max-width: 700px) {
+    .invite-form { grid-template-columns: 1fr; }
+  }
+  .invite-result {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.25);
+    border-radius: 8px;
+    display: none;
+  }
+  .invite-result.visible { display: block; }
+  .invite-result .new-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+  .invite-result .new-code-copy {
+    margin-left: 12px;
+    background: rgba(52,211,153,0.15);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  /* CHAT VIEWER MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-content {
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 40px;
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--orange); }
+  .chat-message {
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    border-left: 3px solid var(--blue);
+  }
+  .chat-message-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .chat-message-model {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--purple);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .chat-q {
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .chat-a {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.55;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+  }
+  .chat-tokens {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+  .loading::after {
+    content: '...';
+    animation: dots 1.5s infinite;
+  }
+  @keyframes dots {
+    0%,20% { content: '.'; }
+    40% { content: '..'; }
+    60%,100% { content: '...'; }
+  }
+
+  .timestamp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Hidden Hint Forms — werden von Netlify gescannt */
+  .hint-forms { display: none; }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div class="container" id="authView">
+  <div class="auth-gate">
+    <h2>DircBot Admin</h2>
+    <p>Bitte Admin-Key eingeben, um auf das Dashboard zuzugreifen.</p>
+    <div class="auth-error" id="authError">Falscher Admin-Key. Bitte erneut versuchen.</div>
+    <input type="password" id="adminKey" placeholder="Admin Key" autocomplete="off">
+    <button class="btn primary" style="width:100%;padding:14px;" onclick="authenticate()">Login</button>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD (versteckt bis nach Login) -->
+<div class="container" id="dashboardView" style="display:none;">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1><span class="orange">DircBot</span> Admin · Tracking Dashboard</h1>
+    <div class="header-actions">
+      <button class="btn" onclick="loadDashboard()">↻ Refresh</button>
+      <button class="btn" onclick="exportData()">⬇ Export JSON</button>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card" data-color="blue">
+      <div class="stat-label">Total Testers</div>
+      <div class="stat-value" id="statTotalTesters">—</div>
+      <div class="stat-sub" id="statActiveTesters">— active</div>
+    </div>
+    <div class="stat-card" data-color="green">
+      <div class="stat-label">Total Messages</div>
+      <div class="stat-value" id="statTotalMessages">—</div>
+      <div class="stat-sub" id="statMessages24h">— last 24h</div>
+    </div>
+    <div class="stat-card" data-color="purple">
+      <div class="stat-label">Messages (7 days)</div>
+      <div class="stat-value" id="statMessages7d">—</div>
+      <div class="stat-sub">last week</div>
+    </div>
+    <div class="stat-card" data-color="gold">
+      <div class="stat-label">Total Cost (USD)</div>
+      <div class="stat-value" id="statTotalCost">—</div>
+      <div class="stat-sub">since beta start</div>
+    </div>
+  </div>
+
+  <!-- COST PANEL -->
+  <div class="cost-panel">
+    <div class="cost-panel-header">
+      <div class="cost-panel-title">💰 Cost Breakdown by Model</div>
+      <div class="cost-panel-total" id="costTotalDisplay">$0.00</div>
+    </div>
+    <div class="cost-breakdown" id="costBreakdown">
+      <div class="cost-row">
+        <div class="cost-row-label">Haiku</div>
+        <div class="cost-row-value" id="costHaiku">$0.00</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-row-label">Sonnet</div>
+        <div class="cost-row-value" id="costSonnet">$0.00</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-row-label">Opus</div>
+        <div class="cost-row-value" id="costOpus">$0.00</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-row-label">Other</div>
+        <div class="cost-row-value" id="costOther">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITE NEW TESTER -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">+ Neuer Tester-Code</div>
+    </div>
+    <div style="padding: 20px;">
+      <div class="invite-form">
+        <input type="text" id="inviteName" placeholder="Name (z.B. Max Mustermann)">
+        <input type="email" id="inviteEmail" placeholder="Email (z.B. max@beispiel.de)">
+        <button class="btn primary" onclick="createInvite()">Code generieren</button>
+      </div>
+      <div class="invite-result" id="inviteResult">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            ✓ Neuer Code für <strong id="inviteResultName"></strong>:
+            <span class="new-code" id="inviteResultCode"></span>
+          </div>
+          <button class="new-code-copy" onclick="copyCode()">Kopieren</button>
+        </div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
+          Schicke diesen Code per E-Mail an <span id="inviteResultEmail"></span>. Der Tester loggt sich damit auf bot.dirczahlmann.com ein.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTERS TABLE -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Tester</div>
+      <div class="panel-actions">
+        <button class="btn small" onclick="filterTesters('all')">Alle</button>
+        <button class="btn small" onclick="filterTesters('personal')">Personal</button>
+        <button class="btn small" onclick="filterTesters('shared-legacy')">Shared</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="testersTable">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Messages</th>
+            <th>Cost</th>
+            <th>Last Activity</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="testersTbody">
+          <tr><td colspan="9" class="loading">Lade Daten</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- CHAT VIEWER MODAL -->
+<div class="modal-overlay" id="chatModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;" id="chatModalTitle">Chat-Verlauf</h2>
+        <div style="color:var(--text-dim);font-size:13px;margin-top:4px;" id="chatModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeChatModal()">×</button>
+    </div>
+    <div id="chatModalBody">
+      <div class="loading">Lade Nachrichten</div>
+    </div>
+  </div>
+</div>
+
+<!-- Versteckte Forms — damit Netlify die beiden Datenbank-Forms beim Build erkennt -->
+<div class="hint-forms">
+  <form name="dirc-codes" netlify hidden>
+    <input type="text" name="code">
+    <input type="email" name="email">
+    <input type="text" name="name">
+    <input type="text" name="status">
+    <input type="text" name="source">
+    <input type="text" name="created">
+    <input type="text" name="messageLimit">
+  </form>
+  <form name="dirc-messages" netlify hidden>
+    <input type="email" name="email">
+    <input type="text" name="code">
+    <input type="text" name="user_name">
+    <input type="text" name="model_label">
+    <input type="text" name="question">
+    <input type="text" name="answer">
+    <input type="text" name="tokens_in">
+    <input type="text" name="tokens_out">
+    <input type="text" name="timestamp">
+  </form>
+</div>
+
+<script>
+  // ========= STATE =========
+  let ADMIN_KEY = null;
+  let currentTesters = [];
+  let currentFilter = 'all';
+
+  // ========= AUTH =========
+  function authenticate() {
+    const key = document.getElementById('adminKey').value.trim();
+    if (!key) return;
+    // Test-Call — wenn 403, ist der Key falsch
+    fetch(`/.netlify/functions/admin-data?view=overview&key=${encodeURIComponent(key)}`)
+      .then(r => {
+        if (r.status === 403) {
+          document.getElementById('authError').classList.add('visible');
+          return;
+        }
+        if (!r.ok) throw new Error('Server error');
+        ADMIN_KEY = key;
+        // Optional: in sessionStorage speichern für Page-Refresh
+        sessionStorage.setItem('dircbot_admin_key', key);
+        document.getElementById('authView').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'block';
+        loadDashboard();
+      })
+      .catch(err => {
+        document.getElementById('authError').textContent = 'Verbindungsfehler: ' + err.message;
+        document.getElementById('authError').classList.add('visible');
+      });
+  }
+  document.getElementById('adminKey').addEventListener('keypress', e => {
+    if (e.key === 'Enter') authenticate();
+  });
+
+  function logout() {
+    sessionStorage.removeItem('dircbot_admin_key');
+    location.reload();
+  }
+
+  // Auto-Login wenn Key in Session
+  (function() {
+    const stored = sessionStorage.getItem('dircbot_admin_key');
+    if (stored) {
+      document.getElementById('adminKey').value = stored;
+      authenticate();
+    }
+  })();
+
+  // ========= DASHBOARD =========
+  async function loadDashboard() {
+    try {
+      const resp = await fetch(`/.netlify/functions/admin-data?view=overview&key=${encodeURIComponent(ADMIN_KEY)}`);
+      const data = await resp.json();
+
+      // Stats
+      document.getElementById('statTotalTesters').textContent = data.stats.totalTesters;
+      document.getElementById('statActiveTesters').textContent = `${data.stats.activeTesters} active`;
+      document.getElementById('statTotalMessages').textContent = data.stats.totalMessages;
+      document.getElementById('statMessages24h').textContent = `${data.stats.messagesLast24h} last 24h`;
+      document.getElementById('statMessages7d').textContent = data.stats.messagesLast7d;
+      document.getElementById('statTotalCost').textContent = '$' + data.stats.totalCost.toFixed(2);
+
+      // Cost Breakdown
+      document.getElementById('costTotalDisplay').textContent = '$' + data.stats.totalCost.toFixed(4);
+      document.getElementById('costHaiku').textContent = '$' + data.stats.costByModel.haiku.toFixed(4);
+      document.getElementById('costSonnet').textContent = '$' + data.stats.costByModel.sonnet.toFixed(4);
+      document.getElementById('costOpus').textContent = '$' + data.stats.costByModel.opus.toFixed(4);
+      document.getElementById('costOther').textContent = '$' + data.stats.costByModel.other.toFixed(4);
+
+      // Testers
+      currentTesters = data.testers;
+      renderTesters();
+    } catch (err) {
+      console.error(err);
+      alert('Fehler beim Laden: ' + err.message);
+    }
+  }
+
+  function filterTesters(filter) {
+    currentFilter = filter;
+    renderTesters();
+  }
+
+  function renderTesters() {
+    const tbody = document.getElementById('testersTbody');
+    let filtered = currentTesters;
+    if (currentFilter === 'personal') filtered = filtered.filter(t => t.source === 'personal');
+    if (currentFilter === 'shared-legacy') filtered = filtered.filter(t => t.source === 'shared-legacy');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Noch keine Tester · Generiere unten den ersten Code</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(t => {
+      const limit = t.messageLimit || 500;
+      const pct = Math.min(100, Math.round((t.messageCount / limit) * 100));
+      const progressClass = pct > 80 ? 'critical' : (pct > 50 ? 'high' : '');
+      const lastAct = t.lastActivity
+        ? formatRelative(t.lastActivity)
+        : '<span style="color:var(--text-muted);">never</span>';
+      const statusBadge = `<span class="badge ${t.status}">${t.status}</span>`;
+      const sourceBadge = t.source === 'shared-legacy'
+        ? '<span class="badge shared">Shared</span>'
+        : '<span class="badge personal">Personal</span>';
+
+      return `<tr>
+        <td class="code-cell">${escapeHtml(t.code || '—')}</td>
+        <td>${escapeHtml(t.name || '—')}</td>
+        <td style="color:var(--text-dim);font-size:13px;">${escapeHtml(t.email || '—')}</td>
+        <td>${sourceBadge}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width:${pct}%"></div></div>
+          <span class="timestamp">${t.messageCount}/${limit}</span>
+        </td>
+        <td><span class="timestamp">$${(t.totalCost || 0).toFixed(4)}</span></td>
+        <td class="timestamp">${lastAct}</td>
+        <td><button class="btn small" onclick="viewChats('${escapeHtml(t.email)}','${escapeHtml(t.name)}')">Chats</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function formatRelative(iso) {
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return 'just now';
+    if (min < 60) return `${min}m ago`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `${h}h ago`;
+    const days = Math.floor(h / 24);
+    if (days < 30) return `${days}d ago`;
+    return d.toLocaleDateString();
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+
+  // ========= CHAT VIEWER =========
+  async function viewChats(email, name) {
+    document.getElementById('chatModalTitle').textContent = name || email;
+    document.getElementById('chatModalSubtitle').textContent = email;
+    document.getElementById('chatModalBody').innerHTML = '<div class="loading">Lade Nachrichten</div>';
+    document.getElementById('chatModal').classList.add('visible');
+
+    try {
+      const resp = await fetch(`/.netlify/functions/admin-data?view=chats&email=${encodeURIComponent(email)}&key=${encodeURIComponent(ADMIN_KEY)}`);
+      const data = await resp.json();
+      const body = document.getElementById('chatModalBody');
+
+      if (!data.messages || data.messages.length === 0) {
+        body.innerHTML = '<div class="empty-state">Keine Nachrichten von diesem Tester</div>';
+        return;
+      }
+
+      const summary = `<div style="padding:14px;background:rgba(232,66,10,0.08);border-radius:8px;margin-bottom:18px;font-size:13px;color:var(--text-dim);">
+        <strong>${data.totalMessages}</strong> Nachrichten · Kosten total: <strong style="color:var(--gold);">$${data.totalCost.toFixed(4)}</strong>
+      </div>`;
+
+      const messages = data.messages.map(m => `
+        <div class="chat-message">
+          <div class="chat-message-meta">
+            <span>${new Date(m.timestamp).toLocaleString('de-DE')}</span>
+            <span class="chat-message-model">${escapeHtml(m.model || 'unknown')}</span>
+          </div>
+          <div class="chat-q">→ ${escapeHtml(m.question || '')}</div>
+          <div class="chat-a">${escapeHtml(m.answer || '')}</div>
+          <div class="chat-tokens">in: ${m.tokens_in} · out: ${m.tokens_out} · $${m.cost.toFixed(5)}</div>
+        </div>
+      `).join('');
+
+      body.innerHTML = summary + messages;
+    } catch (err) {
+      document.getElementById('chatModalBody').innerHTML = '<div class="empty-state">Fehler: ' + err.message + '</div>';
+    }
+  }
+
+  function closeChatModal() {
+    document.getElementById('chatModal').classList.remove('visible');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeChatModal();
+  });
+
+  // ========= INVITE =========
+  async function createInvite() {
+    const name = document.getElementById('inviteName').value.trim();
+    const email = document.getElementById('inviteEmail').value.trim();
+    if (!name || !email) {
+      alert('Bitte Name und Email eingeben');
+      return;
+    }
+
+    try {
+      const resp = await fetch('/.netlify/functions/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', adminKey: ADMIN_KEY, name, email })
+      });
+      const data = await resp.json();
+
+      if (data.success === false && data.existingCode) {
+        alert(`Diese Email hat bereits einen Code: ${data.existingCode}`);
+        return;
+      }
+      if (!data.success) {
+        alert('Fehler: ' + (data.error || 'unknown'));
+        return;
+      }
+
+      document.getElementById('inviteResultName').textContent = name;
+      document.getElementById('inviteResultEmail').textContent = email;
+      document.getElementById('inviteResultCode').textContent = data.code;
+      document.getElementById('inviteResult').classList.add('visible');
+      document.getElementById('inviteName').value = '';
+      document.getElementById('inviteEmail').value = '';
+
+      // Liste neu laden, damit der neue Tester direkt erscheint
+      setTimeout(loadDashboard, 800);
+    } catch (err) {
+      alert('Netzwerk-Fehler: ' + err.message);
+    }
+  }
+
+  function copyCode() {
+    const code = document.getElementById('inviteResultCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.querySelector('.new-code-copy');
+      const original = btn.textContent;
+      btn.textContent = '✓ kopiert';
+      setTimeout(() => btn.textContent = original, 1500);
+    });
+  }
+
+  // ========= EXPORT =========
+  function exportData() {
+    window.location.href = `/.netlify/functions/admin-data?view=export&key=${encodeURIComponent(ADMIN_KEY)}`;
+  }
+</script>
+
+</body>
+</html>
