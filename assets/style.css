@@ -2747,3 +2747,95 @@ body.mode-tester .input-area {
     padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important;
   }
 }
+
+/* ============================================
+   V10: MOBILE SIDEBAR FIX + HAMBURGER
+   ============================================
+   Problem: Auf dem Handy blieb die Sidebar permanent sichtbar
+   und nahm ~75% der Breite weg — Chat war unlesbar.
+   Ursache: V8-Safety-Override mit !important schlug die
+   Mobile-Regel, die sie eigentlich einfahren sollte.
+   Fix: Mobile-First Wegklappen + Hamburger-Button + Backdrop.
+   Desktop (>900px) bleibt unverändert.
+   ============================================ */
+
+/* Hamburger button — Default versteckt, erscheint nur in Tester-Modus auf Mobile */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 14px;
+  z-index: 60;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20,20,20,0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #f0ede8;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+}
+.mobile-menu-btn:hover {
+  background: rgba(232,66,10,0.15);
+  border-color: rgba(232,66,10,0.5);
+  color: #e8420a;
+}
+
+/* Backdrop hinter offener Sidebar */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 49;
+  animation: fade-in 0.2s ease;
+}
+body.sidebar-open .sidebar-backdrop { display: block; }
+
+/* ---- MOBILE (<=900px) ---- */
+@media (max-width: 900px) {
+
+  /* Hamburger erscheint im Tester-Modus */
+  body.mode-tester .mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Sidebar Default: eingefahren — überschreibt die !important-Safety-Override */
+  body.mode-tester .topic-sidebar {
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    width: 290px !important;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  }
+
+  /* Sidebar offen wenn body.sidebar-open */
+  body.mode-tester.sidebar-open .topic-sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* Hauptbereich nimmt volle Breite — kein Versatz mehr für Sidebar */
+  body.mode-tester .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Chat-Header bekommt links Platz für den Hamburger-Button */
+  body.mode-tester .chat-header {
+    padding-left: 68px !important;
+  }
+
+  /* Lang-toggle + tester-badge kollidieren nicht mit Hamburger
+     (Hamburger sitzt links, beide oben rechts — bleibt) */
+  body.mode-tester .tester-badge { display: none !important; }
+}
+
+/* Auf Desktop bleibt der Hamburger ausgeblendet */
+@media (min-width: 901px) {
+  .mobile-menu-btn { display: none !important; }
+  .sidebar-backdrop { display: none !important; }
+}
