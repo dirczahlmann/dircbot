@@ -2839,3 +2839,90 @@ body.sidebar-open .sidebar-backdrop { display: block; }
   .mobile-menu-btn { display: none !important; }
   .sidebar-backdrop { display: none !important; }
 }
+/* ============================================
+   V10.1: MOBILE POLISH (Phones <=700px)
+   ============================================
+   Fixes nach V10:
+   1. Sprach-Toggle überlappt den Chat-Header → kleiner + verschoben
+   2. Topic-Pills laufen rechts ab → horizontal scrollbar statt wrap
+   3. Eingabefeld zu klein/abgeschnitten → Mindesthöhe + korrigiertes Padding
+   Greift nur auf Phones; Desktop/Tablet bleibt unverändert.
+   ============================================ */
+
+@media (max-width: 700px) {
+
+  /* ---- 1. SPRACH-TOGGLE: kompakter, nicht über Header ---- */
+  body.mode-tester .lang-toggle {
+    top: 12px !important;
+    right: 12px !important;
+    padding: 3px !important;
+    gap: 2px !important;
+    border-radius: 5px !important;
+  }
+  body.mode-tester .lang-toggle button {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* Chat-Header etwas mehr Luft rechts, damit Status nicht unter Toggle rutscht */
+  body.mode-tester .chat-header {
+    padding-right: 110px !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+  body.mode-tester .chat-title { font-size: 16px !important; }
+  body.mode-tester .chat-status { font-size: 10.5px !important; }
+
+  /* Message-Counter-Pill nur anzeigen, wenn Platz ist — auf schmalen Phones aus */
+  body.mode-tester .msg-counter-pill {
+    display: none !important;
+  }
+
+  /* ---- 2. TOPIC-PILLS: horizontal scrollbar statt wrap ---- */
+  body.mode-tester .topic-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;          /* Firefox: keine Scrollbar */
+    padding: 10px 14px !important;
+  }
+  body.mode-tester .topic-bar::-webkit-scrollbar {
+    display: none;                  /* WebKit: keine Scrollbar */
+  }
+  body.mode-tester .topic-pill {
+    flex-shrink: 0 !important;       /* Pills nicht zusammendrücken */
+  }
+
+  /* ---- 3. EINGABEFELD: sichtbare Mindesthöhe ---- */
+  body.mode-tester .input-area {
+    min-height: 68px !important;
+    padding: 10px 14px calc(12px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+  }
+  body.mode-tester .input-area form {
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  body.mode-tester .input-area input[type="text"] {
+    min-height: 44px !important;
+    font-size: 16px !important;    /* 16px verhindert iOS-Zoom beim Tap */
+    padding: 10px 14px !important;
+  }
+  body.mode-tester .input-area button {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0 !important;
+  }
+  /* Auf ganz schmalen Phones (≤380px) Attach-Button verstecken,
+     damit Eingabefeld + Mic + Send genug Platz haben */
+  @media (max-width: 380px) {
+    body.mode-tester #attachBtn { display: none !important; }
+  }
+
+  /* Padding-bottom im Chat-Body an das echte Eingabefeld anpassen */
+  body.mode-tester .chat-body:not(.has-welcome) {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+}
