@@ -6,14 +6,22 @@
 <title>DircBot — Your AI Coach</title>
 <meta name="description" content="DircBot — 8 AI-Modelle + 30 Jahre Vertriebs-Expertise + 8 Unicorns.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=9">
-<link rel="stylesheet" href="/assets/legal.css?v=9">
+<link rel="stylesheet" href="/assets/style.css?v=10">
+<link rel="stylesheet" href="/assets/legal.css?v=10">
 </head>
 <body class="lang-de mode-free">
 
 <header class="site-header">
   <a href="/"><img src="/assets/dirc_logo.svg" alt="Dirc Zahlmann"></a>
 </header>
+
+<!-- Mobile Hamburger Button (only shown <=900px in tester mode) -->
+<button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()" aria-label="Menu">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<!-- Backdrop behind open sidebar (tap to close) -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
 <div class="lang-toggle">
   <button onclick="setLang('en')" id="btn-en">EN</button>
@@ -38,12 +46,8 @@
     </button>
   </div>
 
-  <!-- FIXED TOP: Daily + Profile + Projects (never scroll out of view) -->
   <div class="sidebar-fixed-top">
-    <!-- Daily Focus Widget -->
     <div class="sidebar-daily-focus" id="dailyFocusWidget" style="display:none;"></div>
-
-    <!-- Profile Card -->
     <div class="sidebar-profile" id="sidebarProfileCard"></div>
 
     <div class="sidebar-section-divider sidebar-section-divider-row">
@@ -59,7 +63,6 @@
     <div class="sidebar-projects" id="sidebarProjects"></div>
   </div>
 
-  <!-- SCROLLABLE BOTTOM: Chat history (grows over time, scrolls within) -->
   <div class="sidebar-scrollable-bottom">
     <div class="sidebar-section-divider sidebar-section-divider-sticky">
       <span data-lang="en">My Chats</span>
@@ -132,7 +135,6 @@
       <div class="msg-progress-fill" id="msgProgressFill"></div>
     </div>
 
-    <!-- Top Topic Bar: color-coded, wraps to fit screen -->
     <div class="topic-bar" id="topicBar"></div>
 
     <div class="chat-body has-welcome" id="chatBody">
@@ -454,7 +456,6 @@
   </div>
 </div>
 
-<!-- ============== PROFILE MODAL ============== -->
 <div class="profile-modal" id="profileModal">
   <div class="profile-modal-backdrop" onclick="closeProfileModal()"></div>
   <div class="profile-modal-card">
@@ -573,10 +574,29 @@
   </div>
 </div>
 
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-<script src="/assets/topics.js?v=9"></script>
-<script src="/assets/profile.js?v=9"></script>
-<script src="/assets/app.js?v=9"></script>
-<script src="/assets/consent.js?v=9"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Mobile sidebar toggle — only acts on small screens via CSS; ignored on desktop
+  function toggleSidebar(){
+    document.body.classList.toggle('sidebar-open');
+  }
+  function closeSidebar(){
+    document.body.classList.remove('sidebar-open');
+  }
+  // Tap on a chat / project / new-chat button auto-closes the drawer on mobile
+  document.addEventListener('click', function(e){
+    if (window.innerWidth > 900) return;
+    if (!document.body.classList.contains('sidebar-open')) return;
+    var t = e.target;
+    if (t.closest && (t.closest('.chat-history-item') || t.closest('.sidebar-project') || t.closest('.sidebar-newchat-btn'))) {
+      closeSidebar();
+    }
+  });
+</script>
+<script src="/assets/topics.js?v=10"></script>
+<script src="/assets/profile.js?v=10"></script>
+<script src="/assets/app.js?v=10"></script>
+<script src="/assets/consent.js?v=10"></script>
 </body>
 </html>
